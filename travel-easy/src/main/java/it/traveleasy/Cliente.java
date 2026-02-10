@@ -32,5 +32,19 @@ public class Cliente extends Utente {
         this.cc = cc;
     }
 
+    public void incrementaPortafoglio(float importo){
+        this.pv.incrementaSaldo(importo);
+        System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
+    }
+
+    public void decrementaPortafoglio(float importo){
+        this.pv.decrementaSaldo(importo);
+        System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
+    }
+
+    public void stampaSaldoPortafoglio(){
+        System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
+    }
+
     
 }

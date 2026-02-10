@@ -1,6 +1,9 @@
 package it.traveleasy;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 
 public class CartaCredito {
@@ -62,6 +65,75 @@ public class CartaCredito {
 
     public PortafoglioVirtuale getPortafoglioVirtuale(){
         return portafoglioVirtuale;
+    }
+
+    private PortafoglioVirtuale recuperaPortafoglioById(int idPortafoglio){
+        String query = "SELECT * FROM PortafoglioVirtuale WHERE id = ?";
+
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+                pstmt.setInt(1, idPortafoglio);
+                ResultSet rs = pstmt.executeQuery();
+                
+                PortafoglioVirtuale pv = null;
+                while (rs.next()){
+                    int id = rs.getInt("id");
+                    int utenteId = rs.getInt("Utente");
+                    double saldo = rs.getDouble("Saldo");   
+                    pv = new PortafoglioVirtuale(id, utenteId, saldo);
+                }
+
+                return pv;
+            } catch (SQLException e){
+                System.out.println("Errore getPacchettiByFilter:"+e);
+                return null;
+            } 
+        
+    }
+
+    public boolean insertOnPortafoglio(Connection conn, int idUtente, float importo){
+        String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo + ? WHERE Utente = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setFloat(1, importo);
+            pstmt.setInt(2, idUtente);
+            pstmt.executeUpdate();
+
+            this.portafoglioVirtuale.incrementaSaldo(importo);
+            System.out.println("Saldo aggiornato della classe CartaCredito: "+this.portafoglioVirtuale.getSaldo());
+            this.cliente.stampaSaldoPortafoglio();
+            return true;
+        } catch (SQLException e){
+            System.out.println("Errore insertOnPortafoglio: "+e);
+            return false;
+        }
+    }
+
+    private Cliente recuperaUtente(int idUtente){
+        String query = "SELECT * FROM Utenti WHERE id = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+                pstmt.setInt(1, idUtente);
+                ResultSet rs = pstmt.executeQuery();
+
+                Cliente c = null;
+                
+                while (rs.next()){
+                    int id = rs.getInt("id");
+                    String nome = rs.getString("Nome");
+                    String cognome = rs.getString("Cognome");
+                    String telefono = rs.getString("Telefono");
+                    String ruolo = rs.getString("Ruolo");
+                    int account = rs.getInt("Account");
+
+                    c = new Cliente(id, nome, cognome, telefono, ruolo, account, portafoglioVirtuale, this);
+                }
+                return c;
+        } catch (SQLException e){
+            System.out.println("Errore insertOnPortafoglio: "+e);
+            return null;
+        }
+
     }
 
     
