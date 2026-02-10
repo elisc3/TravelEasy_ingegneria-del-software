@@ -1,0 +1,291 @@
+﻿.root {
+    -fx-font-family: "Segoe UI", "Inter", "Roboto", sans-serif;
+    -fx-background-color: #F5F7FB;
+}
+
+.brand-panel {
+    -fx-background-color: linear-gradient(to bottom right, #5DA3FF, #8CB9FF);
+    -fx-pref-width: 360;
+}
+
+.brand-title {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 28px;
+    -fx-font-weight: 700;
+}
+
+.brand-tagline {
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 15px;
+    -fx-line-spacing: 2px;
+}
+
+.highlight {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+}
+
+.bullet {
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-font-size: 18px;
+}
+
+.card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18px;
+    -fx-effect: dropshadow(three-pass-box, rgba(15, 23, 42, 0.12), 20, 0.2, 0, 8);
+    -fx-max-width: 380px;
+}
+
+.title {
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+    -fx-fill: #0F172A;
+}
+
+.subtitle {
+    -fx-font-size: 13px;
+    -fx-fill: #64748B;
+}
+
+.input {
+    -fx-background-radius: 10px;
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 10px;
+    -fx-padding: 10 12;
+    -fx-font-size: 13px;
+}
+
+.primary-button {
+    -fx-background-color: #2A62F4;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 10px;
+    -fx-padding: 10 12;
+}
+
+.primary-button:hover {
+    -fx-background-color: #1D4ED8;
+}
+
+.link {
+    -fx-text-fill: #2A62F4;
+    -fx-font-size: 12px;
+}
+
+.link:hover {
+    -fx-text-fill: #1D4ED8;
+}
+
+.label {
+    -fx-text-fill: #475569;
+    -fx-font-size: 12px;
+}
+
+.top-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 0 0 1 0;
+}
+
+.app-title {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
+}
+
+.section-title {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+}
+
+.search-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(three-pass-box, rgba(15, 23, 42, 0.08), 16, 0.2, 0, 6);
+}
+
+.search-row {
+    -fx-padding: 6 0 0 0;
+}
+
+.search-input {
+    -fx-min-width: 140px;
+}
+
+.date-picker {
+    -fx-background-radius: 10px;
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 10px;
+    -fx-font-size: 13px;
+}
+
+.package-list {
+    -fx-padding: 4 0 0 0;
+}
+
+.package-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(three-pass-box, rgba(15, 23, 42, 0.08), 14, 0.2, 0, 4);
+}
+
+.package-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 2 6 2 0;
+    -fx-fit-to-width: true;
+}
+
+.package-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.package-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10px;
+}
+
+.package-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(37, 99, 235, 0.45);
+    -fx-background-insets: 2;
+    -fx-background-radius: 6px;
+}
+
+.package-scroll .scroll-bar:vertical .track {
+    -fx-background-color: rgba(226, 232, 240, 0.6);
+    -fx-background-radius: 6px;
+}
+
+.package-title {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+}
+
+.package-destination {
+    -fx-text-fill: #2563EB;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.package-meta {
+    -fx-text-fill: #475569;
+    -fx-font-size: 12px;
+}
+
+.package-description {
+    -fx-text-fill: #64748B;
+    -fx-font-size: 12px;
+}
+
+.package-price {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+}
+
+.secondary-button {
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 10px;
+    -fx-padding: 8 10;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #CBD5F5;
+}
+
+.booking-dialog {
+    -fx-background-color: #F8FAFC;
+}
+
+.booking-dialog .header-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 0 0 1 0;
+}
+
+.booking-dialog .content {
+    -fx-background-color: #F8FAFC;
+}
+
+.booking-content {
+    -fx-background-color: #F8FAFC;
+}
+
+.booking-dialog .button-bar .button {
+    -fx-background-radius: 10px;
+    -fx-padding: 8 14;
+}
+
+.payment-root {
+    -fx-background-color: #F5F7FB;
+}
+
+.payment-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18px;
+    -fx-effect: dropshadow(three-pass-box, rgba(15, 23, 42, 0.12), 20, 0.2, 0, 8);
+}
+
+.profile-button {
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 999px;
+    -fx-padding: 6 12;
+}
+
+.profile-button:hover {
+    -fx-background-color: #CBD5F5;
+}
+
+.profile-root {
+    -fx-background-color: #F5F7FB;
+}
+
+.profile-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18px;
+    -fx-effect: dropshadow(three-pass-box, rgba(15, 23, 42, 0.12), 20, 0.2, 0, 8);
+}
+
+.profile-title {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+}
+
+.profile-label {
+    -fx-text-fill: #475569;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.profile-value {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+}
+
+.profile-balance {
+    -fx-text-fill: #1D4ED8;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+}
+
+.profile-row {
+    -fx-background-color: #F9FAFB;
+    -fx-background-radius: 12px;
+    -fx-padding: 12 14;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 12px;
+}
