@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-
 public class CartaCredito {
     private Cliente cliente;
     private String numeroCarta;
@@ -17,6 +16,8 @@ public class CartaCredito {
 
     public CartaCredito(int idUtente, String numeroCarta, String scadenza, String cvv, String circuito, int idPortafoglioVirtuale, Connection conn) {
         this.conn = conn;
+        this.portafoglioVirtuale = this.recuperaPortafoglioById(idPortafoglioVirtuale);
+        this.cliente = this.recuperaUtente(idUtente);
         this.numeroCarta = numeroCarta;
         this.scadenza = scadenza;
         this.cvv = cvv;
@@ -65,6 +66,13 @@ public class CartaCredito {
 
     public PortafoglioVirtuale getPortafoglioVirtuale(){
         return portafoglioVirtuale;
+    }
+
+    public boolean controlCvv(Connection conn, String cvvByUtente){
+        if (cvv.equals(cvvByUtente))
+            return true;
+        else
+            return false;
     }
 
     private PortafoglioVirtuale recuperaPortafoglioById(int idPortafoglio){
@@ -135,7 +143,5 @@ public class CartaCredito {
         }
 
     }
-
-    
 }
 
