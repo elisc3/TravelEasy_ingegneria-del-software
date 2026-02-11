@@ -48,9 +48,6 @@ public class TravelEasy {
             elencoAccount = new HashMap<>();
         }
 
-
-       
-
         elencoCompagnie = this.recuperaCompagnie();
         if (elencoCompagnie == null)
             elencoCompagnie = new HashMap<>();
@@ -66,6 +63,55 @@ public class TravelEasy {
         elencoOfferte = this.recuperaOfferte();
         if (elencoOfferte == null)
             elencoOfferte = new HashMap<>();
+    }
+
+    //* RECUPERO MAPPE
+    private Map<String, Account> recuperaAccount() {
+        Map<String, Account> mappa = new HashMap<>();
+
+        String query = "SELECT * FROM ACCOUNT";
+
+         
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+                
+                ResultSet rs = pstmt.executeQuery();
+                Cliente cliente = null;
+                
+                while (rs.next()){
+                    int id = rs.getInt("id");
+                    String email = rs.getString("Email");
+                    String password = rs.getString("Password");
+                    String ruolo = rs.getString("Ruolo");
+
+                    String queryCliente = "SELECT * FROM Utenti WHERE Account = ?;";
+                    try (PreparedStatement pstmtCliente = conn.prepareStatement(queryCliente)){
+                        pstmtCliente.setInt(1, id);
+                        ResultSet rsCliente = pstmtCliente.executeQuery();
+                        if (rsCliente.next()){
+                            int idCliente = rsCliente.getInt("id");
+                            String nome = rsCliente.getString("Nome");
+                            String cognome = rsCliente.getString("Cognome");
+                            String telefono = rsCliente.getString("Telefono");
+                            String ruoloCliente = rsCliente.getString("Ruolo");
+                            //PortafoglioVirtuale pv = mappaPortafogli.get(idCliente);
+                            PortafoglioVirtuale pv = this.getPortafoglioByClienteDB(idCliente);
+                            CartaCredito cc = this.elencoCarte.get(idCliente);
+                            cliente = new Cliente(idCliente, nome, cognome, telefono, ruoloCliente, id, pv, cc);
+                        }
+                    } catch (SQLException e){
+                        System.out.println("Errore recupero cliente in account: "+e);
+                        return null;
+                    }
+
+                    mappa.put(email, new Account(conn, id, email, password, ruolo, cliente));
+                    
+                }
+                return mappa;
+            } catch (SQLException e){
+                System.out.println("Errore getPacchettiByFilter:"+e);
+                return null;
+            } 
     }
 
     public Map<Integer, CompagniaTrasporto> recuperaCompagnie() {
@@ -353,6 +399,94 @@ public class TravelEasy {
             return false;
     }
 
+
+    //*REGISTRAZIONE
+    private boolean checkEmail(String emailByUser){
+        return !elencoAccount.containsKey(emailByUser);
+    }
+
+    private boolean validazioneDati(String nome, String cognome, String email, String password, String confermaPassword, String telefono) {
+        
+        if (nome.equals("") || cognome.equals("") || email.equals("") || password.equals("") || confermaPassword.equals("") || telefono.equals(""))
+            return false;
+
+        Pattern patternEMAIL =
+            Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+        
+        if (!patternEMAIL.matcher(email.trim()).matches())
+            return false;
+
+        if (!password.equals(confermaPassword))
+            return false;
+
+        return true;
+    }
+
+    private int recuperaIdAccount(String email){
+        String query = "SELECT id FROM Account where Email = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+                pstmt.setString(1, email);
+                
+                ResultSet rs = pstmt.executeQuery();
+                int idRecuperato = 0;
+                while (rs.next()){
+                    idRecuperato = rs.getInt("id");
+                }
+                return idRecuperato;
+            } catch (SQLException e){
+                System.out.println("Errore recuperaId in account:"+e);
+                return 0;
+            }
+    }
+
+    public String registrazione(Connection conn, String nome, String cognome, String email, String password, String confermaPassword, String telefono){
+        if (!validazioneDati(nome, cognome, email, password, confermaPassword, telefono)) {
+            System.out.println("registrazione: validazioneDati fallita");
+            return "errore";
+        }
+
+        if (!checkEmail(email)) {
+            System.out.println("registrazione: email gia' presente");
+            return "errore";
+        }
+
+        String query = "INSERT INTO Account (Email, Password, Ruolo) values (?, ?, ?);";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, email);
+            pstmt.setString(2, password);
+            pstmt.setString(3, "Cliente");
+            pstmt.executeUpdate();
+            
+        } catch (SQLException e){
+            System.out.println("Errore registrazioneInAccount: "+e);
+            return "errore";
+        }
+
+        int idAccount = recuperaIdAccount(email);
+
+        if(idAccount == 0) {
+            System.out.println("registrazione: idAccount non recuperato");
+            return "errore";
+        }
+
+        Account newAccount = new Account(conn, idAccount, email, password, "Cliente", null);
+
+        int idCliente = newAccount.createClient(conn, nome, cognome, telefono);
+
+        if (idCliente == 0) {
+            System.out.println("registrazione: creazione cliente fallita");
+            return "errore";
+        }
+
+        //PortafoglioVirtuale pv = newAccount.getPortafoglioVirtuale();
+        //mappaPortafogli.put(idCliente, pv);
+        
+        elencoAccount.put(email, newAccount);
+
+        return newAccount.getEmail();
+    }
     
 
     public float validazioneDatiNuovaRicarica(String numeroCarta, String scadenza, String cvv, String importo){
