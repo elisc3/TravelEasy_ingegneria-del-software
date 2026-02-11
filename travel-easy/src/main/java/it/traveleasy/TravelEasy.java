@@ -10,11 +10,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.Iterator;
-
 
 import javax.swing.JOptionPane;
 
@@ -25,7 +24,7 @@ public class TravelEasy {
     private Connection conn;
     private Map<Integer, CompagniaTrasporto> elencoCompagnie;
     private Map<Integer, Alloggio> elencoAlloggi;
-    private Map<Integer, CartaCredito> elencoCarte;
+    //private Map<Integer, CartaCredito> elencoCarte;
     private Map<Integer, PacchettoViaggio> elencoPacchetti;
     private Map<PacchettoViaggio, OffertaSpeciale> elencoOfferte;
 
@@ -38,18 +37,15 @@ public class TravelEasy {
         }*/
 
         
-        elencoCarte = this.recuperaCarte();
+        /*elencoCarte = this.recuperaCarte();
         if (elencoCarte == null) {
             elencoCarte = new HashMap<>();
-        }
+        }*/
 
         elencoAccount = this.recuperaAccount();
         if (elencoAccount == null) {
             elencoAccount = new HashMap<>();
         }
-
-
-       
 
         elencoCompagnie = this.recuperaCompagnie();
         if (elencoCompagnie == null)
@@ -66,6 +62,85 @@ public class TravelEasy {
         elencoOfferte = this.recuperaOfferte();
         if (elencoOfferte == null)
             elencoOfferte = new HashMap<>();
+    }
+
+    //* RECUPERO MAPPE
+    private Map<String, Account> recuperaAccount() {
+        Map<String, Account> mappa = new HashMap<>();
+
+        String query = "SELECT * FROM ACCOUNT";
+
+         
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+                
+                ResultSet rs = pstmt.executeQuery();
+                Cliente cliente = null;
+                
+                while (rs.next()){
+                    int id = rs.getInt("id");
+                    String email = rs.getString("Email");
+                    String password = rs.getString("Password");
+                    String ruolo = rs.getString("Ruolo");
+
+                    String queryCliente = "SELECT * FROM Utenti WHERE Account = ?;";
+                    try (PreparedStatement pstmtCliente = conn.prepareStatement(queryCliente)){
+                        pstmtCliente.setInt(1, id);
+                        ResultSet rsCliente = pstmtCliente.executeQuery();
+                        if (rsCliente.next()){
+                            int idCliente = rsCliente.getInt("id");
+                            String nome = rsCliente.getString("Nome");
+                            String cognome = rsCliente.getString("Cognome");
+                            String telefono = rsCliente.getString("Telefono");
+                            String ruoloCliente = rsCliente.getString("Ruolo");
+                            //PortafoglioVirtuale pv = mappaPortafogli.get(idCliente);
+                            PortafoglioVirtuale pv = this.getPortafoglioByClienteDB(idCliente);
+                            //CartaCredito cc = this.elencoCarte.get(idCliente);
+                            CartaCredito cc = this.getCartaCreditoByUtente(idCliente);
+                            cliente = new Cliente(idCliente, nome, cognome, telefono, ruoloCliente, id, pv, cc);
+                        }
+                    } catch (SQLException e){
+                        System.out.println("Errore recupero cliente in account: "+e);
+                        return null;
+                    }
+
+                    mappa.put(email, new Account(conn, id, email, password, ruolo, cliente));
+                    
+                }
+                return mappa;
+            } catch (SQLException e){
+                System.out.println("Errore getPacchettiByFilter:"+e);
+                return null;
+            } 
+    }
+
+    public CartaCredito getCartaCreditoByUtente(int idUtente){
+        String query = "SELECT * FROM CartaCredito WHERE Utente = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setInt(1, idUtente);
+            ResultSet rs = pstmt.executeQuery();
+            CartaCredito cc = null;
+                
+            while (rs.next()){
+                int id = rs.getInt("id");
+                int idUtenteD = rs.getInt("Utente");
+                String numeroCarta = rs.getString("NumeroCarta");
+                String scadenza = rs.getString("Scadenza");
+                String cvv = rs.getString("cvv");
+                String circuito = rs.getString("Circuito");
+                int idPortafoglio = rs.getInt("PortafoglioVirtuale");
+
+                cc = new CartaCredito(idUtenteD, numeroCarta, scadenza, cvv, circuito, idPortafoglio, conn);
+            }
+            return cc;
+            
+        } catch (SQLException e){
+            System.out.println("Errore getCartaCreditoByUtente: "+e);
+            return null;
+        }
+
+
     }
 
     public Map<Integer, CompagniaTrasporto> recuperaCompagnie() {
@@ -116,7 +191,7 @@ public class TravelEasy {
             } 
     }
 
-    private Map<Integer, CartaCredito> recuperaCarte(){
+    /*private Map<Integer, CartaCredito> recuperaCarte(){
         String query = "SELECT * FROM CartaCredito";
         Map<Integer, CartaCredito> mappa = new HashMap<>();
 
@@ -140,11 +215,11 @@ public class TravelEasy {
             return null;
         }
 
-    }
+    }*/
 
-    public void aggiornaElencoCarte(int idUtente, CartaCredito cc){
+    /*public void aggiornaElencoCarte(int idUtente, CartaCredito cc){
         this.elencoCarte.put(idUtente, cc);
-    }
+    }*/
 
     private Map<Integer, PacchettoViaggio> recuperaPacchetti(){
         String query = "SELECT * from PacchettiViaggio";
@@ -317,43 +392,116 @@ public class TravelEasy {
         return this.elencoAlloggi.get(idAlloggio);
     }
 
-    public CartaCredito getCartaCreditoByUtente(int idCliente){
-        return this.elencoCarte.get(idCliente);
+
+    //*REGISTRAZIONE
+    private boolean checkEmail(String emailByUser){
+        return !elencoAccount.containsKey(emailByUser);
     }
 
-    public boolean controlCvv(Connection conn, int idUtente, String cvvByUtente){
-        /*String query = "SELECT cvv FROM CartaCredito WHERE Utente = ?;";
+    private boolean validazioneDati(String nome, String cognome, String email, String password, String confermaPassword, String telefono) {
+        
+        if (nome.equals("") || cognome.equals("") || email.equals("") || password.equals("") || confermaPassword.equals("") || telefono.equals(""))
+            return false;
+
+        Pattern patternEMAIL =
+            Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+        
+        if (!patternEMAIL.matcher(email.trim()).matches())
+            return false;
+
+        if (!password.equals(confermaPassword))
+            return false;
+
+        return true;
+    }
+
+    private int recuperaIdAccount(String email){
+        String query = "SELECT id FROM Account where Email = ?;";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            pstmt.setInt(1, idUtente);
-
-            ResultSet rs = pstmt.executeQuery();
-
-            if(!rs.next())
-                return false;
-
-            String cvv = rs.getString("cvv");
-            
-            if (cvv.equals(cvvByUtente))
-                return true;
-            else
-                return false;
-
-        } catch (SQLException e) {
-            System.out.println("Errore getCartaCreditoByUtente:"+e);
-            return false;
-        }*/
-
-        CartaCredito cc = this.elencoCarte.get(idUtente);
-        String cvv = cc.getCvv();
-
-        if (cvv.equals(cvvByUtente))
-            return true;
-        else
-            return false;
+                pstmt.setString(1, email);
+                
+                ResultSet rs = pstmt.executeQuery();
+                int idRecuperato = 0;
+                while (rs.next()){
+                    idRecuperato = rs.getInt("id");
+                }
+                return idRecuperato;
+            } catch (SQLException e){
+                System.out.println("Errore recuperaId in account:"+e);
+                return 0;
+            }
     }
 
+    public String registrazione(Connection conn, String nome, String cognome, String email, String password, String confermaPassword, String telefono){
+        if (!validazioneDati(nome, cognome, email, password, confermaPassword, telefono)) {
+            System.out.println("registrazione: validazioneDati fallita");
+            return "errore";
+        }
+
+        if (!checkEmail(email)) {
+            System.out.println("registrazione: email gia' presente");
+            return "errore";
+        }
+
+        String query = "INSERT INTO Account (Email, Password, Ruolo) values (?, ?, ?);";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, email);
+            pstmt.setString(2, password);
+            pstmt.setString(3, "Cliente");
+            pstmt.executeUpdate();
+            
+        } catch (SQLException e){
+            System.out.println("Errore registrazioneInAccount: "+e);
+            return "errore";
+        }
+
+        int idAccount = recuperaIdAccount(email);
+
+        if(idAccount == 0) {
+            System.out.println("registrazione: idAccount non recuperato");
+            return "errore";
+        }
+
+        Account newAccount = new Account(conn, idAccount, email, password, "Cliente", null);
+
+        int idCliente = newAccount.createClient(conn, nome, cognome, telefono);
+
+        if (idCliente == 0) {
+            System.out.println("registrazione: creazione cliente fallita");
+            return "errore";
+        }
+
+        //PortafoglioVirtuale pv = newAccount.getPortafoglioVirtuale();
+        //mappaPortafogli.put(idCliente, pv);
+        
+        elencoAccount.put(email, newAccount);
+
+        return newAccount.getEmail();
+    }
     
+    //*LOGIN
+    public String[] login(Connection conn, String email, String password){
+        Account a = elencoAccount.get(email);
+
+        String[] res = new String[2];
+
+        if(a == null) {
+            res[0] = "errore";
+            return res;
+        }
+
+        if (!a.validazioneCredenziali(email, password)) {
+            res[0] = "errore";
+            return res;
+        }
+
+        res[0] = a.getEmail();
+        res[1] = a.getRuolo();
+
+        return res;
+    }
 
     public float validazioneDatiNuovaRicarica(String numeroCarta, String scadenza, String cvv, String importo){
         if (numeroCarta.equals("") || scadenza.equals("") || cvv.equals("") || importo.equals(""))
@@ -410,7 +558,16 @@ public class TravelEasy {
             pstmt.setInt(6, idUtente);
             pstmt.executeUpdate();
 
-            elencoCarte.put(idUtente, new CartaCredito(idUtente, numeroCarta, scadenza, cvv, circuito, idPortafoglio, conn));
+            //elencoCarte.put(idUtente, new CartaCredito(idUtente, numeroCarta, scadenza, cvv, circuito, idPortafoglio, conn));
+            Cliente cliente = null;
+            for (Account a: elencoAccount.values()){
+                Cliente c = a.getCliente();
+                if (c.getId() == idUtente){
+                    cliente = c;
+                    break;
+                }
+            }
+            cliente.setCc(new CartaCredito(idUtente, numeroCarta, scadenza, cvv, circuito, idPortafoglio, conn));
             return true;
         } catch (SQLException e){
             System.out.println("Errore insertOnPortafoglio: "+e);
@@ -607,7 +764,7 @@ public class TravelEasy {
             LocalDate fine = LocalDate.parse(o.getDataFine(), FMT);
 
             if (fine.isBefore(LocalDate.now())) {
-                if (!elimaOfferteDB(o))
+                if (!eliminaOfferteDB(o))
                     return false;
                 it.remove(); 
             }

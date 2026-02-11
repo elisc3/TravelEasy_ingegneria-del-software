@@ -58,6 +58,16 @@ public class SignupView {
         signupButton.getStyleClass().add("primary-button");
         signupButton.setMaxWidth(Double.MAX_VALUE);
 
+        signupButton.setOnAction(e -> {
+            String res = te.registrazione(this.conn, nameField.getText(), surnameField.getText(), emailField.getText(), passwordField.getText(), confirmPasswordField.getText(), phoneField.getText());
+             if (!res.equals("errore")) {
+                System.out.println("Registrazione avvenuta con successo");
+                App.showHome(stage, res);
+            }
+            else
+                System.out.println("Ricontrollare i dati inseriti");
+        });
+
 
         HBox switchBox = new HBox();
         switchBox.setAlignment(Pos.CENTER);
@@ -67,7 +77,7 @@ public class SignupView {
         switchBox.getChildren().addAll(haveAccount, goLogin);
         switchBox.setSpacing(8);
 
-        //goLogin.setOnAction(e -> App.showLogin(stage));
+        goLogin.setOnAction(e -> App.showLogin(stage));
 
         VBox form = new VBox(14, nameField, surnameField, emailField, passwordField, confirmPasswordField, phoneField, signupButton, switchBox);
         form.setAlignment(Pos.CENTER_LEFT);

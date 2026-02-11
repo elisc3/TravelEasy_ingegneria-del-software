@@ -119,7 +119,7 @@ public class RicaricaView {
                     return;
                 }
 
-                boolean esitoCvv = te.controlCvv(conn, idUtente, cvvInserito);
+                boolean esitoCvv = cc.controlCvv(conn, cvvInserito);
                 if (esitoCvv){
                     if (cc.insertOnPortafoglio(conn, idUtente, Float.parseFloat(amount.getText())))
                         JOptionPane.showMessageDialog(null, "Ricarica avvenuta con successo!", "INFO", 1);
