@@ -145,7 +145,7 @@ public class PacchettoViaggio {
 
 
     public OffertaSpeciale nuovaOfferta(float percentuale, String dataFine, int disponibilità){
-        String query = "INSERT INTO OffertaSpeciale (Pacchetto, ScontoPercentuale, PrezzoScontato, DataFine, Disponibilità, Visibilità) values (?, ?, ?, ?, ?, ?);";
+        String query = "INSERT INTO OffertaSpeciale (Pacchetto, ScontoPercentuale, PrezzoScontato, DataFine, Disponibilità) values (?, ?, ?, ?, ?);";
         
         float prezzoScontato = prezzo - prezzo*percentuale/100;
 
@@ -155,7 +155,7 @@ public class PacchettoViaggio {
             pstmt.setFloat(3, prezzoScontato);
             pstmt.setString(4, dataFine);
             pstmt.setInt(5, disponibilità);
-            pstmt.setBoolean(6, true);
+            
 
             pstmt.executeUpdate();
 
