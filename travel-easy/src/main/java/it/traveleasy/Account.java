@@ -106,7 +106,7 @@ public class Account {
         
         return idUtente;
     }
-    
+
     public PortafoglioVirtuale getPortafoglioVirtuale() {
         if (utente instanceof Cliente) {
             return ((Cliente) utente).getPv();
@@ -114,5 +114,17 @@ public class Account {
         return null;
     }
 
-    
+    public boolean validazioneCredenziali(String email, String password) {
+        if (email.equals("") || password.equals(""))
+            return false;
+
+        return this.email.equals(email) && this.password.equals(password);
+    }
+
+
+    public Cliente getCliente(){
+        if (this.utente instanceof Cliente)
+            return ((Cliente) utente);
+        return null;
+    }
 }

@@ -94,6 +94,5 @@ public class Cliente extends Utente {
         //te.aggiornaElencoCarte(this.getId(), cc);
         return true;
     }
-
     
 }

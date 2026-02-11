@@ -43,7 +43,22 @@ public class LoginView {
 
         Button loginButton = new Button("Accedi");
         loginButton.getStyleClass().add("primary-button");
-        loginButton.setMaxWidth(Double.MAX_VALUE);      
+        loginButton.setMaxWidth(Double.MAX_VALUE);   
+        
+        loginButton.setOnAction(e -> {
+            String email = emailField.getText(); 
+            String[] res = te.login(this.conn, email, passwordField.getText());
+            if (!res[0].equals("errore")) {
+                System.out.println("Login avvenuto con successo");
+                //int idUtente = 
+                if (res[1].equals("Cliente"))
+                   App.showHome(stage, res[0]); //CONTINUARE DA QUA L'ASSEGNAZIONE DI UN RIFERIMENTO ALL'UTENTE ALLA HOMEVIEW;
+                else
+                    App.showOperatoreHomeView(stage);
+            }
+            else
+                System.out.println("Ricontrollare i dati inseriti");        
+        });
 
         Hyperlink forgotLink = new Hyperlink("Password dimenticata?");
         forgotLink.getStyleClass().add("link");

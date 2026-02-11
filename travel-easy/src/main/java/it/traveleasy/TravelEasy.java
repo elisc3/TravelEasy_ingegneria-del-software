@@ -10,11 +10,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.Iterator;
-
 
 import javax.swing.JOptionPane;
 
@@ -488,6 +487,27 @@ public class TravelEasy {
         return newAccount.getEmail();
     }
     
+    //*LOGIN
+    public String[] login(Connection conn, String email, String password){
+        Account a = elencoAccount.get(email);
+
+        String[] res = new String[2];
+
+        if(a == null) {
+            res[0] = "errore";
+            return res;
+        }
+
+        if (!a.validazioneCredenziali(email, password)) {
+            res[0] = "errore";
+            return res;
+        }
+
+        res[0] = a.getEmail();
+        res[1] = a.getRuolo();
+
+        return res;
+    }
 
     public float validazioneDatiNuovaRicarica(String numeroCarta, String scadenza, String cvv, String importo){
         if (numeroCarta.equals("") || scadenza.equals("") || cvv.equals("") || importo.equals(""))
@@ -741,7 +761,7 @@ public class TravelEasy {
             LocalDate fine = LocalDate.parse(o.getDataFine(), FMT);
 
             if (fine.isBefore(LocalDate.now())) {
-                if (!elimaOfferteDB(o))
+                if (!eliminaOfferteDB(o))
                     return false;
                 it.remove(); 
             }
