@@ -43,8 +43,7 @@ public class LoginView {
 
         Button loginButton = new Button("Accedi");
         loginButton.getStyleClass().add("primary-button");
-        loginButton.setMaxWidth(Double.MAX_VALUE);
-        
+        loginButton.setMaxWidth(Double.MAX_VALUE);      
 
         Hyperlink forgotLink = new Hyperlink("Password dimenticata?");
         forgotLink.getStyleClass().add("link");
@@ -57,7 +56,7 @@ public class LoginView {
         switchBox.getChildren().addAll(noAccount, goSignup);
         switchBox.setSpacing(8);
 
-        //goSignup.setOnAction(e -> App.showSignup(stage));
+        goSignup.setOnAction(e -> App.showSignup(stage));
 
         VBox form = new VBox(16, emailField, passwordField, loginButton, forgotLink, switchBox);
         form.setAlignment(Pos.CENTER_LEFT);

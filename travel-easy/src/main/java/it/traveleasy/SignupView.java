@@ -67,7 +67,7 @@ public class SignupView {
         switchBox.getChildren().addAll(haveAccount, goLogin);
         switchBox.setSpacing(8);
 
-        //goLogin.setOnAction(e -> App.showLogin(stage));
+        goLogin.setOnAction(e -> App.showLogin(stage));
 
         VBox form = new VBox(14, nameField, surnameField, emailField, passwordField, confirmPasswordField, phoneField, signupButton, switchBox);
         form.setAlignment(Pos.CENTER_LEFT);
