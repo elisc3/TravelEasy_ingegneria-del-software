@@ -114,6 +114,13 @@ public class Account {
         return null;
     }
 
+    public CartaCredito getCartaCredito() {
+        if (utente instanceof Cliente) {
+            return ((Cliente) utente).getCc();
+        }
+        return null;
+    }
+
     public boolean validazioneCredenziali(String email, String password) {
         if (email.equals("") || password.equals(""))
             return false;
