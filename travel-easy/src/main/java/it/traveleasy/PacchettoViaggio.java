@@ -166,7 +166,7 @@ public class PacchettoViaggio {
                      newId = rs.getInt(1);
                 }
             }
-            return new OffertaSpeciale(newId, this, percentuale, prezzoScontato, dataFine, disponibilità, true);
+            return new OffertaSpeciale(newId, this, percentuale, prezzoScontato, dataFine, disponibilità /*, true*/);
 
         } catch (SQLException e){
             System.out.println("Errore nuovaOfferta: "+e);

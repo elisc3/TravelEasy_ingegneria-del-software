@@ -194,10 +194,10 @@ public class TravelEasy {
                 float prezzoScontato = rs.getFloat("PrezzoScontato");
                 String dataFine = rs.getString("DataFine");
                 int disponibilità = rs.getInt("Disponibilità");
-                boolean visibilità = rs.getBoolean("Visibilità");
+               // boolean visibilità = rs.getBoolean("Visibilità");
 
                 PacchettoViaggio pacchetto = this.elencoPacchetti.get(idPacchetto);
-                mappa.put(pacchetto, new OffertaSpeciale(id, pacchetto, percentuale, prezzoScontato, dataFine, disponibilità, visibilità));
+                mappa.put(pacchetto, new OffertaSpeciale(id, pacchetto, percentuale, prezzoScontato, dataFine, disponibilità /*, visibilità*/));
             }
             return mappa;
         } catch (SQLException e){
