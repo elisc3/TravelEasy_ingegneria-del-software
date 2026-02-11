@@ -68,6 +68,29 @@ public class TravelEasy {
             elencoOfferte = new HashMap<>();
     }
 
+    public Map<Integer, CompagniaTrasporto> recuperaCompagnie() {
+        String query = "SELECT * FROM CompagniaTrasporto;";
+
+        Map<Integer, CompagniaTrasporto> mappa = new HashMap<>();
+        
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+                
+                ResultSet rs = pstmt.executeQuery();
+                
+                while (rs.next()){
+                    int id = rs.getInt("id");
+                    String nome = rs.getString("Nome");
+                    String tipo = rs.getString("TIPO");
+
+                    mappa.put(id, new CompagniaTrasporto(id, nome, tipo));
+                }
+                return mappa;
+            } catch (SQLException e){
+                System.out.println("Errore recupera compagnie:"+e);
+                return null;
+            } 
+    }
+
     public Map<Integer, Alloggio> recuperaAlloggi() {
         String query = "SELECT * FROM Alloggio;";
 
@@ -153,6 +176,41 @@ public class TravelEasy {
         }
     }
 
+    public void aggiornaElencoPacchetti(PacchettoViaggio p){
+        this.elencoPacchetti.put(p.getId(), p);
+    }
+
+    public Map<PacchettoViaggio, OffertaSpeciale> recuperaOfferte(){
+        String query = "SELECT * FROM OffertaSpeciale";
+        Map<PacchettoViaggio, OffertaSpeciale> mappa = new HashMap<>();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()){
+                int id = rs.getInt("id");
+                int idPacchetto = rs.getInt("Pacchetto");
+                float percentuale = rs.getFloat("ScontoPercentuale");
+                float prezzoScontato = rs.getFloat("PrezzoScontato");
+                String dataFine = rs.getString("DataFine");
+                int disponibilità = rs.getInt("Disponibilità");
+                boolean visibilità = rs.getBoolean("Visibilità");
+
+                PacchettoViaggio pacchetto = this.elencoPacchetti.get(idPacchetto);
+                mappa.put(pacchetto, new OffertaSpeciale(id, pacchetto, percentuale, prezzoScontato, dataFine, disponibilità, visibilità));
+            }
+            return mappa;
+        } catch (SQLException e){
+            System.out.println("Errore recupero offerte: "+e);
+            return null;
+        }
+
+    }
+
+    public void aggiornaOfferte(OffertaSpeciale o){
+        this.elencoOfferte.put(o.getPacchetto(), o);
+    }
+
     public List<PacchettoViaggio> ricercaPacchetti(Connection conn, String città, String dataAndata, String dataRitorno, float prezzoMassimo){
             //  METODO PER UC2
             /*String query = "SELECT * FROM PacchettiViaggio "
@@ -212,6 +270,27 @@ public class TravelEasy {
                     pacchettiTrovati.add(new PacchettoViaggio(idPacchetto,  codice, p.getTitolo(), cittaP, p.getNazione(), dataAndataP, dataRitornoP, p.getDescrizione(), p.getPrezzo(), p.isVisibilità(), p.getIdCompagniaTrasporto(), p.getIdAlloggio(), conn));
             }
             return pacchettiTrovati;
+    }
+
+    public CompagniaTrasporto getCompagniaTrasportoByPacchetto(int idCompagnia){
+        /*String query = "SELECT * FROM CompagniaTrasporto WHERE id = ?;";
+        CompagniaTrasporto c = null;
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+                pstmt.setInt(1, idCompagnia);
+                ResultSet rs = pstmt.executeQuery();
+                
+                while (rs.next()){
+                    String nome = rs.getString("Nome");
+                    String tipo = rs.getString("TIPO");
+
+                    c = new CompagniaTrasporto(idCompagnia, nome, tipo);
+                }
+                return c;
+            } catch (SQLException e){
+                System.out.println("Errore getPacchettiByFilter:"+e);
+                return null;
+            }     */
+        return this.elencoCompagnie.get(idCompagnia);   
     }
 
     public Alloggio getAlloggioByPacchetto(int idAlloggio){
@@ -339,6 +418,150 @@ public class TravelEasy {
         }
     }
 
+    public float validazioneDatiNuovoPacchetto(String titolo, String citta, String nazione, String descrizione, String prezzo, String compagnia, String alloggio, String dataPartenza, String dataRitorno){
+        if (titolo.equals("") || citta.equals("") || nazione.equals("") || descrizione.equals("") || prezzo.equals("") || compagnia.equals("") || alloggio.equals("") || dataPartenza.equals("") || dataRitorno.equals(""))
+            return -1.0F;
+        float prezzoF;
+        try {
+            prezzoF = Float.parseFloat(prezzo);
+            if (prezzoF <= 0.0F)
+                return 0.0F;
+            return prezzoF;
+        } catch (Exception e){
+            return 0.0F;
+        }
+    }
+
+    private int controllaPacchettiDuplicati(String codice ,String citta, String nazione, String dataPartenza, String dataRitorno, int idCompagnia, int idAlloggio, float prezzo){
+        /*String query = "SELECT * FROM PacchettiViaggio WHERE Città = ? AND Nazione = ? and DataPartenza = ? and DataRitorno = ? and CompagniaTrasporto = ? and Alloggio = ?;";
+
+         try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setString(1, citta);
+            pstmt.setString(2, nazione);
+            pstmt.setString(3, dataPartenza);
+            pstmt.setString(4, dataRitorno);
+            pstmt.setInt(5, idCompagnia);
+            pstmt.setInt(6, idAlloggio);
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()){
+                JOptionPane.showMessageDialog(null, "Esiste già un pacchetto viaggio con queste caratteristiche", "ATTENZIONE", 2);
+                return false;
+            } else {
+                return true;
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("Errore getCartaCreditoByUtente:"+e);
+            
+            return false;
+        }*/
+
+        for (PacchettoViaggio p : elencoPacchetti.values()){
+            if (p.getCodice().equals(codice))
+                return -1;
+        }
+        
+
+        for (PacchettoViaggio p : elencoPacchetti.values()){
+            if (p.getCittà().equals(citta) && p.getNazione().equals(nazione) && p.getDataPartenza().equals(dataPartenza) && p.getDataRitorno().equals(dataRitorno) && p.getIdCompagniaTrasporto() == idCompagnia && p.getIdAlloggio() == idAlloggio && p.getPrezzo() == prezzo)
+                return -2;
+        }
+        return 0;
+        
+    }
+
+    public boolean coerenzaDate(String dataPartenza, String dataArrivo) {
+        DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd-MM-uuuu")
+                .withResolverStyle(ResolverStyle.STRICT);
+
+        LocalDate date1 = LocalDate.parse(dataPartenza, FMT); // partenza
+        LocalDate date2 = LocalDate.parse(dataArrivo, FMT);   // arrivo
+
+        // controllo aggiuntivo: la partenza non deve essere precedente a oggi
+        if (date1.isBefore(LocalDate.now())) {
+            return false;
+        }
+
+        // partenza <= arrivo
+        return !date1.isAfter(date2);
+    }
+
+
+    public boolean nuovoPacchetto(Connection conn, String codice, String titolo, String citta, String nazione, String descrizione, float prezzo, int visibilità, String compagnia, String alloggio, String dataPartenza, String dataRitorno){
+        String query = "INSERT INTO PacchettiViaggio (Città, Titolo, Nazione, DataPartenza, DataRitorno, Descrizione, Prezzo, Visibilità, CompagniaTrasporto, Alloggio, Codice) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+        int idAlloggio = 0;
+        for (Alloggio a : elencoAlloggi.values()) {
+            if (a.getNome().equals(alloggio)){
+                idAlloggio = a.getId();
+                break;
+            }
+        }
+
+        int idCompagniaTrasporto = 0;
+        for (CompagniaTrasporto c : elencoCompagnie.values()){
+            if (c.getNome().equals(compagnia)){
+                idCompagniaTrasporto = c.getId();
+                break;
+            }
+        }
+
+        if (!this.coerenzaDate(dataPartenza, dataRitorno)){
+            JOptionPane.showMessageDialog(null, "Date inserite non valide. Prego ricontrollare.", "ERRORE", 0);
+            return false;
+        }
+
+        int esitoPacchettiDuplicati = this.controllaPacchettiDuplicati(codice, citta, nazione, dataPartenza, dataRitorno, idCompagniaTrasporto, idAlloggio, prezzo);
+
+        if (esitoPacchettiDuplicati == -2){
+            JOptionPane.showMessageDialog(null, "Esiste già un pacchetto con queste caratteristiche", "ATTENZIONE", 2);
+            return false; 
+        } else if (esitoPacchettiDuplicati == -1){
+            JOptionPane.showMessageDialog(null, "Il codice inserito appartiene a un pacchetto già esistente.", "ERRORE", 0);
+            return false;
+        }
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, citta);
+            pstmt.setString(2, titolo);
+            pstmt.setString(3, nazione);
+            pstmt.setString(4, dataPartenza);
+            pstmt.setString(5, dataRitorno);
+            pstmt.setString(6, descrizione);
+            pstmt.setFloat(7, prezzo);
+            pstmt.setInt(8, visibilità);
+            pstmt.setInt(9, idCompagniaTrasporto);
+            pstmt.setInt(10, idAlloggio);
+            pstmt.setString(11, codice);
+
+            pstmt.executeUpdate();
+            int newId = 0;
+            try (Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery("SELECT last_insert_rowid();")) {
+                if (rs.next()) {
+                     newId = rs.getInt(1);
+                }
+            }
+            this.aggiornaElencoPacchetti(new PacchettoViaggio(newId, codice, titolo, citta, nazione, dataPartenza, dataRitorno, descrizione, prezzo, visibilità, idCompagniaTrasporto, idAlloggio, conn));
+            return true;
+        } catch (SQLException e){
+            System.out.println("Errore nuovo pacchetto: "+e);
+            return false;
+        }
+    }
+
+    public Map<Integer, PacchettoViaggio> getElencoPacchetti(){
+        return this.elencoPacchetti;
+    }
+
+    public OffertaSpeciale getOffertaByPack(PacchettoViaggio p){
+        OffertaSpeciale o =  this.elencoOfferte.get(p);
+        if (o != null)
+            return o;
+        else return null;
+    }
+
     private PortafoglioVirtuale getPortafoglioByClienteDB(int idCliente){
         String query = "SELECT * FROM PortafoglioVirtuale WHERE Utente = ?;";
 
@@ -373,5 +596,22 @@ public class TravelEasy {
             return false;
         }
 
+    }
+
+    public boolean eliminaOfferte() {
+        DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd-MM-uuuu").withResolverStyle(ResolverStyle.STRICT);
+
+        Iterator<Map.Entry<PacchettoViaggio, OffertaSpeciale>> it = elencoOfferte.entrySet().iterator();
+        while (it.hasNext()) {
+            OffertaSpeciale o = it.next().getValue();
+            LocalDate fine = LocalDate.parse(o.getDataFine(), FMT);
+
+            if (fine.isBefore(LocalDate.now())) {
+                if (!elimaOfferteDB(o))
+                    return false;
+                it.remove(); 
+            }
+        }
+        return true;
     }
 }
