@@ -478,6 +478,9 @@ public class TravelEasy {
 
         //PortafoglioVirtuale pv = newAccount.getPortafoglioVirtuale();
         //mappaPortafogli.put(idCliente, pv);
+
+        CartaCredito cc = newAccount.getCartaCredito();
+        //elencoCarte.put(idCliente, cc);
         
         elencoAccount.put(email, newAccount);
 
