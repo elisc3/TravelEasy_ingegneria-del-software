@@ -27,6 +27,8 @@ public class TravelEasy {
     //private Map<Integer, CartaCredito> elencoCarte;
     private Map<Integer, PacchettoViaggio> elencoPacchetti;
     private Map<PacchettoViaggio, OffertaSpeciale> elencoOfferte;
+    private final List<OffertaObserver> offertaObservers = new ArrayList<>();
+
 
     public TravelEasy(Connection conn){
         this.conn = conn;
@@ -284,6 +286,7 @@ public class TravelEasy {
 
     public void aggiornaOfferte(OffertaSpeciale o){
         this.elencoOfferte.put(o.getPacchetto(), o);
+        notifyOffertaCreata(o);
     }
 
     public List<PacchettoViaggio> ricercaPacchetti(Connection conn, String città, String dataAndata, String dataRitorno, float prezzoMassimo){
@@ -771,4 +774,19 @@ public class TravelEasy {
         }
         return true;
     }
+
+    public void addOffertaObserver(OffertaObserver observer) {
+        if (observer != null && !offertaObservers.contains(observer)) offertaObservers.add(observer);
+    }
+
+    public void removeOffertaObserver(OffertaObserver observer) {
+        offertaObservers.remove(observer);
+    }
+
+    private void notifyOffertaCreata(OffertaSpeciale offerta) {
+        for (OffertaObserver observer : new ArrayList<>(offertaObservers)) {
+            observer.onOffertaCreata(offerta);
+        }
+    }
+
 }

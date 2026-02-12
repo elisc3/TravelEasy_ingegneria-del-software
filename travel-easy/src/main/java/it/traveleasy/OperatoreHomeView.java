@@ -16,6 +16,7 @@ public class OperatoreHomeView {
     private final VBox content = new VBox(24);
     private Connection conn;
     private TravelEasy te;
+    private OperatoreOfferteView activeOfferteView;
 
     public OperatoreHomeView(Connection conn, TravelEasy te) {
         this.conn = conn;
@@ -73,7 +74,9 @@ public class OperatoreHomeView {
 
         offersButton.setOnAction(e -> {
             setActiveMenuButton(offersButton, newPackageButton, bookingsButton);
-            showContent(new OperatoreOfferteView(te).getRoot());
+            OperatoreOfferteView offersView = new OperatoreOfferteView(te);
+            showContent(offersView.getRoot());
+            activeOfferteView = offersView;
         });
 
         bookingsButton.setOnAction(e -> {
@@ -88,6 +91,11 @@ public class OperatoreHomeView {
     }
 
     private void showContent(VBox view) {
+        if (activeOfferteView != null) {
+            activeOfferteView.dispose();
+            activeOfferteView = null;
+        }
+
         if (content.getChildren().size() > 1) {
             content.getChildren().remove(1);
         }

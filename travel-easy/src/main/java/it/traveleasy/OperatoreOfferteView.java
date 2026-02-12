@@ -14,17 +14,29 @@ import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 
-public class OperatoreOfferteView {
+public class OperatoreOfferteView implements OffertaObserver  {
     private final VBox root;
     private TravelEasy te;
     private Map<Integer, PacchettoViaggio> elencoPacchetti;
+    private final Map<Integer, Button> bottoneOffertaByPacchetto = new HashMap<>();
+    private final Map<Integer, VBox> priceBoxByPacchetto = new HashMap<>();
+    private final Map<Integer, PacchettoViaggio> pacchettoById = new HashMap<>();
+
+    @Override
+    public void onOffertaCreata(OffertaSpeciale offerta) {
+        javafx.application.Platform.runLater(() -> aggiornaCardOfferta(offerta));
+    }
+
+
 
     public OperatoreOfferteView(TravelEasy te) {
         Label sectionTitle = new Label("Elenco pacchetti viaggio disponibili");
         sectionTitle.getStyleClass().add("section-title");
         this.te = te;
+        this.te.addOffertaObserver(this);
         VBox list = new VBox(16);
         list.getStyleClass().add("package-list");
 
@@ -100,9 +112,14 @@ public class OperatoreOfferteView {
             });
         }
 
+        int idPacchetto = p.getId();
+        bottoneOffertaByPacchetto.put(idPacchetto, viewButton);
+        priceBoxByPacchetto.put(idPacchetto, priceBox);
+        pacchettoById.put(idPacchetto, p);
+
         VBox info = new VBox(6, title, code, destination, duration, description);
         info.setAlignment(Pos.CENTER_LEFT);
-
+        
         VBox actions = new VBox(10, priceBox, detailsButton, viewButton);
         actions.setAlignment(Pos.CENTER_RIGHT);
         actions.setPrefWidth(140);
@@ -169,4 +186,23 @@ public class OperatoreOfferteView {
         stage.setScene(scene);
         stage.show();
     }
+
+    private void aggiornaCardOfferta(OffertaSpeciale o) {
+        int idPacchetto = o.getPacchetto().getId();
+        Button btn = bottoneOffertaByPacchetto.get(idPacchetto);
+        VBox priceBox = priceBoxByPacchetto.get(idPacchetto);
+        PacchettoViaggio p = pacchettoById.get(idPacchetto);
+        if (btn == null || priceBox == null || p == null) return;
+
+        btn.setDisable(true);
+        priceBox.getChildren().setAll(
+            buildPriceBox(p.getPrezzo(), o.getScontoPercentuale(), o.getPrezzoScontato()).getChildren()
+        );
+    }
+
+    public void dispose() {
+        te.removeOffertaObserver(this);
+    }
+
+
 }
