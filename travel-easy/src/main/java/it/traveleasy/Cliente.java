@@ -94,5 +94,37 @@ public class Cliente extends Utente {
         //te.aggiornaElencoCarte(this.getId(), cc);
         return true;
     }
+
+    public boolean pagamentoOnPortafoglioDB(Connection conn, float importo){
+        String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo - ? WHERE Utente = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setFloat(1, importo);
+            pstmt.setInt(2, this.getId());
+            pstmt.executeUpdate();
+
+            this.pv.decrementaSaldo(importo);
+            return true;
+        } catch (SQLException e){
+            System.out.println("Errore pagamentoPortafoglio: "+e);
+            return false;
+        }
+    }
+
+    public boolean rimborsoOnPortafoglioDB(Connection conn, float importo){
+        String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo + ? WHERE Utente = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setFloat(1, importo);
+            pstmt.setInt(2, this.getId());
+            pstmt.executeUpdate();
+
+            this.pv.incrementaSaldo(importo);
+            return true;
+        } catch (SQLException e){
+            System.out.println("Errore rimborsoPortafoglio: "+e);
+            return false;
+        }
+    }
     
 }

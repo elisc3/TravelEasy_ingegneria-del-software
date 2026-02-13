@@ -16,24 +16,27 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.sql.Connection;
+import java.util.List;
 
 public class PacchettoVacanzaCard {
 
     private final VBox root;
     private TravelEasy te;
-    private Connection conn;
     private int idUtente;
     private float discountPercent;
+    private PacchettoViaggio pacchetto;
+    private Connection conn;
 
-    public PacchettoVacanzaCard(PacchettoViaggio pacchetto, TravelEasy te, Connection conn, int idUtente) {
-        this(pacchetto, te, conn, idUtente, 0, 0);
+    public PacchettoVacanzaCard(PacchettoViaggio pacchetto, TravelEasy te, int idUtente, Connection conn) {
+        this(pacchetto, te, idUtente, 0, 0, conn);
     }
 
-    public PacchettoVacanzaCard(PacchettoViaggio pacchetto, TravelEasy te, Connection conn, int idUtente, float discountPercent, float prezzoScontato) {
+    public PacchettoVacanzaCard(PacchettoViaggio pacchetto, TravelEasy te, int idUtente, float discountPercent, float prezzoScontato, Connection conn) {
         this.te = te;
-        this.conn = conn;
         this.idUtente = idUtente;
         this.discountPercent = discountPercent;
+        this.pacchetto = pacchetto;
+        this.conn = conn;
 
         Label title = new Label(pacchetto.getTitolo());
         title.getStyleClass().add("package-title");
@@ -133,20 +136,20 @@ public class PacchettoVacanzaCard {
         dialogPane.setPrefWidth(720);
         dialogPane.setPrefHeight(600);
 
-        ModuloPrenotazioneView view = new ModuloPrenotazioneView(() -> {
+        ModuloPrenotazioneView view = new ModuloPrenotazioneView(viaggiatori -> {
             Stage dialogStage = (Stage) dialogPane.getScene().getWindow();
             dialogStage.close();
-            openPaymentWindow();
-        });
+            openPaymentWindow(viaggiatori);
+        }, pacchetto, te);
 
         dialogPane.setContent(view.getRoot());
         dialogPane.getButtonTypes().setAll(ButtonType.CLOSE);
         dialog.showAndWait();
     }
 
-    private void openPaymentWindow() {
+    private void openPaymentWindow(List<Viaggiatore> viaggiatori) {
         Stage stage = new Stage();
-        PagamentoView view = new PagamentoView(te, conn, idUtente);
+        PagamentoView view = new PagamentoView(te, idUtente, pacchetto, viaggiatori, conn);
         Scene scene = new Scene(view.getRoot(), App.WIDTH, App.HEIGHT);
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Pagamento");

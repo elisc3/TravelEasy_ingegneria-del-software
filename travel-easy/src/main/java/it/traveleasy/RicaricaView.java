@@ -16,14 +16,12 @@ import javax.swing.JOptionPane;
  
 public class RicaricaView {
     private TravelEasy te;
-    private Connection conn;
     private int idUtente;
 
     private final StackPane root;
 
-    public RicaricaView(TravelEasy te, Connection conn, int idUtente) {
+    public RicaricaView(TravelEasy te, int idUtente) {
         this.te = te;
-        this.conn = conn;
         this.idUtente = idUtente;
 
         root = new StackPane();
@@ -119,12 +117,14 @@ public class RicaricaView {
                     return;
                 }
 
-                boolean esitoCvv = cc.controlCvv(conn, cvvInserito);
+                boolean esitoCvv = cc.controlCvv(cvvInserito);
                 if (esitoCvv){
-                    if (cc.insertOnPortafoglio(conn, idUtente, Float.parseFloat(amount.getText())))
+                    if (cc.insertOnPortafoglio(idUtente, Float.parseFloat(amount.getText()))) {
                         JOptionPane.showMessageDialog(null, "Ricarica avvenuta con successo!", "INFO", 1);
-                    else
+                        te.ricaricaEffettuata(idUtente);
+                    } else {
                         JOptionPane.showMessageDialog(null, "Si è verificato un problema", "ERRORE", 2);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(null, "Il cvv è errato. Prego riprovare", "ATTENZIONE", 0);
                 }
@@ -150,11 +150,12 @@ public class RicaricaView {
                     return;
                 }
 
-                te.insertCartaCredito(conn, idUtente, cardNumber.getText(), expiry.getText(), cvv.getText(), circuit.getValue());
+                te.insertCartaCredito(idUtente, cardNumber.getText(), expiry.getText(), cvv.getText(), circuit.getValue());
                 //CartaCredito newCarta = te.getCartaCreditoByUtente(idUtente);
-                if (cc.insertOnPortafoglio(conn, idUtente, Float.parseFloat(amount.getText()))){
+                if (cc.insertOnPortafoglio(idUtente, Float.parseFloat(amount.getText()))){
                     JOptionPane.showMessageDialog(null, "Ricarica avvenuta con successo!", "INFO", 1);
                     System.out.println("Ricarica avvenuta con sucecsso");
+                    te.ricaricaEffettuata(idUtente);
                 }
                 else{
                     JOptionPane.showMessageDialog(null, "Si è verificato un problema", "ERRORE", 0);

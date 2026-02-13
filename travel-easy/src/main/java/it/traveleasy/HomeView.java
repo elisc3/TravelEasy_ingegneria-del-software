@@ -141,7 +141,7 @@ public class HomeView {
 
     private void openRechargeWindow() {
         Stage stage = new Stage();
-        RicaricaView view = new RicaricaView(te, conn, idUtente);
+        RicaricaView view = new RicaricaView(te, idUtente);
         Scene scene = new Scene(view.getRoot(), 520, 460);
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Ricarica");
@@ -244,9 +244,9 @@ public class HomeView {
             OffertaSpeciale o = te.getOffertaByPack(pack);
             PacchettoVacanzaCard card;
             if (o == null) 
-                card = new PacchettoVacanzaCard(pack, te, conn, idUtente);
+                card = new PacchettoVacanzaCard(pack, te, idUtente, conn);
             else 
-                card = new PacchettoVacanzaCard(pack, te, conn, idUtente, o.getScontoPercentuale(), o.getPrezzoScontato());
+                card = new PacchettoVacanzaCard(pack, te, idUtente, o.getScontoPercentuale(), o.getPrezzoScontato(), conn);
             
             list.getChildren().add(card.getRoot());
         }

@@ -1,4 +1,7 @@
 package it.traveleasy;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class OffertaSpeciale {
     private int id;
@@ -75,4 +78,29 @@ public class OffertaSpeciale {
     public void setVisibilità(boolean visibilità) {
         this.visibilità = visibilità;
     }*/
+
+    private boolean diminuisciDisponibilitàDB(Connection conn){
+        String query = "UPDATE OffertaSpeciale SET Disponibilità = Disponibilità - 1 WHERE id = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+
+            return true;
+        } catch (SQLException e){
+            System.out.println("Errore diminuisci diponibilità offerta: "+e);
+            return false;
+        }
+        
+    }
+
+    public boolean diminuisciDisponibilità(Connection conn){
+        
+        if(this.diminuisciDisponibilitàDB(conn)){
+            Disponibilità--;
+            return true;
+        } else
+            return false;
+            
+    }
 }

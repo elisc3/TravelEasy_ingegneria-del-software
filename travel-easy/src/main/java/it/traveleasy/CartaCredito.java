@@ -68,7 +68,7 @@ public class CartaCredito {
         return portafoglioVirtuale;
     }
 
-    public boolean controlCvv(Connection conn, String cvvByUtente){
+    public boolean controlCvv(String cvvByUtente){
         if (cvv.equals(cvvByUtente))
             return true;
         else
@@ -99,7 +99,7 @@ public class CartaCredito {
         
     }
 
-    public boolean insertOnPortafoglio(Connection conn, int idUtente, float importo){
+    public boolean insertOnPortafoglio(int idUtente, float importo){
         String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo + ? WHERE Utente = ?;";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
