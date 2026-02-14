@@ -17,8 +17,6 @@ import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
-import javafx.scene.layout.VBox;
-
 
 public class TravelEasy {
     private Map<String, Account> elencoAccount;
@@ -96,7 +94,9 @@ public class TravelEasy {
                             PortafoglioVirtuale pv = this.getPortafoglioByClienteDB(idCliente);
                             //CartaCredito cc = this.elencoCarte.get(idCliente);
                             CartaCredito cc = this.getCartaCreditoByUtente(idCliente);
-                            cliente = new Cliente(idCliente, nome, cognome, telefono, ruoloCliente, id, pv, cc);
+
+                            PortafoglioOre po = this.gePortafoglioOreByUtente(idCliente);
+                            cliente = new Cliente(idCliente, nome, cognome, telefono, ruoloCliente, id, pv, cc, po);
                         }
                     } catch (SQLException e){
                         System.out.println("Errore recupero cliente in account: "+e);
@@ -111,6 +111,30 @@ public class TravelEasy {
                 System.out.println("Errore getPacchettiByFilter:"+e);
                 return null;
             } 
+    }
+
+    public PortafoglioOre gePortafoglioOreByUtente(int idUtente){
+        String query = "SELECT * FROM PortafoglioOre WHERE Utente = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setInt(1, idUtente);
+            ResultSet rs = pstmt.executeQuery();
+            PortafoglioOre po = null;
+                
+            while (rs.next()){
+                int id = rs.getInt("id");
+                int idUtenteD = rs.getInt("Utente");
+                float ore = rs.getFloat("Ore");
+                int sconto = rs.getInt("Sconto");
+
+                po = new PortafoglioOre(id, idUtenteD, ore, sconto);
+            }
+            return po;
+            
+        } catch (SQLException e){
+            System.out.println("Errore gePortafoglioOreByUtente: "+e);
+            return null;
+        }
     }
 
     public CartaCredito getCartaCreditoByUtente(int idUtente){

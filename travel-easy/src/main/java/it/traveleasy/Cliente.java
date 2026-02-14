@@ -9,11 +9,13 @@ public class Cliente extends Utente {
     private PortafoglioVirtuale pv; //
     private CartaCredito cc;
     private TravelEasy te = null;
+    private PortafoglioOre po;
 
-    public Cliente(int id, String nome, String cognome, String Telefono, String ruolo, int Account, PortafoglioVirtuale pv, CartaCredito cc) {
+    public Cliente(int id, String nome, String cognome, String Telefono, String ruolo, int Account, PortafoglioVirtuale pv, CartaCredito cc, PortafoglioOre po) {
         super(id, nome, cognome, Telefono, ruolo, Account);
         this.pv = pv;
         this.cc = cc;
+        this.po = po;
     }
     
     public PortafoglioVirtuale getPv() {
@@ -30,6 +32,14 @@ public class Cliente extends Utente {
 
     public void setCc(CartaCredito cc) {
         this.cc = cc;
+    }
+
+    public PortafoglioOre getPo() {
+        return po;
+    }
+
+    public void setPo(PortafoglioOre po) {
+        this.po = po;
     }
 
     public void incrementaPortafoglio(float importo){
@@ -92,6 +102,33 @@ public class Cliente extends Utente {
 
         this.cc = new CartaCredito(this.getId(), "", "", "", "", idPortafoglioVirtuale, conn);
         //te.aggiornaElencoCarte(this.getId(), cc);
+
+        query = "INSERT INTO PortafoglioOre (Utente, Ore, Sconto) VALUES (?, ?, ?);";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, this.getId());
+            pstmt.setFloat(2, 0.0f);
+            pstmt.setInt(3, 0);
+            pstmt.executeUpdate();
+        } catch (SQLException e){
+            System.out.println("Errore creazione Portafoglio Ore: "+e);
+            return false;
+        }
+
+         query = "SELECT id FROM PortafoglioOre WHERE Utente = ?;";
+         int idPortafoglioOre = 0;
+         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+             pstmt.setInt(1, this.getId());
+             ResultSet rs = pstmt.executeQuery();
+             if (rs.next())
+                 idPortafoglioOre = rs.getInt("id");
+         } catch (SQLException e){
+             System.out.println("Errore recupero id Portafoglio Ore: "+e);
+             return false;
+         }
+
+         PortafoglioOre po = new PortafoglioOre(idPortafoglioOre, this.getId(), 0.0f, 0);
+         setPo(po);
+         
         return true;
     }
 
