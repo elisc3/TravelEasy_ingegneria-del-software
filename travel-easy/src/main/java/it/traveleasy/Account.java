@@ -134,4 +134,11 @@ public class Account {
             return ((Cliente) utente);
         return null;
     }
+
+    public PortafoglioOre getPortafoglioOre() {
+        if (utente instanceof Cliente) {
+            return ((Cliente) utente).getPo();
+        }
+        return null;
+    }
 }

@@ -30,6 +30,7 @@ public class TravelEasy {
     private final List<OffertaObserver> offertaObservers = new ArrayList<>();
     private final List<RicaricaObserver> ricaricaObservers = new ArrayList<>();
     private List<Prenotazione> elencoPrenotazioni;
+    private Map<Integer, PortafoglioOre> elencoPortafoglioOre;
 
 
     public TravelEasy(Connection conn){
@@ -97,6 +98,7 @@ public class TravelEasy {
 
                             PortafoglioOre po = this.gePortafoglioOreByUtente(idCliente);
                             cliente = new Cliente(idCliente, nome, cognome, telefono, ruoloCliente, id, pv, cc, po);
+                            this.elencoPortafoglioOre.put(idCliente, po);
                         }
                     } catch (SQLException e){
                         System.out.println("Errore recupero cliente in account: "+e);
@@ -448,8 +450,11 @@ public class TravelEasy {
         //PortafoglioVirtuale pv = newAccount.getPortafoglioVirtuale();
         //mappaPortafogli.put(idCliente, pv);
 
-        CartaCredito cc = newAccount.getCartaCredito();
+        //CartaCredito cc = newAccount.getCartaCredito();
         //elencoCarte.put(idCliente, cc);
+
+        PortafoglioOre po = newAccount.getPortafoglioOre();
+        elencoPortafoglioOre.put(idCliente, po);
         
         elencoAccount.put(email, newAccount);
 
@@ -478,6 +483,38 @@ public class TravelEasy {
         return res;
     }
 
+    //*AGGIORNAMENTO ORE
+    public boolean aggiornaOre(String email, float oreDaAggiungere){
+        Account a = elencoAccount.get(email);
+        
+        if (a == null) {
+            System.out.println("Account non trovato");
+            return false;
+        }
+
+        Cliente c = a.getCliente();
+        if (c == null) {
+            System.out.println("Cliente non trovato");
+            return false;
+        }
+
+        int idCliente = c.getId();
+        PortafoglioOre po = elencoPortafoglioOre.get(idCliente);
+        if (po == null) {
+            System.out.println("PortafoglioOre non trovato");
+            return false;
+        }
+
+        if(!po.incrementaOre(conn, oreDaAggiungere)) {
+            System.out.println("Errore aggiornamento ore");
+            return false;
+        }
+
+        return true;
+    }
+
+    
+    
     public float validazioneDatiNuovaRicarica(String numeroCarta, String scadenza, String cvv, String importo){
         if (numeroCarta.equals("") || scadenza.equals("") || cvv.equals("") || importo.equals(""))
             return -1.0F;
