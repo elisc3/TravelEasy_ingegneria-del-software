@@ -10,8 +10,10 @@ import javafx.scene.layout.VBox;
 public class ProfiloView {
 
     private final StackPane root;
+    private Account account;
 
-    public ProfiloView() {
+    public ProfiloView(Account a) {
+        this.account = a;
         root = new StackPane();
         root.getStyleClass().add("profile-root");
         root.setPadding(new Insets(24));
@@ -23,6 +25,13 @@ public class ProfiloView {
     }
 
     private VBox buildCard() {
+        Cliente c = account.getCliente();
+        String nome = c.getNome();
+        String cognome = c.getCognome();
+        String e_mail = account.getEmail();
+        String numeroTelefono = c.getTelefono();
+        double saldo = c.getPv().getSaldo();
+
         HBox header = buildHeader();
 
         Label title = new Label("I miei dati");
@@ -30,27 +39,27 @@ public class ProfiloView {
 
         Label name = new Label("Nome");
         name.getStyleClass().add("profile-label");
-        Label nameValue = new Label("Mario");
+        Label nameValue = new Label(nome);
         nameValue.getStyleClass().add("profile-value");
 
         Label surname = new Label("Cognome");
         surname.getStyleClass().add("profile-label");
-        Label surnameValue = new Label("Rossi");
+        Label surnameValue = new Label(cognome);
         surnameValue.getStyleClass().add("profile-value");
 
         Label email = new Label("E-Mail");
         email.getStyleClass().add("profile-label");
-        Label emailValue = new Label("mario.rossi@email.it");
+        Label emailValue = new Label(e_mail);
         emailValue.getStyleClass().add("profile-value");
 
         Label phone = new Label("Numero telefono");
         phone.getStyleClass().add("profile-label");
-        Label phoneValue = new Label("+39 333 1234567");
+        Label phoneValue = new Label(numeroTelefono);
         phoneValue.getStyleClass().add("profile-value");
 
         Label balanceLabel = new Label("Saldo portafoglio");
         balanceLabel.getStyleClass().add("profile-label");
-        Label balanceValue = new Label("€ 0.00");
+        Label balanceValue = new Label("€ "+saldo);
         balanceValue.getStyleClass().add("profile-balance");
 
         VBox grid = new VBox(12,

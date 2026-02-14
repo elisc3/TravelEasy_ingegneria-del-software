@@ -838,4 +838,8 @@ public class TravelEasy {
         }
     }
 
+    public Account getAccountToHomeView(String email){
+        return this.elencoAccount.get(email);
+    }
+
 }
