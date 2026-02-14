@@ -289,3 +289,14 @@
     -fx-border-color: #E2E8F0;
     -fx-border-radius: 12px;
 }
+
+.danger-button {
+    -fx-background-color: #DC2626;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 10px;
+}
+
+.danger-button:hover {
+    -fx-background-color: #B91C1C;
+}

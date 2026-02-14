@@ -52,7 +52,7 @@ public class LoginView {
                 System.out.println("Login avvenuto con successo");
                 //int idUtente = 
                 if (res[1].equals("Cliente"))
-                   App.showHome(stage, res[0]); //CONTINUARE DA QUA L'ASSEGNAZIONE DI UN RIFERIMENTO ALL'UTENTE ALLA HOMEVIEW;
+                   App.showHome(stage, res[0]);
                 else
                     App.showOperatoreHomeView(stage);
             }

@@ -2,6 +2,8 @@ package it.traveleasy;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -21,9 +23,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.ResultSet;
 
 
 public class HomeView {
@@ -118,10 +117,15 @@ public class HomeView {
         profileButton.getStyleClass().add("profile-button");
         profileButton.setOnAction(e -> openProfileWindow());
 
+        Button deleteButton = new Button("Elimina");
+        deleteButton.getStyleClass().add("danger-button");
+        deleteButton.setOnAction(e -> openDeleteView());
+
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox header = new HBox(16, title, spacer, bookingsButton, rechargeButton, profileButton);
+        HBox header = new HBox(16, title, spacer, bookingsButton, rechargeButton, profileButton, deleteButton);
         header.getStyleClass().add("top-bar");
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPadding(new Insets(16, 40, 16, 40));
@@ -134,6 +138,17 @@ public class HomeView {
         Scene scene = new Scene(view.getRoot(), 520, 520);
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Profilo");
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void openDeleteView() {
+        Stage stage = new Stage();
+        DeleteView view = new DeleteView(te, conn, emailUtente);
+        Scene scene = new Scene(view.getRoot(), 450, 300);
+        scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
+        stage.setTitle("Travel Easy - Elimina Account");
         stage.setResizable(false);
         stage.setScene(scene);
         stage.show();

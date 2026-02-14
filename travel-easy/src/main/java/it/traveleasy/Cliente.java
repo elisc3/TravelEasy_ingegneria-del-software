@@ -128,10 +128,41 @@ public class Cliente extends Utente {
 
          PortafoglioOre po = new PortafoglioOre(idPortafoglioOre, this.getId(), 0.0f, 0);
          setPo(po);
-         
+
         return true;
     }
 
+    public boolean eliminaMetodiPagamento(Connection conn){
+        String query = "DELETE FROM CartaCredito WHERE Utente = ?;";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, this.getId());
+            pstmt.executeUpdate();
+        } catch (SQLException e){
+            System.out.println("Errore eliminazione carta di credito: "+e);
+            return false;
+        }
+
+        query = "DELETE FROM PortafoglioVirtuale WHERE Utente = ?;";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, this.getId());
+            pstmt.executeUpdate();
+        } catch (SQLException e){
+            System.out.println("Errore eliminazione portafoglio virtuale: "+e);
+            return false;
+        }
+
+        query = "DELETE FROM PortafoglioOre WHERE Utente = ?;";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, this.getId());
+            pstmt.executeUpdate();
+        } catch (SQLException e){
+            System.out.println("Errore eliminazione portafoglio ore: "+e);
+            return false;
+        }
+
+        return true;
+    }
+    
     public boolean pagamentoOnPortafoglioDB(Connection conn, float importo){
         String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo - ? WHERE Utente = ?;";
 

@@ -107,6 +107,26 @@ public class Account {
         return idUtente;
     }
 
+    public boolean eliminaCliente(Connection conn){
+        Cliente cliente = this.getCliente();
+        if (cliente == null)
+            return false;
+
+        if(!cliente.eliminaMetodiPagamento(conn))
+            return false;
+
+        String query = "DELETE FROM Utenti where id = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setInt(1, this.utente.getId());
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e){
+            System.out.println("Errore eliminazione cliente: "+e);
+            return false;
+        }
+    }
+
     public PortafoglioVirtuale getPortafoglioVirtuale() {
         if (utente instanceof Cliente) {
             return ((Cliente) utente).getPv();

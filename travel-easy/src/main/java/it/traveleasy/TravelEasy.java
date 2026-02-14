@@ -483,6 +483,37 @@ public class TravelEasy {
         return res;
     }
 
+    //*ELIMINAZIONE ACCOUNT
+    public boolean eliminaAccount(Connection conn, String email, String password){
+        Account a = elencoAccount.get(email);
+
+        if(!a.validazioneCredenziali(email, password))
+            return false;
+
+        Cliente cliente = a.getCliente();
+        int idCliente = cliente.getId();
+
+        elencoPortafoglioOre.remove(idCliente);
+
+        if (!a.eliminaCliente(conn))
+            return false;
+
+        elencoAccount.remove(email);
+
+        String query = "DELETE FROM Account WHERE Email = ? AND Password = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setString(1, email);
+            pstmt.setString(2, password);
+            pstmt.executeUpdate();
+            elencoAccount.remove(email);
+        } catch (SQLException e){
+            System.out.println("Errore elimina account: "+e);
+        }
+
+        return true;
+    }
+
     //*AGGIORNAMENTO ORE
     public boolean aggiornaOre(String email, float oreDaAggiungere){
         Account a = elencoAccount.get(email);
