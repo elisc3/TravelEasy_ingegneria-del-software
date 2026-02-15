@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class Cliente extends Utente {
-    private PortafoglioVirtuale pv; //
+    private PortafoglioVirtuale pv; 
     private CartaCredito cc;
     private TravelEasy te = null;
     private PortafoglioOre po;
@@ -100,13 +100,13 @@ public class Cliente extends Utente {
 
 
 
-        this.cc = new CartaCredito(this.getId(), "", "", "", "", idPortafoglioVirtuale, conn);
+        this.cc = new CartaCredito("", "", "", "", idPortafoglioVirtuale, this, conn);
         //te.aggiornaElencoCarte(this.getId(), cc);
 
         query = "INSERT INTO PortafoglioOre (Utente, Ore, Sconto) VALUES (?, ?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, this.getId());
-            pstmt.setFloat(2, 0.0f);
+            pstmt.setFloat(2, 0.0F);
             pstmt.setInt(3, 0);
             pstmt.executeUpdate();
         } catch (SQLException e){
@@ -194,5 +194,7 @@ public class Cliente extends Utente {
             return false;
         }
     }
+
+    
     
 }

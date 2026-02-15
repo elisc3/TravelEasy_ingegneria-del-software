@@ -20,11 +20,9 @@ import javax.swing.JOptionPane;
 
 public class TravelEasy {
     private Map<String, Account> elencoAccount;
-    //private Map<Integer, PortafoglioVirtuale> mappaPortafogli;
     private Connection conn;
     private Map<Integer, CompagniaTrasporto> elencoCompagnie;
     private Map<Integer, Alloggio> elencoAlloggi;
-    //private Map<Integer, CartaCredito> elencoCarte;
     private Map<Integer, PacchettoViaggio> elencoPacchetti;
     private Map<PacchettoViaggio, OffertaSpeciale> elencoOfferte;
     private final List<OffertaObserver> offertaObservers = new ArrayList<>();
@@ -65,6 +63,7 @@ public class TravelEasy {
     //* RECUPERO MAPPE
     private Map<String, Account> recuperaAccount() {
         Map<String, Account> mappa = new HashMap<>();
+        this.elencoPortafoglioOre = new HashMap<>();
 
         String query = "SELECT * FROM ACCOUNT";
 
@@ -94,11 +93,12 @@ public class TravelEasy {
                             //PortafoglioVirtuale pv = mappaPortafogli.get(idCliente);
                             PortafoglioVirtuale pv = this.getPortafoglioByClienteDB(idCliente);
                             //CartaCredito cc = this.elencoCarte.get(idCliente);
-                            CartaCredito cc = this.getCartaCreditoByUtente(idCliente);
-
+                            
                             PortafoglioOre po = this.gePortafoglioOreByUtente(idCliente);
-                            cliente = new Cliente(idCliente, nome, cognome, telefono, ruoloCliente, id, pv, cc, po);
-                            this.elencoPortafoglioOre.put(idCliente, po);
+                            cliente = new Cliente(idCliente, nome, cognome, telefono, ruoloCliente, id, pv, null, po);
+                            CartaCredito cc = this.getCartaCreditoByUtenteDB(cliente);
+                            cliente.setCc(cc);
+                            this.elencoPortafoglioOre.put(idCliente, po); 
                         }
                     } catch (SQLException e){
                         System.out.println("Errore recupero cliente in account: "+e);
@@ -116,7 +116,7 @@ public class TravelEasy {
     }
 
     public PortafoglioOre gePortafoglioOreByUtente(int idUtente){
-        String query = "SELECT * FROM PortafoglioOre WHERE Utente = ?;";
+        String query = "SELECT * FROM PortafoglioOre WHERE proprietario = ?;";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)){
             pstmt.setInt(1, idUtente);
@@ -125,9 +125,9 @@ public class TravelEasy {
                 
             while (rs.next()){
                 int id = rs.getInt("id");
-                int idUtenteD = rs.getInt("Utente");
-                float ore = rs.getFloat("Ore");
-                int sconto = rs.getInt("Sconto");
+                int idUtenteD = rs.getInt("proprietario");
+                float ore = rs.getFloat("ore");
+                int sconto = rs.getInt("sconto");
 
                 po = new PortafoglioOre(id, idUtenteD, ore, sconto);
             }
@@ -139,11 +139,11 @@ public class TravelEasy {
         }
     }
 
-    public CartaCredito getCartaCreditoByUtente(int idUtente){
+    public CartaCredito getCartaCreditoByUtenteDB(Cliente cliente){
         String query = "SELECT * FROM CartaCredito WHERE Utente = ?;";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            pstmt.setInt(1, idUtente);
+            pstmt.setInt(1, cliente.getId());
             ResultSet rs = pstmt.executeQuery();
             CartaCredito cc = null;
                 
@@ -156,7 +156,7 @@ public class TravelEasy {
                 String circuito = rs.getString("Circuito");
                 int idPortafoglio = rs.getInt("PortafoglioVirtuale");
 
-                cc = new CartaCredito(idUtenteD, numeroCarta, scadenza, cvv, circuito, idPortafoglio, conn);
+                cc = new CartaCredito(numeroCarta, scadenza, cvv, circuito, idPortafoglio, cliente, conn);
             }
             return cc;
             
@@ -234,11 +234,12 @@ public class TravelEasy {
                 String dataRitorno = rs.getString("DataRitorno");
                 String descrizione = rs.getString("Descrizione");
                 float prezzo= rs.getFloat("Prezzo");
+                float oreViaggio = rs.getFloat("OreViaggio");
                 int visibilità = rs.getInt("Visibilità");
                 int idCompagniaTrasporto = rs.getInt("CompagniaTrasporto");
                 int idAlloggio = rs.getInt("Alloggio");
 
-                mappa.put(id, new PacchettoViaggio(id, codice, titolo, citta, nazione, dataPartenza, dataRitorno, descrizione, prezzo, visibilità, idCompagniaTrasporto, idAlloggio, conn));
+                mappa.put(id, new PacchettoViaggio(id, codice, titolo, citta, nazione, dataPartenza, dataRitorno, descrizione, prezzo, oreViaggio, visibilità, idCompagniaTrasporto, idAlloggio, conn));
             }
             return mappa;
         } catch (SQLException e){
@@ -603,7 +604,7 @@ public class TravelEasy {
 
             //elencoCarte.put(idUtente, new CartaCredito(idUtente, numeroCarta, scadenza, cvv, circuito, idPortafoglio, conn));
             Cliente cliente = this.getClienteById(idUtente);
-            cliente.setCc(new CartaCredito(idUtente, numeroCarta, scadenza, cvv, circuito, idPortafoglio, conn));
+            cliente.setCc(new CartaCredito(numeroCarta, scadenza, cvv, circuito, idPortafoglio, cliente, conn));
             return true;
         } catch (SQLException e){
             System.out.println("Errore insertOnPortafoglio: "+e);
@@ -658,8 +659,8 @@ public class TravelEasy {
     }
 
 
-    public boolean nuovoPacchetto(Connection conn, String codice, String titolo, String citta, String nazione, String descrizione, float prezzo, int visibilità, String compagnia, String alloggio, String dataPartenza, String dataRitorno){
-        String query = "INSERT INTO PacchettiViaggio (Città, Titolo, Nazione, DataPartenza, DataRitorno, Descrizione, Prezzo, Visibilità, CompagniaTrasporto, Alloggio, Codice) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    public boolean nuovoPacchetto(Connection conn, String codice, String titolo, String citta, String nazione, String descrizione, float prezzo, float oreViaggio, int visibilità, String compagnia, String alloggio, String dataPartenza, String dataRitorno){
+        String query = "INSERT INTO PacchettiViaggio (Città, Titolo, Nazione, DataPartenza, DataRitorno, Descrizione, Prezzo, Visibilità, CompagniaTrasporto, Alloggio, Codice, OreViaggio) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         int idAlloggio = 0;
         for (Alloggio a : elencoAlloggi.values()) {
@@ -704,6 +705,7 @@ public class TravelEasy {
             pstmt.setInt(9, idCompagniaTrasporto);
             pstmt.setInt(10, idAlloggio);
             pstmt.setString(11, codice);
+            pstmt.setFloat(12, oreViaggio);
 
             pstmt.executeUpdate();
             int newId = 0;
@@ -713,7 +715,7 @@ public class TravelEasy {
                      newId = rs.getInt(1);
                 }
             }
-            this.aggiornaElencoPacchetti(new PacchettoViaggio(newId, codice, titolo, citta, nazione, dataPartenza, dataRitorno, descrizione, prezzo, visibilità, idCompagniaTrasporto, idAlloggio, conn));
+            this.aggiornaElencoPacchetti(new PacchettoViaggio(newId, codice, titolo, citta, nazione, dataPartenza, dataRitorno, descrizione, prezzo, oreViaggio, visibilità, idCompagniaTrasporto, idAlloggio, conn));
             return true;
         } catch (SQLException e){
             System.out.println("Errore nuovo pacchetto: "+e);
@@ -852,7 +854,7 @@ public class TravelEasy {
         return 0;
     }
 
-    public float getTotalePrenotazione(PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori){
+    public float getTotalePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori){
         //DEVONO ESSERE AGGIUNTI SCONTI FEDELTà, DOPO L'IMPLEMENTAZIONE DI UC13
         OffertaSpeciale o = elencoOfferte.get(pacchetto);
         float prezzoVero = 0.0F;
@@ -861,7 +863,10 @@ public class TravelEasy {
         else
             prezzoVero = pacchetto.getPrezzo();
 
-        return prezzoVero*elencoViaggiatori.size();
+        float sconto = cliente.getPo().getSconto();
+        float totaleSenzaSconto = prezzoVero*elencoViaggiatori.size();
+        
+        return totaleSenzaSconto - sconto;
     }
 
     public Cliente getClienteById(int idCliente){
@@ -896,6 +901,17 @@ public class TravelEasy {
         String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione) values (?, ?, ?);";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            if (cliente.getPo() == null) {
+                PortafoglioOre po = this.elencoPortafoglioOre.get(cliente.getId());
+                if (po == null) {
+                    po = this.gePortafoglioOreByUtente(cliente.getId());
+                    if (po != null) {
+                        this.elencoPortafoglioOre.put(cliente.getId(), po);
+                    }
+                }
+                cliente.setPo(po);
+            }
+
             pstmt.setInt(1, cliente.getId());
             pstmt.setInt(2, pacchetto.getId());
             String dataPrenotazione = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
@@ -915,14 +931,17 @@ public class TravelEasy {
                     return false;
             }
             
-            
-            this.aggiungiPrenotazione(new Prenotazione(cliente, pacchetto, dataPrenotazione, elencoViaggiatori));
+            Prenotazione p = new Prenotazione(cliente, pacchetto, dataPrenotazione, elencoViaggiatori);
+            if (!p.aggiornaOreViaggio(conn))
+                return false;
+            this.aggiungiPrenotazione(p);
             OffertaSpeciale o = this.elencoOfferte.get(pacchetto);
             if (o != null){
                 if(!o.diminuisciDisponibilità(conn))
                     return false;
             }
 
+            
             return true;
         } catch (SQLException e){
             System.out.println("Errore registrazionePrenotazione: "+e);

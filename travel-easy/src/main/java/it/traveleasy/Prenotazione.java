@@ -1,5 +1,6 @@
 package it.traveleasy;
 import java.util.List;
+import java.sql.Connection;
 
 public class Prenotazione {
     private Cliente cliente;
@@ -36,5 +37,12 @@ public class Prenotazione {
 
     public void setDataPrenotazione(String dataPrenotazione) {
         this.dataPrenotazione = dataPrenotazione;
+    }
+
+    public boolean aggiornaOreViaggio(Connection conn){
+        if (this.cliente == null || this.cliente.getPo() == null || this.pacchetto == null) {
+            return false;
+        }
+        return this.cliente.getPo().incrementaOre(conn, this.pacchetto.getOreViaggio());
     }
 }

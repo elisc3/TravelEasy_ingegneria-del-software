@@ -16,13 +16,14 @@ import javax.swing.JOptionPane;
  
 public class RicaricaView {
     private TravelEasy te;
-    private int idUtente;
+    private Cliente cliente;
 
     private final StackPane root;
 
     public RicaricaView(TravelEasy te, int idUtente) {
         this.te = te;
-        this.idUtente = idUtente;
+        this.cliente = te.getClienteById(idUtente);
+
 
         root = new StackPane();
         root.getStyleClass().add("payment-root");
@@ -68,7 +69,7 @@ public class RicaricaView {
         Button confirm = new Button("Conferma ricarica");
         confirm.getStyleClass().add("primary-button");
 
-        CartaCredito cc = te.getCartaCreditoByUtente(idUtente);
+        CartaCredito cc = cliente.getCc();
         if (cc != null && cc.getNumeroCarta() != null && !cc.getNumeroCarta().isEmpty()){
             cardNumber.setText(cc.getNumeroCarta());
             cardNumber.setEditable(false);
@@ -82,8 +83,9 @@ public class RicaricaView {
         }
 
         confirm.setOnAction(e -> {
-            CartaCredito ccOnConfirm = te.getCartaCreditoByUtente(idUtente);
-
+            CartaCredito ccOnConfirm = cliente.getCc();
+            int idUtente = cliente.getId();
+            
             if (ccOnConfirm != null && ccOnConfirm.getNumeroCarta() != null && !ccOnConfirm.getNumeroCarta().isEmpty()){
                 cardNumber.setText(ccOnConfirm.getNumeroCarta());
                 cardNumber.setEditable(false);
@@ -119,6 +121,7 @@ public class RicaricaView {
 
                 boolean esitoCvv = cc.controlCvv(cvvInserito);
                 if (esitoCvv){
+                    
                     if (cc.insertOnPortafoglio(idUtente, Float.parseFloat(amount.getText()))) {
                         JOptionPane.showMessageDialog(null, "Ricarica avvenuta con successo!", "INFO", 1);
                         te.ricaricaEffettuata(idUtente);

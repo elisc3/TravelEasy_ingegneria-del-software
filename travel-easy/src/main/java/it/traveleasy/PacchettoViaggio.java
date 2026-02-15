@@ -19,12 +19,13 @@ public class PacchettoViaggio {
     private String dataRitorno;
     private String descrizione;
     private float prezzo;
+    private float oreViaggio;
     private int visibilità;
     private int idCompagniaTrasporto;
     private int idAlloggio;
     private Connection conn;
 
-    public PacchettoViaggio(int id, String codice, String titolo,  String città, String nazione, String dataPartenza, String dataRitorno, String descrizione, float prezzo, int visibilità, int idCompagniaTrasporto, int idAlloggio, Connection conn){
+    public PacchettoViaggio(int id, String codice, String titolo,  String città, String nazione, String dataPartenza, String dataRitorno, String descrizione, float prezzo, float oreViaggio, int visibilità, int idCompagniaTrasporto, int idAlloggio, Connection conn){
         this.id= id;
         this.codice = codice;
         this.titolo = titolo;
@@ -34,6 +35,7 @@ public class PacchettoViaggio {
         this.dataRitorno = dataRitorno;
         this.descrizione = descrizione;
         this.prezzo = prezzo;
+        this.oreViaggio = oreViaggio;
         this.visibilità = visibilità;
         this.idCompagniaTrasporto = idCompagniaTrasporto;
         this.idAlloggio = idAlloggio;
@@ -86,6 +88,10 @@ public class PacchettoViaggio {
 
     public String getCodice(){
         return this.codice;
+    }
+
+    public float getOreViaggio(){
+        return this.oreViaggio;
     }
 
     public float validazionePercentunaleNuovaOfferta(String percentuale){

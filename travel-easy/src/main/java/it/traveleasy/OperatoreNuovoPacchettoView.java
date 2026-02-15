@@ -70,6 +70,10 @@ public class OperatoreNuovoPacchettoView {
         prezzoField.setPromptText("Prezzo");
         prezzoField.getStyleClass().add("input");
 
+        TextField oreViaggioField = new TextField();
+        oreViaggioField.setPromptText("Ore viaggio");
+        oreViaggioField.getStyleClass().add("input");
+
         ComboBox<String> compagniaCombo = new ComboBox<>();
         compagniaCombo.setPromptText("Compagnia di trasporto");
 
@@ -112,6 +116,7 @@ public class OperatoreNuovoPacchettoView {
             else
                 visibilità = 0;
             String prezzo = prezzoField.getText();
+            String oreViaggio = oreViaggioField.getText();
             String compagnia = compagniaCombo.getValue();
             String alloggio = alloggioCombo.getValue();
             DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -133,9 +138,22 @@ public class OperatoreNuovoPacchettoView {
                 return;
             }
 
+
+            float oreViaggioF;
+            try {
+                oreViaggioF = Float.parseFloat(oreViaggio);
+                if (oreViaggioF <= 0.0F) {
+                    JOptionPane.showMessageDialog(null, "Numero ore viaggio non valido", "ERRORE", 0);
+                    return;
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Numero ore viaggio non valido", "ERRORE", 0);
+                return;
+            }
+
             
 
-            if (te.nuovoPacchetto(conn, codice, titolo, citta, nazione, descrizione, prezzoF, visibilità, compagnia, alloggio, dataPartenzaValue, dataRitornoValue))
+            if (te.nuovoPacchetto(conn, codice, titolo, citta, nazione, descrizione, prezzoF, oreViaggioF, visibilità, compagnia, alloggio, dataPartenzaValue, dataRitornoValue))
                 JOptionPane.showMessageDialog(null, "Nuovo pacchetto inserito con successo!", "INFO", 1);
 
 
@@ -163,6 +181,7 @@ public class OperatoreNuovoPacchettoView {
             descrizioneField,
             visibilitaCheck,
             prezzoField,
+            oreViaggioField,
             comboRow,
             saveButton
         );

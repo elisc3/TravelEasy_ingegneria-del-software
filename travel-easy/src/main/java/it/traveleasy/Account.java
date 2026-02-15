@@ -98,11 +98,15 @@ public class Account {
             return 0;
         }
 
+        
+
         Cliente c = new Cliente(idUtente, nome, cognome, telefono, "Cliente", this.id, null, null, null);
         this.utente = c;
 
         if(!c.metodiPagamento(conn))
             return 0;
+
+        
         
         return idUtente;
     }

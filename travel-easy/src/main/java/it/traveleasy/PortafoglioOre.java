@@ -7,9 +7,9 @@ public class PortafoglioOre {
     private int id;
     private int utenteId;
     private float  ore;
-    private int sconto;
+    private float sconto;
 
-    public PortafoglioOre(int id, int utenteId, float ore, int sconto) {
+    public PortafoglioOre(int id, int utenteId, float ore, float sconto) {
         this.id = id;
         this.utenteId = utenteId;
         this.ore = ore;
@@ -40,11 +40,11 @@ public class PortafoglioOre {
         this.ore = ore;
     }
 
-    public int getSconto() {
+    public float getSconto() {
         return sconto;
     }
 
-    public void setSconto(int sconto) {
+    public void setSconto(float sconto) {
         this.sconto = sconto;
     }
 
@@ -55,7 +55,7 @@ public class PortafoglioOre {
         String query = "UPDATE PortafoglioOre SET Ore = ?, Sconto = ? WHERE id = ?;";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setFloat(1, this.ore);
-            pstmt.setInt(2, this.sconto);
+            pstmt.setFloat(2, this.sconto);
             pstmt.setInt(3, this.id);
             pstmt.executeUpdate();
         } catch (SQLException e){

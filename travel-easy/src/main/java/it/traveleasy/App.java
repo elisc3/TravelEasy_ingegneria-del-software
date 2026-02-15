@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Statement;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -42,6 +43,9 @@ public class App extends Application {
         DB_URL = "jdbc:sqlite:" + dbPath;
        
             Connection conn = DriverManager.getConnection(DB_URL);
+            try (Statement st = conn.createStatement()) {
+                st.execute("PRAGMA busy_timeout = 5000;");
+            }
             System.out.println("Connessione al database riuscita!");
             //this.creaTabelle(conn);
             return conn;

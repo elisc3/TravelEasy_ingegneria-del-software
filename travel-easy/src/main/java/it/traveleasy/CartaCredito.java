@@ -2,7 +2,6 @@ package it.traveleasy;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class CartaCredito {
@@ -14,10 +13,12 @@ public class CartaCredito {
     private PortafoglioVirtuale portafoglioVirtuale;
     private Connection conn;
 
-    public CartaCredito(int idUtente, String numeroCarta, String scadenza, String cvv, String circuito, int idPortafoglioVirtuale, Connection conn) {
+    public CartaCredito(String numeroCarta, String scadenza, String cvv, String circuito, int idPortafoglioVirtuale, Cliente cliente, Connection conn) {
         this.conn = conn;
-        this.portafoglioVirtuale = this.recuperaPortafoglioById(idPortafoglioVirtuale);
-        this.cliente = this.recuperaUtente(idUtente);
+        this.cliente = cliente;
+        //this.portafoglioVirtuale = this.recuperaPortafoglioById(idPortafoglioVirtuale);
+        //this.cliente = this.recuperaUtente(idUtente);
+        this.portafoglioVirtuale = this.cliente.getPv();
         this.numeroCarta = numeroCarta;
         this.scadenza = scadenza;
         this.cvv = cvv;
@@ -75,7 +76,7 @@ public class CartaCredito {
             return false;
     }
 
-    private PortafoglioVirtuale recuperaPortafoglioById(int idPortafoglio){
+    /*private PortafoglioVirtuale recuperaPortafoglioById(int idPortafoglio){
         String query = "SELECT * FROM PortafoglioVirtuale WHERE id = ?";
 
 
@@ -97,7 +98,7 @@ public class CartaCredito {
                 return null;
             } 
         
-    }
+    }*/
 
     public boolean insertOnPortafoglio(int idUtente, float importo){
         String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo + ? WHERE Utente = ?;";
@@ -116,6 +117,28 @@ public class CartaCredito {
             return false;
         }
     }
+    
+    /*private PortafoglioOre recuperaPortafoglioOre(int idCliente){
+        String query = "SELECT * FROM PortafoglioOre WHERE proprietario = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+                pstmt.setInt(1, idCliente);
+                ResultSet rs = pstmt.executeQuery();
+                
+                PortafoglioOre pv = null;
+                while (rs.next()){
+                    int id = rs.getInt("id");
+                    
+                }
+
+                return pv;
+            } catch (SQLException e){
+                System.out.println("Errore getPacchettiByFilter:"+e);
+                return null;
+            }
+
+    }
+    
 
     private Cliente recuperaUtente(int idUtente){
         String query = "SELECT * FROM Utenti WHERE id = ?;";
@@ -134,7 +157,8 @@ public class CartaCredito {
                     String ruolo = rs.getString("Ruolo");
                     int account = rs.getInt("Account");
 
-                    c = new Cliente(id, nome, cognome, telefono, ruolo, account, portafoglioVirtuale, this);
+                    PortafoglioOre po = this.recuperaPortafoglioOre(id);
+                    c = new Cliente(id, nome, cognome, telefono, ruolo, account, portafoglioVirtuale, this, po);
                 }
                 return c;
         } catch (SQLException e){
@@ -142,6 +166,6 @@ public class CartaCredito {
             return null;
         }
 
-    }
+    }*/
 }
 

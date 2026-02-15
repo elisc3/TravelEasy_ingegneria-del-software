@@ -28,11 +28,12 @@ public class PagamentoView implements RicaricaObserver {
     private Button confirmButton;
     private float totale;
 
-    public PagamentoView(TravelEasy te, int idUtente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori, Connection conn) {
+    public PagamentoView(TravelEasy te, int idUtente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori,  Connection conn) {
         this.te = te;
         this.cliente = this.te.getClienteById(idUtente);
         this.elencoViaggiatori = elencoViaggiatori;
         this.pacchetto = pacchetto;
+        
         this.conn = conn;
         this.te.addRicaricaObserver(this);
         root = new StackPane();
@@ -59,7 +60,9 @@ public class PagamentoView implements RicaricaObserver {
         Label sectionTitle = new Label("Pagamento");
         sectionTitle.getStyleClass().add("section-title");
 
-        totale = te.getTotalePrenotazione(pacchetto, elencoViaggiatori);
+        totale = te.getTotalePrenotazione(cliente, pacchetto, elencoViaggiatori);
+        float scontoApplicato = cliente.getPo().getSconto();
+        
 
         Label totalLabel = new Label("Totale dovuto: EUR " + totale);
         totalLabel.getStyleClass().add("package-price");
@@ -68,6 +71,22 @@ public class PagamentoView implements RicaricaObserver {
 
         balanceLabel = new Label("Saldo attuale portafoglio: EUR " + saldoPortafoglio);
         balanceLabel.getStyleClass().add("package-meta");
+
+        Label fidelityTitle = new Label("Sconto fedelta");
+        fidelityTitle.getStyleClass().add("section-subtitle");
+
+        
+
+        Label fidelityValue = new Label("Sconto disponibile: " + scontoApplicato + " EUR");
+        fidelityValue.getStyleClass().add("package-meta");
+
+        Label fidelityHint = new Label("E' stato applicato lo sconto nel riepilogo finale.");
+        fidelityHint.getStyleClass().add("package-meta");
+
+        VBox fidelityBox = new VBox(6, fidelityTitle, fidelityValue, fidelityHint);
+        fidelityBox.getStyleClass().add("search-card");
+        fidelityBox.setPadding(new Insets(12));
+        fidelityBox.setMaxWidth(Double.MAX_VALUE);
 
         confirmButton = new Button("Conferma pagamento");
         confirmButton.getStyleClass().add("primary-button");
@@ -92,6 +111,13 @@ public class PagamentoView implements RicaricaObserver {
                     return;
                 }
             }
+
+            float totaleSenzaSconto = totale + scontoApplicato;
+            if (scontoApplicato >= totaleSenzaSconto){
+                cliente.getPo().setSconto(scontoApplicato - (scontoApplicato - totaleSenzaSconto));
+                
+            }
+            cliente.getPo().setSconto(0);
             
             JOptionPane.showMessageDialog(null, "Prenotazione avvenuta con successo!", "INFO", 1);
         });
@@ -102,7 +128,7 @@ public class PagamentoView implements RicaricaObserver {
             openRechargeWindow();
         });
 
-        VBox content = new VBox(16, sectionTitle, totalLabel, balanceLabel, confirmButton, rechargeButton);
+        VBox content = new VBox(16, sectionTitle, totalLabel, balanceLabel, fidelityBox, confirmButton, rechargeButton);
         content.setAlignment(Pos.CENTER_LEFT);
         return content;
     }
