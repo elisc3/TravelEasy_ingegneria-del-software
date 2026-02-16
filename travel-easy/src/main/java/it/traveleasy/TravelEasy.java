@@ -330,8 +330,10 @@ public class TravelEasy {
                 Cliente cliente = this.getClienteById(idCliente);
 
                
-
-                lista.add(new Prenotazione(cliente, pacchettoViaggio, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta));
+                Prenotazione newPrenotazione = new Prenotazione(cliente, pacchettoViaggio, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta);
+                lista.add(newPrenotazione);
+                cliente.addPrenotazione(newPrenotazione);
+                
             }
             return lista;
         } catch (SQLException e){
@@ -339,6 +341,8 @@ public class TravelEasy {
             return null;
         }
     }
+
+    
 
     private void aggiungiPrenotazione(Prenotazione p){
         elencoPrenotazioni.add(p);
@@ -927,6 +931,7 @@ public class TravelEasy {
             if (!p.aggiornaOreViaggio(conn))
                 return false;
             this.aggiungiPrenotazione(p);
+            cliente.addPrenotazione(p);
             OffertaSpeciale o = this.elencoOfferte.get(pacchetto);
             if (o != null){
                 if(!o.diminuisciDisponibilità(conn))

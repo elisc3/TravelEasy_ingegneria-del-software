@@ -4,18 +4,22 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Cliente extends Utente {
     private PortafoglioVirtuale pv; 
     private CartaCredito cc;
     private TravelEasy te = null;
     private PortafoglioOre po;
+    private List<Prenotazione> elencoPrenotazioniEffettuate;
 
     public Cliente(int id, String nome, String cognome, String Telefono, String ruolo, int Account, PortafoglioVirtuale pv, CartaCredito cc, PortafoglioOre po) {
         super(id, nome, cognome, Telefono, ruolo, Account);
         this.pv = pv;
         this.cc = cc;
         this.po = po;
+        this.elencoPrenotazioniEffettuate = new ArrayList<>();
     }
     
     public PortafoglioVirtuale getPv() {
@@ -196,5 +200,13 @@ public class Cliente extends Utente {
     }
 
     
+
+    public void addPrenotazione(Prenotazione p){
+        this.elencoPrenotazioniEffettuate.add(p);
+    }
+
+    public List<Prenotazione> getElencoPrenotazioniEffettuate() {
+        return this.elencoPrenotazioniEffettuate;
+    }
     
 }

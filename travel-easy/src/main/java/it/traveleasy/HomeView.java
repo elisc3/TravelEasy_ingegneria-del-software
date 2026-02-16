@@ -106,8 +106,7 @@ public class HomeView {
 
         Button bookingsButton = new Button("Visualizza le mie prenotazioni");
         bookingsButton.getStyleClass().add("secondary-button");
-        bookingsButton.setOnAction(e -> {
-        });
+        bookingsButton.setOnAction(e -> openBookingsWindow());
 
         Button rechargeButton = new Button("Nuova ricarica portafoglio");
         rechargeButton.getStyleClass().add("secondary-button");
@@ -138,6 +137,18 @@ public class HomeView {
         Scene scene = new Scene(view.getRoot(), 600, 700);
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Profilo");
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void openBookingsWindow() {
+        Stage stage = new Stage();
+        Cliente cliente = te.getAccountToHomeView(emailUtente).getCliente();
+        OperatorePrenotazioniView view = new OperatorePrenotazioniView(cliente.getElencoPrenotazioniEffettuate(), te);
+        Scene scene = new Scene(view.getRoot(), 1180, 760);
+        scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
+        stage.setTitle("Travel Easy - Le mie prenotazioni");
         stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
