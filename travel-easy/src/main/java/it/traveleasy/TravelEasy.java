@@ -266,10 +266,9 @@ public class TravelEasy {
                 float prezzoScontato = rs.getFloat("PrezzoScontato");
                 String dataFine = rs.getString("DataFine");
                 int disponibilità = rs.getInt("Disponibilità");
-               // boolean visibilità = rs.getBoolean("Visibilità");
-
+                
                 PacchettoViaggio pacchetto = this.elencoPacchetti.get(idPacchetto);
-                mappa.put(pacchetto, new OffertaSpeciale(id, pacchetto, percentuale, prezzoScontato, dataFine, disponibilità /*, visibilità*/));
+                mappa.put(pacchetto, new OffertaSpeciale(id, pacchetto, percentuale, prezzoScontato, dataFine, disponibilità));
             }
             return mappa;
         } catch (SQLException e){
@@ -289,6 +288,7 @@ public class TravelEasy {
         List<Viaggiatore> lista = new ArrayList<>();
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setInt(1, idPrenotazione);
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()){
@@ -320,12 +320,18 @@ public class TravelEasy {
                 int idCliente = rs.getInt("Utente");
                 int idPacchetto = rs.getInt("Pacchetto");
                 String dataPrenotazione = rs.getString("DataPrenotazione");
+                float prezzoTotale = rs.getFloat("PrezzoTotale");
+                float scontoApplicato = rs.getFloat("ScontoApplicato");
+                float percentualeOfferta = rs.getFloat("OffertaSpeciale");
+                
                 
                 List<Viaggiatore> elencoViaggiatori = this.recuperaViaggiatoriByPrenotazione(id);
                 PacchettoViaggio pacchettoViaggio = elencoPacchetti.get(idPacchetto);
                 Cliente cliente = this.getClienteById(idCliente);
 
-                lista.add(new Prenotazione(cliente, pacchettoViaggio, dataPrenotazione, elencoViaggiatori));
+               
+
+                lista.add(new Prenotazione(cliente, pacchettoViaggio, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta));
             }
             return lista;
         } catch (SQLException e){
@@ -336,6 +342,10 @@ public class TravelEasy {
 
     private void aggiungiPrenotazione(Prenotazione p){
         elencoPrenotazioni.add(p);
+    }
+
+    public List<Prenotazione> getPrenotazioni(){
+        return this.elencoPrenotazioni;
     }
 
     public List<PacchettoViaggio> ricercaPacchetti(Connection conn, String città, String dataAndata, String dataRitorno, float prezzoMassimo){
@@ -734,6 +744,10 @@ public class TravelEasy {
         else return null;
     }
 
+    public OffertaSpeciale getOffertaByPackOperatore(PacchettoViaggio p){
+        return this.elencoOfferte.get(p);
+    }
+
     private PortafoglioVirtuale getPortafoglioByClienteDB(int idCliente){
         String query = "SELECT * FROM PortafoglioVirtuale WHERE Utente = ?;";
 
@@ -758,6 +772,7 @@ public class TravelEasy {
     public boolean eliminaOfferteDB(OffertaSpeciale o){
         String query = "DELETE FROM OffertaSpeciale WHERE id = ?;";
 
+        //String query = "UPDATE OffertaSpeciale SET Visibilità = ? WHERE id = ?;";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, o.getId());
 
@@ -778,10 +793,9 @@ public class TravelEasy {
             OffertaSpeciale o = it.next().getValue();
             LocalDate fine = LocalDate.parse(o.getDataFine(), FMT);
 
-            if (fine.isBefore(LocalDate.now())) {
+            if (fine.isBefore(LocalDate.now()) || o.getDisponibilità() == 0) {
                 if (!eliminaOfferteDB(o))
                     return false;
-                it.remove(); 
             }
         }
         return true;
@@ -870,8 +884,8 @@ public class TravelEasy {
 
     }
 
-    public boolean registrazionePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori, float scontoApplicato){
-        String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione) values (?, ?, ?);";
+    public boolean registrazionePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori, float scontoApplicato, float totaleAggiornato, float offertaApplicata){
+        String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale) values (?, ?, ?, ?, ?, ?);";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             if (cliente.getPo() == null) {
@@ -889,6 +903,9 @@ public class TravelEasy {
             pstmt.setInt(2, pacchetto.getId());
             String dataPrenotazione = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
             pstmt.setString(3, dataPrenotazione);
+            pstmt.setFloat(4, totaleAggiornato);
+            pstmt.setFloat(5, scontoApplicato);
+            pstmt.setFloat(6, offertaApplicata);
             pstmt.executeUpdate();
 
             int newId = 0;
@@ -904,7 +921,7 @@ public class TravelEasy {
                     return false;
             }
             
-            Prenotazione p = new Prenotazione(cliente, pacchetto, dataPrenotazione, elencoViaggiatori);
+            Prenotazione p = new Prenotazione(cliente, pacchetto, dataPrenotazione, elencoViaggiatori, totaleAggiornato, scontoApplicato, offertaApplicata);
             if (!p.applicaSconto(conn, scontoApplicato))
                 return false;
             if (!p.aggiornaOreViaggio(conn))

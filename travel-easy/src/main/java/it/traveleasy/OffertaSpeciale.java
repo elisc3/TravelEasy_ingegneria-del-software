@@ -11,7 +11,7 @@ public class OffertaSpeciale {
     private float prezzoScontato;
     private String dataFine;
     private int Disponibilità;
-   // private boolean visibilità;
+    //private boolean visibilità;
 
     public OffertaSpeciale(int id, PacchettoViaggio pacchetto, float scontoPercentuale, float prezzoScontato, String dataFine, int Disponibilità /*, boolean visibilità*/) {
         this.id = id;
@@ -20,7 +20,7 @@ public class OffertaSpeciale {
         this.prezzoScontato = prezzoScontato;
         this.dataFine = dataFine;
         this.Disponibilità = Disponibilità;
-       // this.visibilità = visibilità;
+        //this.visibilità = visibilità;
     }
 
     public int getId() {
@@ -71,7 +71,7 @@ public class OffertaSpeciale {
         this.Disponibilità = Disponibilità;
     }
 
-   /* public boolean isVisibilità() {
+    /*public boolean isVisibilità() {
         return visibilità;
     }
 
@@ -100,7 +100,6 @@ public class OffertaSpeciale {
             Disponibilità--;
             return true;
         } else
-            return false;
-            
+            return false;  
     }
 }

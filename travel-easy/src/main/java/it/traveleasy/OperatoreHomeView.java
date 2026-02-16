@@ -53,7 +53,7 @@ public class OperatoreHomeView {
     }
 
     private VBox buildContent() {
-        content.getChildren().addAll(buildMenuBar(), new OperatorePrenotazioniView().getRoot());
+        content.getChildren().addAll(buildMenuBar(), new OperatorePrenotazioniView(te.getPrenotazioni(), te).getRoot());
         return content;
     }
 
@@ -81,7 +81,7 @@ public class OperatoreHomeView {
 
         bookingsButton.setOnAction(e -> {
             setActiveMenuButton(bookingsButton, newPackageButton, offersButton);
-            showContent(new OperatorePrenotazioniView().getRoot());
+            showContent(new OperatorePrenotazioniView(te.getPrenotazioni(), te).getRoot());
         });
 
         HBox menu = new HBox(12, newPackageButton, offersButton, bookingsButton);

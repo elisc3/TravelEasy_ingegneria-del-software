@@ -101,7 +101,14 @@ public class PagamentoView implements RicaricaObserver {
                 JOptionPane.showMessageDialog(null, "Errore durante il pagamento, riprovare.", "ERRORE", 0);
                 return;
             }
-            if(!te.registrazionePrenotazione(cliente, pacchetto, elencoViaggiatori, scontoApplicato)){
+            OffertaSpeciale o = te.getOffertaByPack(pacchetto);
+            float percentualeOfferta;
+            if (o == null)
+                percentualeOfferta = 0.0F;
+            else
+                percentualeOfferta = o.getScontoPercentuale();
+            
+            if(!te.registrazionePrenotazione(cliente, pacchetto, elencoViaggiatori, scontoApplicato, totale, percentualeOfferta)){
                 JOptionPane.showMessageDialog(null, "La registrazione della prenotazione non è andata a buon fine, stiamo effetuando il rimborso.", "ERRORE", 0);
                 if (!cliente.rimborsoOnPortafoglioDB(conn, totale)){
                     JOptionPane.showMessageDialog(null, "Rimborso fallito. Contattare l'assistenza.", "ERRORE", 0);

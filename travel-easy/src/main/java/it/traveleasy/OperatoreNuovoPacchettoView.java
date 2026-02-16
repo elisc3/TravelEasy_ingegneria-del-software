@@ -154,7 +154,7 @@ public class OperatoreNuovoPacchettoView {
             
 
             if (te.nuovoPacchetto(conn, codice, titolo, citta, nazione, descrizione, prezzoF, oreViaggioF, visibilità, compagnia, alloggio, dataPartenzaValue, dataRitornoValue))
-                JOptionPane.showMessageDialog(null, "Nuovo pacchetto inserito con successo!", "INFO", 1);
+                JOptionPane.showMessageDialog(null, "Il pacchetto #"+ codice + " e' stato inserito con successo!", "INFO", 1);
 
 
 

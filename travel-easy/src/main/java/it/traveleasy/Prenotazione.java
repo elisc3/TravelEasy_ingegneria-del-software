@@ -9,12 +9,19 @@ public class Prenotazione {
     private PacchettoViaggio pacchetto;
     private String dataPrenotazione;
     private List<Viaggiatore> elencoViaggiatori;
+    private float prezzoTotale;
+    private float scontoApplicato;
+    private float percentualeOfferta;
+    
 
-    public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori) {
+    public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta) {
         this.cliente = cliente;
         this.pacchetto = pacchetto;
         this.dataPrenotazione = dataPrenotazione;
         this.elencoViaggiatori = elencoViaggiatori;
+        this.prezzoTotale = prezzoTotale;
+        this.scontoApplicato = scontoApplicato;
+        this.percentualeOfferta = percentualeOfferta;
     }
 
     public Cliente getCliente() {
@@ -41,6 +48,31 @@ public class Prenotazione {
         this.dataPrenotazione = dataPrenotazione;
     }
 
+    public float getPrezzoTotale(){
+        return this.prezzoTotale;
+    }
+
+    public void setPrezzoTotale(float prezzoTotale){
+        this.prezzoTotale = prezzoTotale;
+    }
+
+    public float getScontoApplicato(){
+        return this.scontoApplicato;
+    }
+
+    public void setScontoApplicato(float scontoApplicato){
+        this.scontoApplicato = scontoApplicato;
+    }
+
+    public float getPercentualeOfferta(){
+        return percentualeOfferta;
+    }
+
+    public float getOffertaApplicata() {
+        return this.percentualeOfferta;
+    }
+
+
     public boolean aggiornaOreViaggio(Connection conn){
         if (this.cliente == null || this.cliente.getPo() == null || this.pacchetto == null) {
             return false;
@@ -62,5 +94,13 @@ public class Prenotazione {
         }
 
         return true;
+    }
+
+    public int getNViaggiatori(){
+        return this.elencoViaggiatori.size();
+    }
+
+    public List<Viaggiatore> getElencoViaggiatori() {
+        return this.elencoViaggiatori;
     }
 }

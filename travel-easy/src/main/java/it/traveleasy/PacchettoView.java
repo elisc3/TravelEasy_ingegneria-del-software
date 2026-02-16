@@ -130,10 +130,24 @@ public class PacchettoView {
 
     private VBox buildOffertaSection() {
         OffertaSpeciale o = te.getOffertaByPack(pacchetto);
-        if (o == null) {
-            return null;
+        /*if (this instanceof OperatorePacchettoPrenotazioneView) {
+            o = te.getOffertaByPackOperatore(pacchetto);
+        } else {
+            o = te.getOffertaByPack(pacchetto);
         }
+        if (this instanceof OperatorePacchettoPrenotazioneView){
+            if (o == null) 
+                return null;
+        } else {
+            if (o == null || !o.isVisibilità()) {
+                return null;
+            }
 
+        }*/
+
+        if (o == null)
+            return null;
+        
         Label sectionTitle = new Label("Offerta speciale");
         sectionTitle.getStyleClass().add("section-title");
 
