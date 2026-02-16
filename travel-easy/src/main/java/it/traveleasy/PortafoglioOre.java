@@ -52,16 +52,10 @@ public class PortafoglioOre {
         this.ore += ore;
         aggiornaSconto();
 
-        String query = "UPDATE PortafoglioOre SET Ore = ?, Sconto = ? WHERE id = ?;";
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setFloat(1, this.ore);
-            pstmt.setFloat(2, this.sconto);
-            pstmt.setInt(3, this.id);
-            pstmt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("Errore aggiornamento Portafoglio Ore: "+e);
+        if(!applicaScontoDB(conn)) {
             return false;
         }
+        
         return true;
     }
 
