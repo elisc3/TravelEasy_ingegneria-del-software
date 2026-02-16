@@ -824,35 +824,7 @@ public class TravelEasy {
         }
     }
 
-    public int validazioneDatiPrenotazione(List<Viaggiatore> listaViaggiatori){
-        for(Viaggiatore v: listaViaggiatori){
-            String nome = v.getNome();
-            String cognome = v.getCognome();
-            String dataNascita = v.getDataNascita();
-            String tipoDocumento = v.getTipoDocumento();
-            String codiceDocumento = v.getCodiceDocumento();
-
-            if (nome.isBlank() || cognome.isBlank() || dataNascita.isBlank() ||tipoDocumento.isBlank() || codiceDocumento.isBlank())
-                return -1;
-            
-            DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd-MM-uuuu").withResolverStyle(ResolverStyle.STRICT);
-
-            LocalDate d = LocalDate.parse(dataNascita, FMT);
-
-            if (d.isAfter(LocalDate.now()))
-                return -2;
-
-            if (tipoDocumento.equals("Carta d'identità") && codiceDocumento.length() != 9){
-                return -3;
-            } else if (tipoDocumento.equals("Patente di guida") && codiceDocumento.length() != 10){
-                return -4;
-            } else if (tipoDocumento.equals("Passaporto") && codiceDocumento.length() != 9){
-                return -5;
-            } 
-        }
-
-        return 0;
-    }
+    
 
     public float getTotalePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori){
         //DEVONO ESSERE AGGIUNTI SCONTI FEDELTà, DOPO L'IMPLEMENTAZIONE DI UC13
@@ -954,6 +926,10 @@ public class TravelEasy {
 
     public Account getAccountToHomeView(String email){
         return this.elencoAccount.get(email);
+    }
+
+    public void inserisciDatiViaggiatore(List<Viaggiatore> elencoViaggiatori, Viaggiatore v){
+        elencoViaggiatori.add(v);
     }
 
 }

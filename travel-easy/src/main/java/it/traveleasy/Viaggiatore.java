@@ -1,5 +1,9 @@
 package it.traveleasy;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
+
 public class Viaggiatore {
     private String nome;
     private String cognome;
@@ -34,5 +38,33 @@ public class Viaggiatore {
 
     public String getCodiceDocumento(){
         return codiceDocumento;
+    }
+
+    public int validazioneDatiPrenotazione(Viaggiatore v){
+        
+            String nome = v.getNome();
+            String cognome = v.getCognome();
+            String dataNascita = v.getDataNascita();
+            String tipoDocumento = v.getTipoDocumento();
+            String codiceDocumento = v.getCodiceDocumento();
+
+            if (nome.isBlank() || cognome.isBlank() || dataNascita.isBlank() ||tipoDocumento.isBlank() || codiceDocumento.isBlank())
+                return -1;
+            
+            DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd-MM-uuuu").withResolverStyle(ResolverStyle.STRICT);
+
+            LocalDate d = LocalDate.parse(dataNascita, FMT);
+
+            if (d.isAfter(LocalDate.now()))
+                return -2;
+
+            if (tipoDocumento.equals("Carta d'identità") && codiceDocumento.length() != 9){
+                return -3;
+            } else if (tipoDocumento.equals("Patente di guida") && codiceDocumento.length() != 10){
+                return -4;
+            } else if (tipoDocumento.equals("Passaporto") && codiceDocumento.length() != 9){
+                return -5;
+            } 
+        return 0;
     }
 }

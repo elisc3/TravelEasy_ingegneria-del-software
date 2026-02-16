@@ -135,32 +135,35 @@ public class ModuloPrenotazioneView {
                 ComboBox<String> docTypeField = (ComboBox<String>) card.getChildren().get(4);
                 TextField docField = (TextField) card.getChildren().get(5);
 
-
-                listaViaggiatori.add(new Viaggiatore(nameField.getText(), surnameField.getText(), data, docTypeField.getValue(), docField.getText()));
+                Viaggiatore v = new Viaggiatore(nameField.getText(), surnameField.getText(), data, docTypeField.getValue(), docField.getText());
+                //listaViaggiatori.add(new Viaggiatore(nameField.getText(), surnameField.getText(), data, docTypeField.getValue(), docField.getText()));
+                te.inserisciDatiViaggiatore(listaViaggiatori, v);
             }
             
-            int esitoValidazioneDati = te.validazioneDatiPrenotazione(listaViaggiatori);
-            if (esitoValidazioneDati == -1){
-                JOptionPane.showMessageDialog(null, "Hai dimenticato qualche campo.", "ATTENZIONE", 2);
-                return;
-            } else if (esitoValidazioneDati == -2){
-                JOptionPane.showMessageDialog(null, "Data inserita non valida.", "ERRORE", 0);
-                return;
-            } else if (esitoValidazioneDati == -3){
-                JOptionPane.showMessageDialog(null, "Codice del documento non valido.", "ERRORE", 0);
-                return;
-            } else if (esitoValidazioneDati == -4){
-                JOptionPane.showMessageDialog(null, "Codice del documento non valido.", "ERRORE", 0);
-                return;
-            } else if (esitoValidazioneDati == -5){
-                JOptionPane.showMessageDialog(null, "Codice del documento non valido.", "ERRORE", 0);
-                return;
-            } else {
-                if (closeHandler != null) {
-                    closeHandler.onConferma(listaViaggiatori);
+            for (int i = 0; i < listaViaggiatori.size(); i++){ //non ho usato il foreach per poter dire in quale persona si ha l'errore, tramite l'indice. 
+                Viaggiatore v = listaViaggiatori.get(i);
+                int esitoValidazioneDati = v.validazioneDatiPrenotazione(v);
+                int pos = i+1;
+                if (esitoValidazioneDati == -1){
+                    JOptionPane.showMessageDialog(null, "Hai dimenticato qualche campo in persona "+pos+".", "ATTENZIONE", 2);
+                    return;
+                } else if (esitoValidazioneDati == -2){
+                    JOptionPane.showMessageDialog(null, "Data inserita non valida in persona "+pos+".", "ERRORE", 0);
+                    return;
+                } else if (esitoValidazioneDati == -3){
+                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona "+pos+".", "ERRORE", 0);
+                    return;
+                } else if (esitoValidazioneDati == -4){
+                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona "+pos+".", "ERRORE", 0);
+                    return;
+                } else if (esitoValidazioneDati == -5){
+                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona "+pos+".", "ERRORE", 0);
+                    return;
                 }
             }
-
+            if (closeHandler != null) {
+                closeHandler.onConferma(listaViaggiatori);
+            }
         });
 
         ScrollPane scrollPane = new ScrollPane(peopleForm);
