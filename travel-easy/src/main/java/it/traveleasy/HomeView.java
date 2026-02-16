@@ -135,7 +135,7 @@ public class HomeView {
     private void openProfileWindow() {
         Stage stage = new Stage();
         ProfiloView view = new ProfiloView(te.getAccountToHomeView(emailUtente));
-        Scene scene = new Scene(view.getRoot(), 520, 520);
+        Scene scene = new Scene(view.getRoot(), 600, 700);
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Profilo");
         stage.setResizable(false);

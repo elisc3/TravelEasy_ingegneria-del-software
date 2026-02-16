@@ -31,6 +31,9 @@ public class ProfiloView {
         String e_mail = account.getEmail();
         String numeroTelefono = c.getTelefono();
         double saldo = c.getPv().getSaldo();
+        PortafoglioOre po = c.getPo();
+        float oreAccumulate = po.getOre();
+        float scontoAccumulato = po.getSconto();
 
         HBox header = buildHeader();
 
@@ -62,12 +65,24 @@ public class ProfiloView {
         Label balanceValue = new Label("€ "+saldo);
         balanceValue.getStyleClass().add("profile-balance");
 
+        Label accumulatedHoursLabel = new Label("Ore accumulate");
+        accumulatedHoursLabel.getStyleClass().add("profile-label");
+        Label accumulatedHoursValue = new Label(String.valueOf(oreAccumulate));
+        accumulatedHoursValue.getStyleClass().add("profile-value");
+
+        Label accumulatedDiscountLabel = new Label("Sconto accumulato");
+        accumulatedDiscountLabel.getStyleClass().add("profile-label");
+        Label accumulatedDiscountValue = new Label(String.valueOf(scontoAccumulato) + "%");
+        accumulatedDiscountValue.getStyleClass().add("profile-value");
+
         VBox grid = new VBox(12,
             buildRow(name, nameValue),
             buildRow(surname, surnameValue),
             buildRow(email, emailValue),
             buildRow(phone, phoneValue),
-            buildRow(balanceLabel, balanceValue)
+            buildRow(balanceLabel, balanceValue),
+            buildRow(accumulatedHoursLabel, accumulatedHoursValue),
+            buildRow(accumulatedDiscountLabel, accumulatedDiscountValue)
         );
 
         VBox card = new VBox(18, header, title, grid);

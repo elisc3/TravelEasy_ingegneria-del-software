@@ -866,7 +866,8 @@ public class TravelEasy {
         float sconto = cliente.getPo().getSconto();
         float totaleSenzaSconto = prezzoVero*elencoViaggiatori.size();
         
-        return totaleSenzaSconto - sconto;
+
+        return totaleSenzaSconto - totaleSenzaSconto*sconto/100;
     }
 
     public Cliente getClienteById(int idCliente){
@@ -897,7 +898,7 @@ public class TravelEasy {
 
     }
 
-    public boolean registrazionePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori){
+    public boolean registrazionePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori, float scontoApplicato){
         String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione) values (?, ?, ?);";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -932,6 +933,8 @@ public class TravelEasy {
             }
             
             Prenotazione p = new Prenotazione(cliente, pacchetto, dataPrenotazione, elencoViaggiatori);
+            if (!p.applicaSconto(conn, scontoApplicato))
+                return false;
             if (!p.aggiornaOreViaggio(conn))
                 return false;
             this.aggiungiPrenotazione(p);

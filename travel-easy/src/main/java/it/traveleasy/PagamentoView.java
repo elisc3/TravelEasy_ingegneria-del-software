@@ -77,7 +77,7 @@ public class PagamentoView implements RicaricaObserver {
 
         
 
-        Label fidelityValue = new Label("Sconto disponibile: " + scontoApplicato + " EUR");
+        Label fidelityValue = new Label("Sconto disponibile: " + scontoApplicato + "%");
         fidelityValue.getStyleClass().add("package-meta");
 
         Label fidelityHint = new Label("E' stato applicato lo sconto nel riepilogo finale.");
@@ -101,7 +101,7 @@ public class PagamentoView implements RicaricaObserver {
                 JOptionPane.showMessageDialog(null, "Errore durante il pagamento, riprovare.", "ERRORE", 0);
                 return;
             }
-            if(!te.registrazionePrenotazione(cliente, pacchetto, elencoViaggiatori)){
+            if(!te.registrazionePrenotazione(cliente, pacchetto, elencoViaggiatori, scontoApplicato)){
                 JOptionPane.showMessageDialog(null, "La registrazione della prenotazione non è andata a buon fine, stiamo effetuando il rimborso.", "ERRORE", 0);
                 if (!cliente.rimborsoOnPortafoglioDB(conn, totale)){
                     JOptionPane.showMessageDialog(null, "Rimborso fallito. Contattare l'assistenza.", "ERRORE", 0);
@@ -112,13 +112,6 @@ public class PagamentoView implements RicaricaObserver {
                 }
             }
 
-            float totaleSenzaSconto = totale + scontoApplicato;
-            if (scontoApplicato >= totaleSenzaSconto){
-                cliente.getPo().setSconto(scontoApplicato - (scontoApplicato - totaleSenzaSconto));
-                
-            }
-            cliente.getPo().setSconto(0);
-            
             JOptionPane.showMessageDialog(null, "Prenotazione avvenuta con successo!", "INFO", 1);
         });
 
