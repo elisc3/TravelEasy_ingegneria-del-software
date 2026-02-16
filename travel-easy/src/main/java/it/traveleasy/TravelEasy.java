@@ -28,8 +28,6 @@ public class TravelEasy {
     private final List<OffertaObserver> offertaObservers = new ArrayList<>();
     private final List<RicaricaObserver> ricaricaObservers = new ArrayList<>();
     private List<Prenotazione> elencoPrenotazioni;
-    private Map<Integer, PortafoglioOre> elencoPortafoglioOre;
-
 
     public TravelEasy(Connection conn){
         this.conn = conn;
@@ -63,7 +61,6 @@ public class TravelEasy {
     //* RECUPERO MAPPE
     private Map<String, Account> recuperaAccount() {
         Map<String, Account> mappa = new HashMap<>();
-        this.elencoPortafoglioOre = new HashMap<>();
 
         String query = "SELECT * FROM ACCOUNT";
 
@@ -90,15 +87,12 @@ public class TravelEasy {
                             String cognome = rsCliente.getString("Cognome");
                             String telefono = rsCliente.getString("Telefono");
                             String ruoloCliente = rsCliente.getString("Ruolo");
-                            //PortafoglioVirtuale pv = mappaPortafogli.get(idCliente);
                             PortafoglioVirtuale pv = this.getPortafoglioByClienteDB(idCliente);
-                            //CartaCredito cc = this.elencoCarte.get(idCliente);
                             
                             PortafoglioOre po = this.gePortafoglioOreByUtente(idCliente);
                             cliente = new Cliente(idCliente, nome, cognome, telefono, ruoloCliente, id, pv, null, po);
                             CartaCredito cc = this.getCartaCreditoByUtenteDB(cliente);
-                            cliente.setCc(cc);
-                            this.elencoPortafoglioOre.put(idCliente, po); 
+                            cliente.setCc(cc); 
                         }
                     } catch (SQLException e){
                         System.out.println("Errore recupero cliente in account: "+e);
@@ -461,15 +455,6 @@ public class TravelEasy {
             System.out.println("registrazione: creazione cliente fallita");
             return "errore";
         }
-
-        //PortafoglioVirtuale pv = newAccount.getPortafoglioVirtuale();
-        //mappaPortafogli.put(idCliente, pv);
-
-        //CartaCredito cc = newAccount.getCartaCredito();
-        //elencoCarte.put(idCliente, cc);
-
-        PortafoglioOre po = newAccount.getPortafoglioOre();
-        elencoPortafoglioOre.put(idCliente, po);
         
         elencoAccount.put(email, newAccount);
 
@@ -505,11 +490,6 @@ public class TravelEasy {
         if(!a.validazioneCredenziali(email, password))
             return false;
 
-        Cliente cliente = a.getCliente();
-        int idCliente = cliente.getId();
-
-        elencoPortafoglioOre.remove(idCliente);
-
         if (!a.eliminaCliente(conn))
             return false;
 
@@ -527,39 +507,7 @@ public class TravelEasy {
         }
 
         return true;
-    }
-
-    //*AGGIORNAMENTO ORE
-    public boolean aggiornaOre(String email, float oreDaAggiungere){
-        Account a = elencoAccount.get(email);
-        
-        if (a == null) {
-            System.out.println("Account non trovato");
-            return false;
-        }
-
-        Cliente c = a.getCliente();
-        if (c == null) {
-            System.out.println("Cliente non trovato");
-            return false;
-        }
-
-        int idCliente = c.getId();
-        PortafoglioOre po = elencoPortafoglioOre.get(idCliente);
-        if (po == null) {
-            System.out.println("PortafoglioOre non trovato");
-            return false;
-        }
-
-        if(!po.incrementaOre(conn, oreDaAggiungere)) {
-            System.out.println("Errore aggiornamento ore");
-            return false;
-        }
-
-        return true;
-    }
-
-    
+    }    
     
     public float validazioneDatiNuovaRicarica(String numeroCarta, String scadenza, String cvv, String importo){
         if (numeroCarta.equals("") || scadenza.equals("") || cvv.equals("") || importo.equals(""))
@@ -892,16 +840,6 @@ public class TravelEasy {
         String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale) values (?, ?, ?, ?, ?, ?);";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            if (cliente.getPo() == null) {
-                PortafoglioOre po = this.elencoPortafoglioOre.get(cliente.getId());
-                if (po == null) {
-                    po = this.gePortafoglioOreByUtente(cliente.getId());
-                    if (po != null) {
-                        this.elencoPortafoglioOre.put(cliente.getId(), po);
-                    }
-                }
-                cliente.setPo(po);
-            }
 
             pstmt.setInt(1, cliente.getId());
             pstmt.setInt(2, pacchetto.getId());
