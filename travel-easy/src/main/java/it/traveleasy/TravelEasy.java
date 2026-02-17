@@ -349,7 +349,7 @@ public class TravelEasy {
         return this.elencoPrenotazioni;
     }
 
-    public List<PacchettoViaggio> ricercaPacchetti(Connection conn, String città, String dataAndata, String dataRitorno, float prezzoMassimo){
+    public List<PacchettoViaggio> ricercaPacchetti(String città, String dataAndata, String dataRitorno, float prezzoMassimo){
            //metodo per uc2
            
             List<PacchettoViaggio> pacchettiTrovati = new ArrayList<>();
@@ -600,7 +600,7 @@ public class TravelEasy {
         
 
         for (PacchettoViaggio p : elencoPacchetti.values()){
-            if (p.getCittà().equals(citta) && p.getNazione().equals(nazione) && p.getDataPartenza().equals(dataPartenza) && p.getDataRitorno().equals(dataRitorno) && p.getIdCompagniaTrasporto() == idCompagnia && p.getIdAlloggio() == idAlloggio && p.getPrezzo() == prezzo)
+            if (p.getCittà().equals(citta) && p.getNazione().equals(nazione) && p.getDataPartenza().equals(dataPartenza) && p.getDataRitorno().equals(dataRitorno) && p.getCompagniaTrasporto().getId() == idCompagnia && p.getAlloggio().getId() == idAlloggio && p.getPrezzo() == prezzo)
                 return -2;
         }
         return 0;

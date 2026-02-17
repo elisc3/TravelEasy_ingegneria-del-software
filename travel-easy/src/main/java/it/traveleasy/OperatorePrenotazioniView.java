@@ -11,16 +11,32 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.sql.Connection;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 import java.util.List;
 
 public class OperatorePrenotazioniView {
     private final VBox root;
     private final TravelEasy te;
+    private final boolean showModificaPrenotazioneButton;
+    private final Connection conn;
     private List<Prenotazione> elencoPrenotazioni;
 
     public OperatorePrenotazioniView(List<Prenotazione> elencoPrenotazioni, TravelEasy te) {
+        this(elencoPrenotazioni, te, false, null);
+    }
+
+    public OperatorePrenotazioniView(List<Prenotazione> elencoPrenotazioni, TravelEasy te, boolean showModificaPrenotazioneButton) {
+        this(elencoPrenotazioni, te, showModificaPrenotazioneButton, null);
+    }
+
+    public OperatorePrenotazioniView(List<Prenotazione> elencoPrenotazioni, TravelEasy te, boolean showModificaPrenotazioneButton, Connection conn) {
         this.elencoPrenotazioni = elencoPrenotazioni;
         this.te = te;
+        this.showModificaPrenotazioneButton = showModificaPrenotazioneButton;
+        this.conn = conn;
         root = new VBox(12, buildHeader(), buildList());
     }
 
@@ -87,6 +103,31 @@ public class OperatorePrenotazioniView {
         stage.show();
     }
 
+    private void openModificaPrenotazioneWindow(Prenotazione prenotazione) {
+        Stage stage = new Stage();
+        ModuloModificaPrenotazioneView view = new ModuloModificaPrenotazioneView(prenotazione, te, conn);
+        Scene scene = new Scene(view.getRoot(), 720, 600);
+        scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
+        stage.setTitle("Travel Easy - Modifica Prenotazione");
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private boolean almeno7GiorniDopoOggi(String data) {
+        if (data == null || data.isBlank()) return false;
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-uuuu")
+                .withResolverStyle(ResolverStyle.STRICT);
+
+        try {
+            LocalDate d = LocalDate.parse(data, fmt);
+            return !d.isBefore(LocalDate.now().plusDays(7)); // d >= oggi + 7
+        } catch (Exception e) {
+            return false;
+        }
+    }   
+
     private VBox buildPrenotazioneCard(String titolo, String destinazione, String date, String partecipanti, String prezzo, Prenotazione prenotazione) {
         Label title = new Label(titolo);
         title.getStyleClass().add("package-title");
@@ -116,7 +157,22 @@ public class OperatorePrenotazioniView {
         VBox info = new VBox(6, title, destination, duration, description);
         info.setAlignment(Pos.CENTER_LEFT);
 
-        VBox actions = new VBox(10, price, detailsButton, viewButton);
+        VBox actions = new VBox(10, price, detailsButton);
+        if (showModificaPrenotazioneButton) {
+            Button editButton = new Button("Modifica Prenotazione");
+            editButton.getStyleClass().add("secondary-button");
+            editButton.setPrefWidth(180);
+            PacchettoViaggio pacchetto = prenotazione.getPacchetto();
+            String dataPartenza = pacchetto.getDataPartenza();
+            if (!almeno7GiorniDopoOggi(dataPartenza))
+                editButton.setDisable(true);
+            else
+                editButton.setDisable(false);
+            
+            editButton.setOnAction(e -> openModificaPrenotazioneWindow(prenotazione));
+            actions.getChildren().add(editButton);
+        }
+        actions.getChildren().add(viewButton);
         actions.setAlignment(Pos.CENTER_RIGHT);
         actions.setPrefWidth(190);
 

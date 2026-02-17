@@ -98,7 +98,7 @@ public class PacchettoView {
         Label sectionTitle = new Label("Compagnia di trasporto");
         sectionTitle.getStyleClass().add("section-title");
 
-        CompagniaTrasporto c = te.getCompagniaTrasportoByPacchetto(pacchetto.getIdCompagniaTrasporto());
+        CompagniaTrasporto c = pacchetto.getCompagniaTrasporto();
 
         VBox info = new VBox(8,
             buildRow("Nome", c.getNome()),
@@ -114,7 +114,7 @@ public class PacchettoView {
         Label sectionTitle = new Label("Alloggio");
         sectionTitle.getStyleClass().add("section-title");
 
-        Alloggio a = te.getAlloggioByPacchetto(pacchetto.getIdAlloggio());
+        Alloggio a = pacchetto.getAlloggio();
 
         VBox info = new VBox(8,
             buildRow("Nome", a.getNome()),

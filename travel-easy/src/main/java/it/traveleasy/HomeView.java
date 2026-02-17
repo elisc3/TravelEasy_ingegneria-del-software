@@ -147,7 +147,7 @@ public class HomeView {
     private void openBookingsWindow() {
         Stage stage = new Stage();
         Cliente cliente = te.getAccountToHomeView(emailUtente).getCliente();
-        OperatorePrenotazioniView view = new OperatorePrenotazioniView(cliente.getElencoPrenotazioniEffettuate(), te);
+        OperatorePrenotazioniView view = new OperatorePrenotazioniView(cliente.getElencoPrenotazioniEffettuate(), te, true, conn);
         StackPane wrapper = new StackPane(view.getRoot());
         wrapper.setPadding(new Insets(20, 24, 20, 24));
         double maxAvailableHeight = Screen.getPrimary().getVisualBounds().getHeight() - 80;
@@ -264,7 +264,7 @@ public class HomeView {
             return null;
         }
 
-        List<PacchettoViaggio> packages = te.ricercaPacchetti(conn, destinationField.getText(), startDateText, endDateText, maxPrice);
+        List<PacchettoViaggio> packages = te.ricercaPacchetti(destinationField.getText(), startDateText, endDateText, maxPrice);
 
         if (packages.size() == 0){
             sectionTitle.setText("Nessun pacchetto viaggio trovato secondo le vostre esigenze");
