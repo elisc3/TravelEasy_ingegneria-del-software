@@ -101,9 +101,37 @@ public class ModuloModificaPrenotazioneView {
                     OffertaSpeciale o = te.getOffertaByPack(pack);
                     PacchettoVacanzaCard card;
                     if (o == null) {
-                        card = new PacchettoVacanzaCard(pack, te, idUtente, conn);
+                        card = new PacchettoVacanzaModificaCard(
+                            pack,
+                            te,
+                            idUtente,
+                            conn,
+                            prenotazione,
+                            () -> {
+                                searchResultsWrapper.getChildren().clear();
+                                searchResultsWrapper.setVisible(false);
+                                searchResultsWrapper.setManaged(false);
+                                formWrapper.setVisible(true);
+                                formWrapper.setManaged(true);
+                            }
+                        );
                     } else {
-                        card = new PacchettoVacanzaCard(pack, te, idUtente, o.getScontoPercentuale(), o.getPrezzoScontato(), conn);
+                        card = new PacchettoVacanzaModificaCard(
+                            pack,
+                            te,
+                            idUtente,
+                            o.getScontoPercentuale(),
+                            o.getPrezzoScontato(),
+                            conn,
+                            prenotazione,
+                            () -> {
+                                searchResultsWrapper.getChildren().clear();
+                                searchResultsWrapper.setVisible(false);
+                                searchResultsWrapper.setManaged(false);
+                                formWrapper.setVisible(true);
+                                formWrapper.setManaged(true);
+                            }
+                        );
                     }
                     list.getChildren().add(card.getRoot());
                 }

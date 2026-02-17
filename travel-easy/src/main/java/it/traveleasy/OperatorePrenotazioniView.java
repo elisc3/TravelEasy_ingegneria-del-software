@@ -1,5 +1,6 @@
 package it.traveleasy;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -16,12 +17,14 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.util.List;
+import javax.swing.JOptionPane;
 
-public class OperatorePrenotazioniView {
+public class OperatorePrenotazioniView implements PrenotazioneObserver {
     private final VBox root;
     private final TravelEasy te;
     private final boolean showModificaPrenotazioneButton;
     private final Connection conn;
+    private VBox listContainer;
     private List<Prenotazione> elencoPrenotazioni;
 
     public OperatorePrenotazioniView(List<Prenotazione> elencoPrenotazioni, TravelEasy te) {
@@ -37,6 +40,9 @@ public class OperatorePrenotazioniView {
         this.te = te;
         this.showModificaPrenotazioneButton = showModificaPrenotazioneButton;
         this.conn = conn;
+        if (showModificaPrenotazioneButton) {
+            this.te.addPrenotazioneObserver(this);
+        }
         root = new VBox(12, buildHeader(), buildList());
     }
 
@@ -54,30 +60,36 @@ public class OperatorePrenotazioniView {
     }
 
     private ScrollPane buildList() {
-        VBox list = new VBox(16);
-        list.getStyleClass().add("package-list");
+        listContainer = new VBox(16);
+        listContainer.getStyleClass().add("package-list");
+        refreshPrenotazioniList();
 
-
-
-        /*list.getChildren().addAll(
-            buildPrenotazioneCard("Prenotazione #1024", "Roma, Italia", "15-04-2026 → 20-04-2026", "2 adulti, 1 bambino", "€ 780,00"),
-            buildPrenotazioneCard("Prenotazione #1025", "Parigi, Francia", "02-05-2026 → 06-05-2026", "2 adulti", "€ 920,00"),
-            buildPrenotazioneCard("Prenotazione #1026", "Lisbona, Portogallo", "18-06-2026 → 25-06-2026", "1 adulto", "€ 640,00")
-        );*/
-
-       for (Prenotazione p: elencoPrenotazioni){
-            PacchettoViaggio pacchetto = p.getPacchetto();
-            Cliente cliente = p.getCliente();
-            list.getChildren().add(buildPrenotazioneCard("Prenotazione #"+pacchetto.getCodice(), pacchetto.getCittà()+", "+pacchetto.getNazione(), pacchetto.getDataPartenza() + " → "+pacchetto.getDataRitorno(), "Effettuata da: "+cliente.getNome() + " " + cliente.getCognome() + "\nNumero di telefono: "+cliente.getTelefono()+"\nData prenotazione: "+p.getDataPrenotazione(), "EUR "+p.getPrezzoTotale(), p));
-        }
-        
-
-        ScrollPane scrollPane = new ScrollPane(list);
+        ScrollPane scrollPane = new ScrollPane(listContainer);
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.getStyleClass().add("package-scroll");
         return scrollPane;
+    }
+
+    private void refreshPrenotazioniList() {
+        if (listContainer == null) {
+            return;
+        }
+
+        listContainer.getChildren().clear();
+        for (Prenotazione p : elencoPrenotazioni) {
+            PacchettoViaggio pacchetto = p.getPacchetto();
+            Cliente cliente = p.getCliente();
+            listContainer.getChildren().add(buildPrenotazioneCard(
+                "Prenotazione #" + pacchetto.getCodice(),
+                pacchetto.getCittà() + ", " + pacchetto.getNazione(),
+                pacchetto.getDataPartenza() + " -> " + pacchetto.getDataRitorno(),
+                "Effettuata da: " + cliente.getNome() + " " + cliente.getCognome() + "\nNumero di telefono: " + cliente.getTelefono() + "\nData prenotazione: " + p.getDataPrenotazione(),
+                "EUR " + p.getPrezzoTotale(),
+                p
+            ));
+        }
     }
 
     private void openPackageWindow(Prenotazione p) {
@@ -122,11 +134,11 @@ public class OperatorePrenotazioniView {
 
         try {
             LocalDate d = LocalDate.parse(data, fmt);
-            return !d.isBefore(LocalDate.now().plusDays(7)); // d >= oggi + 7
+            return !d.isBefore(LocalDate.now().plusDays(7));
         } catch (Exception e) {
             return false;
         }
-    }   
+    }
 
     private VBox buildPrenotazioneCard(String titolo, String destinazione, String date, String partecipanti, String prezzo, Prenotazione prenotazione) {
         Label title = new Label(titolo);
@@ -147,6 +159,7 @@ public class OperatorePrenotazioniView {
 
         Button detailsButton = new Button("Dettagli Pacchetto");
         detailsButton.getStyleClass().add("secondary-button");
+        detailsButton.setPrefWidth(180);
         detailsButton.setOnAction(e -> openPackageWindow(prenotazione));
 
         Button viewButton = new Button("Visualizza Viaggiatori");
@@ -164,13 +177,17 @@ public class OperatorePrenotazioniView {
             editButton.setPrefWidth(180);
             PacchettoViaggio pacchetto = prenotazione.getPacchetto();
             String dataPartenza = pacchetto.getDataPartenza();
-            if (!almeno7GiorniDopoOggi(dataPartenza))
-                editButton.setDisable(true);
-            else
-                editButton.setDisable(false);
-            
+            editButton.setDisable(!almeno7GiorniDopoOggi(dataPartenza));
             editButton.setOnAction(e -> openModificaPrenotazioneWindow(prenotazione));
             actions.getChildren().add(editButton);
+        } else {
+            Button checkInButton = new Button("Effettua check-in");
+            checkInButton.getStyleClass().add("secondary-button");
+            checkInButton.setPrefWidth(180);
+            checkInButton.setOnAction(e ->
+                JOptionPane.showMessageDialog(null, "Check-in effettuato con successo.", "INFO", 1)
+            );
+            actions.getChildren().add(checkInButton);
         }
         actions.getChildren().add(viewButton);
         actions.setAlignment(Pos.CENTER_RIGHT);
@@ -184,5 +201,22 @@ public class OperatorePrenotazioniView {
         card.getStyleClass().add("package-card");
         card.setPadding(new Insets(16, 20, 16, 20));
         return card;
+    }
+
+    @Override
+    public void onPrenotazioneModificata(Prenotazione prenotazione) {
+        if (!showModificaPrenotazioneButton || prenotazione == null) {
+            return;
+        }
+        if (!elencoPrenotazioni.contains(prenotazione)) {
+            return;
+        }
+        Platform.runLater(this::refreshPrenotazioniList);
+    }
+
+    public void dispose() {
+        if (showModificaPrenotazioneButton) {
+            te.removePrenotazioneObserver(this);
+        }
     }
 }

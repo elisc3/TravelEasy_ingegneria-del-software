@@ -27,6 +27,7 @@ public class TravelEasy {
     private Map<PacchettoViaggio, OffertaSpeciale> elencoOfferte;
     private final List<OffertaObserver> offertaObservers = new ArrayList<>();
     private final List<RicaricaObserver> ricaricaObservers = new ArrayList<>();
+    private final List<PrenotazioneObserver> prenotazioneObservers = new ArrayList<>();
     private List<Prenotazione> elencoPrenotazioni;
 
     public TravelEasy(Connection conn){
@@ -327,7 +328,7 @@ public class TravelEasy {
                 Cliente cliente = this.getClienteById(idCliente);
 
                
-                Prenotazione newPrenotazione = new Prenotazione(cliente, pacchettoViaggio, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta);
+                Prenotazione newPrenotazione = new Prenotazione(id, cliente, pacchettoViaggio, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta);
                 lista.add(newPrenotazione);
                 cliente.addPrenotazione(newPrenotazione);
                 
@@ -793,6 +794,20 @@ public class TravelEasy {
         }
     }
 
+    public void addPrenotazioneObserver(PrenotazioneObserver observer) {
+        if (observer != null && !prenotazioneObservers.contains(observer)) prenotazioneObservers.add(observer);
+    }
+
+    public void removePrenotazioneObserver(PrenotazioneObserver observer) {
+        prenotazioneObservers.remove(observer);
+    }
+
+    private void notifyPrenotazioneModificata(Prenotazione prenotazione) {
+        for (PrenotazioneObserver observer : new ArrayList<>(prenotazioneObservers)) {
+            observer.onPrenotazioneModificata(prenotazione);
+        }
+    }
+
     
 
     public float getTotalePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori){
@@ -866,7 +881,7 @@ public class TravelEasy {
                     return false;
             }
             
-            Prenotazione p = new Prenotazione(cliente, pacchetto, dataPrenotazione, elencoViaggiatori, totaleAggiornato, scontoApplicato, offertaApplicata);
+            Prenotazione p = new Prenotazione(newId, cliente, pacchetto, dataPrenotazione, elencoViaggiatori, totaleAggiornato, scontoApplicato, offertaApplicata);
             if (!p.applicaSconto(conn, scontoApplicato))
                 return false;
             if (!p.aggiornaOreViaggio(conn))
@@ -883,6 +898,47 @@ public class TravelEasy {
             return true;
         } catch (SQLException e){
             System.out.println("Errore registrazionePrenotazione: "+e);
+            return false;
+        }
+    }
+
+    public boolean modificaPacchettoPrenotazione(Prenotazione prenotazione, PacchettoViaggio nuovoPacchetto) {
+        if (prenotazione == null || nuovoPacchetto == null) {
+            return false;
+        }
+
+        int idPrenotazione = prenotazione.getId();
+        if (idPrenotazione <= 0) {
+            return false;
+        }
+
+        float nuovaOffertaApplicata = 0.0F;
+        OffertaSpeciale o = this.elencoOfferte.get(nuovoPacchetto);
+        if (o != null) {
+            nuovaOffertaApplicata = o.getScontoPercentuale();
+        }
+
+        float nuovoTotale = this.getTotalePrenotazione(prenotazione.getCliente(), nuovoPacchetto, prenotazione.getElencoViaggiatori());
+
+        String query = "UPDATE Prenotazioni SET Pacchetto = ?, PrezzoTotale = ?, OffertaSpeciale = ? WHERE id = ?;";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, nuovoPacchetto.getId());
+            pstmt.setFloat(2, nuovoTotale);
+            pstmt.setFloat(3, nuovaOffertaApplicata);
+            pstmt.setInt(4, idPrenotazione);
+
+            int updatedRows = pstmt.executeUpdate();
+            if (updatedRows != 1) {
+                return false;
+            }
+
+            prenotazione.setPacchetto(nuovoPacchetto);
+            prenotazione.setPrezzoTotale(nuovoTotale);
+            prenotazione.setOffertaApplicata(nuovaOffertaApplicata);
+            notifyPrenotazioneModificata(prenotazione);
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Errore modificaPacchettoPrenotazione: " + e);
             return false;
         }
     }

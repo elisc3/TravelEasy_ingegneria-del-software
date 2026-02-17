@@ -21,14 +21,16 @@ public class PagamentoView implements RicaricaObserver {
     private final StackPane root;
     private TravelEasy te;
     private PacchettoViaggio pacchetto;
+    private PacchettoViaggio pacchettoOriginale;
     private Cliente cliente;
     private List<Viaggiatore> elencoViaggiatori;
     private Connection conn;
     private Label balanceLabel;
     private Button confirmButton;
     private float totale;
+    private boolean modificaPrenotazioneMode;
 
-    public PagamentoView(TravelEasy te, int idUtente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori,  Connection conn) {
+    public PagamentoView(TravelEasy te, int idUtente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori,Connection conn) {
         this.te = te;
         this.cliente = this.te.getClienteById(idUtente);
         this.elencoViaggiatori = elencoViaggiatori;
@@ -38,7 +40,21 @@ public class PagamentoView implements RicaricaObserver {
         this.te.addRicaricaObserver(this);
         root = new StackPane();
         root.getStyleClass().add("payment-root");
-        root.getChildren().add(buildCard());
+        root.getChildren().add(buildCard(null));
+    }
+
+    public PagamentoView(TravelEasy te, Prenotazione prenotazione, PacchettoViaggio nuovoPacchetto, Connection conn) {
+        this.te = te;
+        this.cliente = prenotazione.getCliente();
+        this.elencoViaggiatori = prenotazione.getElencoViaggiatori();
+        this.pacchettoOriginale = prenotazione.getPacchetto();
+        this.pacchetto = nuovoPacchetto;
+        this.conn = conn;
+        this.modificaPrenotazioneMode = true;
+        this.te.addRicaricaObserver(this);
+        root = new StackPane();
+        root.getStyleClass().add("payment-root");
+        root.getChildren().add(buildCard(prenotazione));
     }
 
     public StackPane getRoot() {
@@ -56,7 +72,11 @@ public class PagamentoView implements RicaricaObserver {
         return header;
     }
 
-    private VBox buildContent() {
+    private VBox buildContent(Prenotazione prenotazione) {
+        if (modificaPrenotazioneMode) {
+            return buildContentModificaPrenotazione(prenotazione);
+        }
+
         Label sectionTitle = new Label("Pagamento");
         sectionTitle.getStyleClass().add("section-title");
 
@@ -134,8 +154,65 @@ public class PagamentoView implements RicaricaObserver {
         return content;
     }
 
-    private VBox buildCard() {
-        VBox card = new VBox(20, buildHeader(), buildContent());
+    private VBox buildContentModificaPrenotazione(Prenotazione prenotazione) {
+        Label sectionTitle = new Label("Pagamento modifica prenotazione");
+        sectionTitle.getStyleClass().add("section-title");
+
+        float totaleOriginale = te.getTotalePrenotazione(cliente, pacchettoOriginale, elencoViaggiatori);
+        totale = te.getTotalePrenotazione(cliente, pacchetto, elencoViaggiatori);
+
+        Label oldTotalLabel = new Label(String.format("Totale attuale: EUR %.2f", totaleOriginale));
+        oldTotalLabel.getStyleClass().add("package-meta");
+
+        Label newTotalLabel = new Label(String.format("Nuovo totale: EUR %.2f", totale));
+        newTotalLabel.getStyleClass().add("package-price");
+
+        double saldoPortafoglio = cliente.getPv().getSaldo();
+        String saldoFormat = String.format(java.util.Locale.US, "%.2f", saldoPortafoglio);
+        balanceLabel = new Label("Saldo attuale portafoglio: EUR " + saldoFormat);
+        balanceLabel.getStyleClass().add("package-meta");
+
+        confirmButton = new Button("Conferma pagamento");
+        confirmButton.getStyleClass().add("primary-button");
+        float difference = totale - totaleOriginale;
+        if (difference > 0 && totale > saldoPortafoglio) {
+            confirmButton.setDisable(true);
+        } else {
+            confirmButton.setDisable(false);
+        }
+        // Placeholder UI-only: la logica business di conferma viene gestita successivamente.
+        confirmButton.setOnAction(e -> {
+            if (totaleOriginale > totale){
+                float rimborso = totaleOriginale - totale;
+                if (!cliente.rimborsoOnPortafoglioDB(conn, rimborso)){
+                    JOptionPane.showMessageDialog(null, "Il rimborso non è andato a buon fine. Prego riprovare.", "ERRORE", 0);
+                    return;
+                }
+            } else {
+                float nuovoPagamento = totale - totaleOriginale;
+                if (!cliente.pagamentoOnPortafoglioDB(conn, nuovoPagamento)){
+                    JOptionPane.showMessageDialog(null, "Il pagamento non è andato a buon fine. Prego riprovare.", "ERRORE", 0);
+                    return;
+                }
+            }
+
+            if (!te.modificaPacchettoPrenotazione(prenotazione, pacchetto)){
+                JOptionPane.showMessageDialog(null, "La modifica della prenotazione non è andata a buon fine. Prego riprovare.", "ERRORE", 0);
+                return;   
+            }
+         });
+
+        Button rechargeButton = new Button("Nuova ricarica portafoglio");
+        rechargeButton.getStyleClass().add("secondary-button");
+        rechargeButton.setOnAction(e -> openRechargeWindow());
+
+        VBox content = new VBox(16, sectionTitle, oldTotalLabel, newTotalLabel, balanceLabel, confirmButton, rechargeButton);
+        content.setAlignment(Pos.CENTER_LEFT);
+        return content;
+    }
+
+    private VBox buildCard(Prenotazione prenotazione) {
+        VBox card = new VBox(20, buildHeader(), buildContent(prenotazione));
         card.getStyleClass().add("payment-card");
         card.setPadding(new Insets(28, 32, 32, 32));
         card.setMaxWidth(520);

@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class Prenotazione {
+    private int id;
     private Cliente cliente;
     private PacchettoViaggio pacchetto;
     private String dataPrenotazione;
@@ -15,6 +16,11 @@ public class Prenotazione {
     
 
     public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta) {
+        this(0, cliente, pacchetto, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta);
+    }
+
+    public Prenotazione(int id, Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta) {
+        this.id = id;
         this.cliente = cliente;
         this.pacchetto = pacchetto;
         this.dataPrenotazione = dataPrenotazione;
@@ -22,6 +28,14 @@ public class Prenotazione {
         this.prezzoTotale = prezzoTotale;
         this.scontoApplicato = scontoApplicato;
         this.percentualeOfferta = percentualeOfferta;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public Cliente getCliente() {
@@ -70,6 +84,10 @@ public class Prenotazione {
 
     public float getOffertaApplicata() {
         return this.percentualeOfferta;
+    }
+
+    public void setOffertaApplicata(float percentualeOfferta) {
+        this.percentualeOfferta = percentualeOfferta;
     }
 
 

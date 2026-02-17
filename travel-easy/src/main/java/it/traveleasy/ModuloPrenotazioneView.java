@@ -1,8 +1,14 @@
 package it.traveleasy;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JOptionPane;
 
 import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -10,21 +16,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
-
-import java.util.List;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import javafx.stage.Stage;
 
 public class ModuloPrenotazioneView {
     private final VBox root;
     private final DialogCloseHandler closeHandler;
-    private TravelEasy te;
-    private List<VBox> listaPersonCards;
-    private List<Viaggiatore> listaViaggiatori;
+    private final TravelEasy te;
+    private final List<VBox> listaPersonCards;
+    private final List<Viaggiatore> listaViaggiatori;
 
     public interface DialogCloseHandler {
         void onConferma(List<Viaggiatore> viaggiatori);
@@ -32,10 +31,10 @@ public class ModuloPrenotazioneView {
 
     public ModuloPrenotazioneView(DialogCloseHandler closeHandler, PacchettoViaggio pacchetto, TravelEasy te) {
         this.closeHandler = closeHandler;
-        this.root = build();
         this.te = te;
         this.listaViaggiatori = new ArrayList<>();
         this.listaPersonCards = new ArrayList<>();
+        this.root = build();
     }
 
     public VBox getRoot() {
@@ -60,6 +59,8 @@ public class ModuloPrenotazioneView {
         generateButton.getStyleClass().add("secondary-button");
         generateButton.setOnAction(e -> {
             peopleForm.getChildren().clear();
+            listaPersonCards.clear();
+            listaViaggiatori.clear();
 
             int count;
             try {
@@ -73,7 +74,6 @@ public class ModuloPrenotazioneView {
                 return;
             }
 
-            
             for (int i = 1; i <= count; i++) {
                 VBox personCard = new VBox(8);
                 personCard.getStyleClass().add("package-card");
@@ -116,54 +116,58 @@ public class ModuloPrenotazioneView {
                 listaPersonCards.add(personCard);
             }
         });
-        
+
         Button confirmButton = new Button("Conferma dati");
         confirmButton.getStyleClass().add("primary-button");
         confirmButton.setOnAction(e -> {
-            for (VBox card : listaPersonCards){
-                
-                DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+            listaViaggiatori.clear();
 
-                //LocalDate d = birthDateField.getValue();
+            for (VBox card : listaPersonCards) {
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-uuuu");
                 DatePicker birthDate = (DatePicker) card.getChildren().get(3);
                 LocalDate d = birthDate.getValue();
-                String data = (d == null) ? "" : d.format(FMT);
+                String data = (d == null) ? "" : d.format(fmt);
 
                 TextField nameField = (TextField) card.getChildren().get(1);
                 TextField surnameField = (TextField) card.getChildren().get(2);
-                
+
+                @SuppressWarnings("unchecked")
                 ComboBox<String> docTypeField = (ComboBox<String>) card.getChildren().get(4);
                 TextField docField = (TextField) card.getChildren().get(5);
 
-                Viaggiatore v = new Viaggiatore(nameField.getText(), surnameField.getText(), data, docTypeField.getValue(), docField.getText());
-                //listaViaggiatori.add(new Viaggiatore(nameField.getText(), surnameField.getText(), data, docTypeField.getValue(), docField.getText()));
+                Viaggiatore v = new Viaggiatore(
+                    nameField.getText(),
+                    surnameField.getText(),
+                    data,
+                    docTypeField.getValue(),
+                    docField.getText()
+                );
                 te.inserisciDatiViaggiatore(listaViaggiatori, v);
             }
-            
-            for (int i = 0; i < listaViaggiatori.size(); i++){ //non ho usato il foreach per poter dire in quale persona si ha l'errore, tramite l'indice. 
+
+            for (int i = 0; i < listaViaggiatori.size(); i++) {
                 Viaggiatore v = listaViaggiatori.get(i);
                 int esitoValidazioneDati = v.validazioneDatiPrenotazione(v);
-                int pos = i+1;
-                if (esitoValidazioneDati == -1){
-                    JOptionPane.showMessageDialog(null, "Hai dimenticato qualche campo in persona "+pos+".", "ATTENZIONE", 2);
+                int pos = i + 1;
+                if (esitoValidazioneDati == -1) {
+                    JOptionPane.showMessageDialog(null, "Hai dimenticato qualche campo in persona " + pos + ".", "ATTENZIONE", 2);
                     return;
-                } else if (esitoValidazioneDati == -2){
-                    JOptionPane.showMessageDialog(null, "Data inserita non valida in persona "+pos+".", "ERRORE", 0);
+                } else if (esitoValidazioneDati == -2) {
+                    JOptionPane.showMessageDialog(null, "Data inserita non valida in persona " + pos + ".", "ERRORE", 0);
                     return;
-                } else if (esitoValidazioneDati == -3){
-                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona "+pos+".", "ERRORE", 0);
+                } else if (esitoValidazioneDati == -3) {
+                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona " + pos + ".", "ERRORE", 0);
                     return;
-                } else if (esitoValidazioneDati == -4){
-                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona "+pos+".", "ERRORE", 0);
+                } else if (esitoValidazioneDati == -4) {
+                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona " + pos + ".", "ERRORE", 0);
                     return;
-                } else if (esitoValidazioneDati == -5){
-                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona "+pos+".", "ERRORE", 0);
+                } else if (esitoValidazioneDati == -5) {
+                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona " + pos + ".", "ERRORE", 0);
                     return;
                 }
             }
-            if (closeHandler != null) {
-                closeHandler.onConferma(listaViaggiatori);
-            }
+
+            openAssistenzaSpecialeWindow();
         });
 
         ScrollPane scrollPane = new ScrollPane(peopleForm);
@@ -174,5 +178,21 @@ public class ModuloPrenotazioneView {
 
         content.getChildren().addAll(prompt, peopleField, generateButton, scrollPane, confirmButton);
         return content;
+    }
+
+    private void openAssistenzaSpecialeWindow() {
+        Stage stage = new Stage();
+        ModuloAssistenzaSpecialeView view = new ModuloAssistenzaSpecialeView(listaViaggiatori, viaggiatori -> {
+            stage.close();
+            if (closeHandler != null) {
+                closeHandler.onConferma(viaggiatori);
+            }
+        });
+        Scene scene = new Scene(view.getRoot(), 740, 600);
+        scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
+        stage.setTitle("Travel Easy - Assistenza Speciale");
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
     }
 }

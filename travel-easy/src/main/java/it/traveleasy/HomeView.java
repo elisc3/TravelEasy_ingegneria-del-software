@@ -156,6 +156,7 @@ public class HomeView {
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Le mie prenotazioni");
         stage.setResizable(false);
+        stage.setOnCloseRequest(e -> view.dispose());
         stage.setScene(scene);
         stage.show();
     }

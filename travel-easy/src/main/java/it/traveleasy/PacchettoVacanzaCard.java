@@ -74,7 +74,7 @@ public class PacchettoVacanzaCard {
 
         Button bookButton = new Button("Prenota");
         bookButton.getStyleClass().add("primary-button");
-        bookButton.setOnAction(e -> openBookingDialog());
+        bookButton.setOnAction(e -> onPrenotaAction());
 
         VBox info = new VBox(6, title, code, destination, duration, description);
         info.setAlignment(Pos.CENTER_LEFT);
@@ -94,6 +94,22 @@ public class PacchettoVacanzaCard {
 
     public VBox getRoot() {
         return root;
+    }
+
+    protected void onPrenotaAction() {
+        openBookingDialog();
+    }
+
+    protected TravelEasy getTravelEasy() {
+        return te;
+    }
+
+    protected PacchettoViaggio getPacchetto() {
+        return pacchetto;
+    }
+
+    protected Connection getConnection() {
+        return conn;
     }
 
     private VBox buildPriceBox(float prezzo, float prezzoScontato) {
