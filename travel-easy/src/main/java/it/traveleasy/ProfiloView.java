@@ -35,6 +35,8 @@ public class ProfiloView {
         float oreAccumulate = po.getOre();
         float scontoAccumulato = po.getSconto();
 
+        String saldoFormat = String.format(java.util.Locale.US, "%.2f", saldo);
+
         HBox header = buildHeader();
 
         Label title = new Label("I miei dati");
@@ -62,7 +64,7 @@ public class ProfiloView {
 
         Label balanceLabel = new Label("Saldo portafoglio");
         balanceLabel.getStyleClass().add("profile-label");
-        Label balanceValue = new Label("€ "+saldo);
+        Label balanceValue = new Label("€ "+saldoFormat);
         balanceValue.getStyleClass().add("profile-balance");
 
         Label accumulatedHoursLabel = new Label("Ore accumulate");

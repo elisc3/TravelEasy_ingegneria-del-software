@@ -303,7 +303,10 @@ public class TravelEasy {
     }
 
     private List<Prenotazione> recuperaPrenotazioni(){
-        String query = "SELECT * FROM Prenotazioni";
+        String query =
+            "SELECT * FROM Prenotazioni " +
+            "ORDER BY substr(DataPrenotazione, 7, 4) || '-' || substr(DataPrenotazione, 4, 2) || '-' || substr(DataPrenotazione, 1, 2) DESC";
+
         List<Prenotazione> lista = new ArrayList<>();
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)){

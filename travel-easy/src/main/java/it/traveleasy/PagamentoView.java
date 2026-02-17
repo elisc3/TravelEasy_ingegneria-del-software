@@ -69,7 +69,8 @@ public class PagamentoView implements RicaricaObserver {
 
         double saldoPortafoglio = cliente.getPv().getSaldo();
 
-        balanceLabel = new Label("Saldo attuale portafoglio: EUR " + saldoPortafoglio);
+        String saldoFormat = String.format(java.util.Locale.US, "%.2f", saldoPortafoglio);
+        balanceLabel = new Label("Saldo attuale portafoglio: EUR " + saldoFormat);
         balanceLabel.getStyleClass().add("package-meta");
 
         Label fidelityTitle = new Label("Sconto fedelta");

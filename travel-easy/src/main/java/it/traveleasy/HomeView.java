@@ -21,7 +21,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 
@@ -146,7 +148,11 @@ public class HomeView {
         Stage stage = new Stage();
         Cliente cliente = te.getAccountToHomeView(emailUtente).getCliente();
         OperatorePrenotazioniView view = new OperatorePrenotazioniView(cliente.getElencoPrenotazioniEffettuate(), te);
-        Scene scene = new Scene(view.getRoot(), 1180, 760);
+        StackPane wrapper = new StackPane(view.getRoot());
+        wrapper.setPadding(new Insets(20, 24, 20, 24));
+        double maxAvailableHeight = Screen.getPrimary().getVisualBounds().getHeight() - 80;
+        double windowHeight = Math.min(760, maxAvailableHeight);
+        Scene scene = new Scene(wrapper, 1260, windowHeight);
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Le mie prenotazioni");
         stage.setResizable(false);

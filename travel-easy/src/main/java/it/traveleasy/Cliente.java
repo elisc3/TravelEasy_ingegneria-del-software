@@ -48,16 +48,16 @@ public class Cliente extends Utente {
 
     public void incrementaPortafoglio(float importo){
         this.pv.incrementaSaldo(importo);
-        System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
+        //System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
     }
 
     public void decrementaPortafoglio(float importo){
         this.pv.decrementaSaldo(importo);
-        System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
+        //System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
     }
 
     public void stampaSaldoPortafoglio(){
-        System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
+        //System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
     }
 
     public boolean metodiPagamento(Connection conn){
@@ -199,7 +199,7 @@ public class Cliente extends Utente {
         }
     }
 
-    
+
 
     public void addPrenotazione(Prenotazione p){
         this.elencoPrenotazioniEffettuate.add(p);

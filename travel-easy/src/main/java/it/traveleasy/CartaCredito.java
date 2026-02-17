@@ -109,7 +109,7 @@ public class CartaCredito {
             pstmt.executeUpdate();
 
             this.portafoglioVirtuale.incrementaSaldo(importo);
-            System.out.println("Saldo aggiornato della classe CartaCredito: "+this.portafoglioVirtuale.getSaldo());
+            //System.out.println("Saldo aggiornato della classe CartaCredito: "+this.portafoglioVirtuale.getSaldo());
             this.cliente.stampaSaldoPortafoglio();
             return true;
         } catch (SQLException e){
