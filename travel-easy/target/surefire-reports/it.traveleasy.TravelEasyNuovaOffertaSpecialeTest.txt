@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: it.traveleasy.TravelEasyNuovaOffertaSpecialeTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.322 s -- in it.traveleasy.TravelEasyNuovaOffertaSpecialeTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.333 s -- in it.traveleasy.TravelEasyNuovaOffertaSpecialeTest
