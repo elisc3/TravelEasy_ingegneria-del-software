@@ -1,5 +1,10 @@
 package it.traveleasy;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter; 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class Prenotazione {
@@ -12,11 +17,13 @@ public class Prenotazione {
     private float prezzoAssistenzaSpeciale;
     private float scontoApplicato;
     private float percentualeOfferta;
+    private boolean checkedIn;
     
 
     public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta) {
         this(0, cliente, pacchetto, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta);
         this.prezzoAssistenzaSpeciale = 0;
+        this.checkedIn = false;
     }
 
     public Prenotazione(int id, Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta) {
@@ -29,6 +36,7 @@ public class Prenotazione {
         this.scontoApplicato = scontoApplicato;
         this.percentualeOfferta = percentualeOfferta;
         this.prezzoAssistenzaSpeciale = 0;
+        this.checkedIn = false;
     }
 
     public int getId() {
@@ -71,6 +79,14 @@ public class Prenotazione {
         this.prezzoTotale = prezzoTotale;
     }
 
+    public float getPrezzoAssistenzaSpeciale() {
+        return prezzoAssistenzaSpeciale;
+    }
+
+    public void setPrezzoAssistenzaSpeciale(float prezzoAssistenzaSpeciale) {
+        this.prezzoAssistenzaSpeciale = prezzoAssistenzaSpeciale;
+    }
+
     public float getScontoApplicato(){
         return this.scontoApplicato;
     }
@@ -89,6 +105,14 @@ public class Prenotazione {
 
     public void setOffertaApplicata(float percentualeOfferta) {
         this.percentualeOfferta = percentualeOfferta;
+    }
+
+    public boolean isCheckedIn() {
+        return checkedIn;
+    }
+
+    public void setCheckedIn(boolean checkedIn) {
+        this.checkedIn = checkedIn;
     }
 
 
@@ -150,5 +174,33 @@ public class Prenotazione {
 
         this.prezzoAssistenzaSpeciale = totaleAssistenza;
     }
+
+    public boolean checkIn(Connection conn) {
+        if(this.pacchetto == null){
+            return false;
+        }
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+        LocalDate dataPartenza = LocalDate.parse(this.pacchetto.getDataPartenza(), formatter);
+        LocalDate oggi = LocalDate.now();
+        long giorniMancanti = ChronoUnit.DAYS.between(oggi, dataPartenza);
+
+        if (giorniMancanti <= 2) {
+            String query = "UPDATE Prenotazione SET checkIn = 1 WHERE id = ?;";
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setInt(1, this.id);
+                pstmt.executeUpdate();
+            } catch (SQLException e){
+                System.out.println("Errore salvataggio check-in: "+e);
+                return false;
+            }
+            this.setCheckedIn(true);
+            return true;
+        }
+        else {
+            System.out.println("Check-in non consentito. Mancano più di 2 giorni alla partenza.");
+            return false;
+        }
+    }    
 
 }

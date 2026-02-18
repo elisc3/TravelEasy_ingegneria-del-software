@@ -1,5 +1,13 @@
 package it.traveleasy;
 
+import java.sql.Connection;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
+import java.util.Map;
+
+import javax.swing.JOptionPane;
+
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,14 +19,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import java.sql.Connection;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.ResolverStyle;
-import java.util.List;
-import java.util.Map;
-import javax.swing.JOptionPane;
 
 public class OperatorePrenotazioniView implements PrenotazioneObserver, RecensioneObserver {
     private final VBox root;
@@ -233,8 +233,10 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
             Button checkInButton = new Button("Effettua check-in");
             checkInButton.getStyleClass().add("secondary-button");
             checkInButton.setPrefWidth(180);
-            checkInButton.setOnAction(e ->
-                JOptionPane.showMessageDialog(null, "Check-in effettuato con successo.", "INFO", 1)
+            checkInButton.setOnAction(e -> {
+                    if(te.effettuaCheckIn(prenotazione))
+                        JOptionPane.showMessageDialog(null, "Check-in effettuato con successo.", "INFO", 1);
+                }
             );
             actions.getChildren().add(checkInButton);
         }

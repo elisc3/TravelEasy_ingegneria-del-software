@@ -1105,4 +1105,18 @@ public class TravelEasy implements AssistenzaObserver{
     public void confermaAssistenzaSpeciale(Prenotazione prenotazione){
         prenotazione.calcolaPrezzoAssistenzaSpeciale();
     }
+
+    //*CHECK-IN
+    public boolean effettuaCheckIn(Prenotazione p){
+        if (p == null) {
+            return false;
+        }
+
+        if(p.isCheckedIn()) {
+            System.out.println("Check-in già effettuato.");
+            return false;
+        }
+
+        return p.checkIn(conn);
+    }
 }
