@@ -1,4 +1,4 @@
-﻿package it.traveleasy;
+package it.traveleasy;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;

@@ -16,6 +16,7 @@ public class Cliente extends Utente {
     private PortafoglioOre po;
     private Map<Integer, Prenotazione> elencoPrenotazioniEffettuate;
     private Map<Integer, Recensione> elencoRecensioni;
+    private int nRiferimentiRecensione = 3;
 
     public Cliente(int id, String nome, String cognome, String Telefono, String ruolo, int Account, PortafoglioVirtuale pv, CartaCredito cc, PortafoglioOre po) {
         super(id, nome, cognome, Telefono, ruolo, Account);
@@ -218,12 +219,12 @@ public class Cliente extends Utente {
     }
 
     public Recensione[] getRecensioneByPrenotazione(int idPrenotazione){
-        Recensione[] recensione = new Recensione[3];
+        Recensione[] recensione = new Recensione[nRiferimentiRecensione];
         int count = 0;
         for (Recensione r: elencoRecensioni.values()){
             if (r.getPrenotazione().getId() == idPrenotazione){
                 recensione[count++] = r;
-                if (count == 3)
+                if (count == nRiferimentiRecensione)
                     return recensione;
             }   
         }

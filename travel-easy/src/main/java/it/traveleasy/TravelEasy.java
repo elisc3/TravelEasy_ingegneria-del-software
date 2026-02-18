@@ -370,10 +370,11 @@ public class TravelEasy {
                 String commento = rs.getString("Commento");
                 int idCliente = rs.getInt("Cliente");
                 int idPrenotazione = rs.getInt("Prenotazione");
+                String data = rs.getString("DataRecensione");
                 Cliente cliente = getClienteById(idCliente);
                 Prenotazione prenotazione = elencoPrenotazioni.get(idPrenotazione);
 
-                Recensione r = new Recensione(id, riferimento, stelle, commento, cliente, prenotazione);
+                Recensione r = new Recensione(id, riferimento, stelle, commento, data, cliente, prenotazione);
                 elencoRecensioni.put(id, r);
                 cliente.addRecensione(r);
             }
@@ -1005,7 +1006,7 @@ public class TravelEasy {
     }
 
     public boolean inserisciRecensione(Cliente cliente, Prenotazione prenotazione, String commento, int stelle, String riferimento){
-        String query = "INSERT INTO Recensione(Riferimento, Stelle, Commento, Cliente, Prenotazione) values (?, ?, ?, ?, ?);";
+        String query = "INSERT INTO Recensione(Riferimento, Stelle, Commento, Cliente, Prenotazione, DataRecensione) values (?, ?, ?, ?, ?, ?);";
         
         try(PreparedStatement pstmt = conn.prepareStatement(query)){
             pstmt.setString(1, riferimento);
@@ -1013,6 +1014,8 @@ public class TravelEasy {
             pstmt.setString(3, commento);
             pstmt.setInt(4, cliente.getId());
             pstmt.setInt(5, prenotazione.getId());
+            String dataRecensione = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
+            pstmt.setString(6, dataRecensione);
 
 
             pstmt.executeUpdate();
@@ -1024,7 +1027,9 @@ public class TravelEasy {
                      newId = rs.getInt(1);
                 }
             }
-            Recensione r = new Recensione(newId, riferimento, stelle, commento, cliente, prenotazione);
+
+
+            Recensione r = new Recensione(newId, riferimento, stelle, commento, dataRecensione, cliente, prenotazione);
             this.elencoRecensioni.put(newId, r);
             cliente.addRecensione(r);
             notifyRecensioneCreata(r);
@@ -1035,4 +1040,23 @@ public class TravelEasy {
         }
     }
 
+    public Map<Integer, Recensione> getRecensioni(){
+        return this.elencoRecensioni;
+    }
+
+    public float getMediaRecensioni(String riferimento){
+        int somma = 0;
+        int nRecensioni = 0;
+        for (Recensione r: elencoRecensioni.values()){
+            if (r.getRiferimento().equals(riferimento)){
+                somma += r.getStelle();
+                nRecensioni++;
+            }
+        }
+        return (float)somma/nRecensioni;
+    }
+
+    public int getNTotaleRecensioni(){
+        return this.elencoRecensioni.size()/3;
+    }
 }

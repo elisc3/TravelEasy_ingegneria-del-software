@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 
 public class ModuloRecensioniView {
     private final ScrollPane root;
+    private int nRiferimenti = 3;
 
     public ModuloRecensioniView(TravelEasy te, int idCliente, Prenotazione prenotazione) {
         this(te, idCliente, prenotazione, null, false);
@@ -54,11 +55,12 @@ public class ModuloRecensioniView {
             Stage stage = (Stage) annullaButton.getScene().getWindow();
             stage.close();
         });
-        
+
         if (solaLettura && recensione != null) {
             popolaRecensioneInSolaLettura(recensione, sezioneAgenzia, sezioneTrasporto, sezioneAlloggio);
             annullaButton.setText("Chiudi");
-            confermaButton.setDisable(true);
+            confermaButton.setVisible(false);
+            confermaButton.setManaged(false);
         } else {
             confermaButton.setDisable(false);
             confermaButton.setOnAction(e -> {
@@ -114,7 +116,7 @@ public class ModuloRecensioniView {
     }
 
     private void popolaRecensioneInSolaLettura(Recensione[] recensione, SectionControls sezioneAgenzia, SectionControls sezioneTrasporto, SectionControls sezioneAlloggio) {
-        for (int i = 0; i < 3; i++){
+        for (int i = 0; i < nRiferimenti; i++){
             SectionControls target = null;
             String riferimento = recensione[i].getRiferimento();
             if ("Agenzia".equalsIgnoreCase(riferimento)) {

@@ -67,24 +67,32 @@ public class OperatoreHomeView {
         Button bookingsButton = new Button("Prenotazioni");
         bookingsButton.getStyleClass().add("primary-button");
 
+        Button reviewsButton = new Button("Recensioni");
+        reviewsButton.getStyleClass().add("secondary-button");
+
         newPackageButton.setOnAction(e -> {
-            setActiveMenuButton(newPackageButton, offersButton, bookingsButton);
+            setActiveMenuButton(newPackageButton, offersButton, bookingsButton, reviewsButton);
             showContent(new OperatoreNuovoPacchettoView(conn, te).getRoot());
         });
 
         offersButton.setOnAction(e -> {
-            setActiveMenuButton(offersButton, newPackageButton, bookingsButton);
+            setActiveMenuButton(offersButton, newPackageButton, bookingsButton, reviewsButton);
             OperatoreOfferteView offersView = new OperatoreOfferteView(te);
             showContent(offersView.getRoot());
             activeOfferteView = offersView;
         });
 
         bookingsButton.setOnAction(e -> {
-            setActiveMenuButton(bookingsButton, newPackageButton, offersButton);
+            setActiveMenuButton(bookingsButton, newPackageButton, offersButton, reviewsButton);
             showContent(new OperatorePrenotazioniView(te.getPrenotazioni(), te).getRoot());
         });
 
-        HBox menu = new HBox(12, newPackageButton, offersButton, bookingsButton);
+        reviewsButton.setOnAction(e -> {
+            setActiveMenuButton(reviewsButton, newPackageButton, offersButton, bookingsButton);
+            showContent(new OperatoreRecensioniView(te, te.getRecensioni()).getRoot());
+        });
+
+        HBox menu = new HBox(12, newPackageButton, offersButton, bookingsButton, reviewsButton);
         menu.getStyleClass().add("search-row");
         menu.setAlignment(Pos.CENTER_LEFT);
         return menu;
@@ -102,20 +110,17 @@ public class OperatoreHomeView {
         content.getChildren().add(view);
     }
 
-    private void setActiveMenuButton(Button active, Button otherA, Button otherB) {
+    private void setActiveMenuButton(Button active, Button... others) {
         active.getStyleClass().remove("secondary-button");
         if (!active.getStyleClass().contains("primary-button")) {
             active.getStyleClass().add("primary-button");
         }
 
-        otherA.getStyleClass().remove("primary-button");
-        if (!otherA.getStyleClass().contains("secondary-button")) {
-            otherA.getStyleClass().add("secondary-button");
-        }
-
-        otherB.getStyleClass().remove("primary-button");
-        if (!otherB.getStyleClass().contains("secondary-button")) {
-            otherB.getStyleClass().add("secondary-button");
+        for (Button other : others) {
+            other.getStyleClass().remove("primary-button");
+            if (!other.getStyleClass().contains("secondary-button")) {
+                other.getStyleClass().add("secondary-button");
+            }
         }
     }
 

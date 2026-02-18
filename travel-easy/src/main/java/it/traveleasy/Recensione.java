@@ -5,14 +5,16 @@ public class Recensione {
     private String riferimento;
     private int stelle;
     private String commento;
+    private String data;
     private Cliente cliente;
     private Prenotazione prenotazione;
 
-    public Recensione(int id, String riferimento, int stelle, String commento, Cliente cliente, Prenotazione prenotazione) {
+    public Recensione(int id, String riferimento, int stelle, String commento, String data, Cliente cliente, Prenotazione prenotazione) {
         this.id = id;
         this.riferimento = riferimento;
         this.stelle = stelle;
         this.commento = commento;
+        this.data = data;
         this.cliente = cliente;
         this.prenotazione = prenotazione;
     }
@@ -64,4 +66,12 @@ public class Recensione {
     public void setPrenotazione(Prenotazione prenotazione){
         this.prenotazione = prenotazione;
     }
+
+    public String getData(){
+        return data;
+    }
+
+    public void setData(String data){
+        this.data = data;
+    } 
 }
