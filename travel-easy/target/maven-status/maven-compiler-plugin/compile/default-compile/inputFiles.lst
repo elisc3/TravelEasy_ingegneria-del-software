@@ -11,6 +11,7 @@ C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\s
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\ModuloModificaPrenotazioneView.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\ModuloOffertaView.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\ModuloPrenotazioneView.java
+C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\ModuloRecensioniView.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\OffertaObserver.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\OffertaSpeciale.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\Operatore.java
@@ -29,6 +30,8 @@ C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\s
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\Prenotazione.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\PrenotazioneObserver.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\ProfiloView.java
+C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\Recensione.java
+C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\RecensioneObserver.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\RicaricaObserver.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\RicaricaView.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\main\java\it\traveleasy\SharedView.java

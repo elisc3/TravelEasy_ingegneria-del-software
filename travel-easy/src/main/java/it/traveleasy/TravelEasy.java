@@ -28,7 +28,9 @@ public class TravelEasy {
     private final List<OffertaObserver> offertaObservers = new ArrayList<>();
     private final List<RicaricaObserver> ricaricaObservers = new ArrayList<>();
     private final List<PrenotazioneObserver> prenotazioneObservers = new ArrayList<>();
-    private List<Prenotazione> elencoPrenotazioni;
+    private final List<RecensioneObserver> recensioneObservers = new ArrayList<>();
+    private Map<Integer, Prenotazione> elencoPrenotazioni;
+    private Map<Integer, Recensione> elencoRecensioni;
 
     public TravelEasy(Connection conn){
         this.conn = conn;
@@ -56,7 +58,11 @@ public class TravelEasy {
 
         elencoPrenotazioni = this.recuperaPrenotazioni();
         if (elencoPrenotazioni == null)
-            elencoPrenotazioni = new ArrayList<>();
+            elencoPrenotazioni = new HashMap<>();
+
+        elencoRecensioni = this.recuperaRecensioni();
+        if (elencoRecensioni == null)
+            elencoRecensioni = new HashMap<>();
     }
 
     //* RECUPERO MAPPE
@@ -303,12 +309,12 @@ public class TravelEasy {
         }
     }
 
-    private List<Prenotazione> recuperaPrenotazioni(){
+    private Map<Integer, Prenotazione> recuperaPrenotazioni(){
         String query =
             "SELECT * FROM Prenotazioni " +
             "ORDER BY substr(DataPrenotazione, 7, 4) || '-' || substr(DataPrenotazione, 4, 2) || '-' || substr(DataPrenotazione, 1, 2) DESC";
 
-        List<Prenotazione> lista = new ArrayList<>();
+        Map<Integer, Prenotazione> mappa = new HashMap<>();
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)){
             ResultSet rs = pstmt.executeQuery();
@@ -329,11 +335,11 @@ public class TravelEasy {
 
                
                 Prenotazione newPrenotazione = new Prenotazione(id, cliente, pacchettoViaggio, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta);
-                lista.add(newPrenotazione);
+                mappa.put(id, newPrenotazione);
                 cliente.addPrenotazione(newPrenotazione);
                 
             }
-            return lista;
+            return mappa;
         } catch (SQLException e){
             System.out.println("Errore recupero offerte: "+e);
             return null;
@@ -343,11 +349,40 @@ public class TravelEasy {
     
 
     private void aggiungiPrenotazione(Prenotazione p){
-        elencoPrenotazioni.add(p);
+        elencoPrenotazioni.put(p.getId(), p);
     }
 
-    public List<Prenotazione> getPrenotazioni(){
+    public Map<Integer, Prenotazione> getPrenotazioni(){
         return this.elencoPrenotazioni;
+    }
+
+    private Map<Integer, Recensione> recuperaRecensioni(){
+        String query = "SELECT * FROM Recensione;";
+        Map<Integer, Recensione> elencoRecensioni = new HashMap<>();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()){
+                int id = rs.getInt("id");
+                String riferimento = rs.getString("Riferimento");
+                int stelle = rs.getInt("Stelle");
+                String commento = rs.getString("Commento");
+                int idCliente = rs.getInt("Cliente");
+                int idPrenotazione = rs.getInt("Prenotazione");
+                Cliente cliente = getClienteById(idCliente);
+                Prenotazione prenotazione = elencoPrenotazioni.get(idPrenotazione);
+
+                Recensione r = new Recensione(id, riferimento, stelle, commento, cliente, prenotazione);
+                elencoRecensioni.put(id, r);
+                cliente.addRecensione(r);
+            }
+            return elencoRecensioni;
+
+        } catch (SQLException e){
+            System.out.println("Errore recupera recesioni: "+e);
+            return null;
+        }
     }
 
     public List<PacchettoViaggio> ricercaPacchetti(String città, String dataAndata, String dataRitorno, float prezzoMassimo){
@@ -808,6 +843,20 @@ public class TravelEasy {
         }
     }
 
+    public void addRecensioneObserver(RecensioneObserver observer) {
+        if (observer != null && !recensioneObservers.contains(observer)) recensioneObservers.add(observer);
+    }
+
+    public void removeRecensioneObserver(RecensioneObserver observer) {
+        recensioneObservers.remove(observer);
+    }
+
+    private void notifyRecensioneCreata(Recensione recensione) {
+        for (RecensioneObserver observer : new ArrayList<>(recensioneObservers)) {
+            observer.onRecensioneCreata(recensione);
+        }
+    }
+
     
 
     public float getTotalePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori){
@@ -949,6 +998,41 @@ public class TravelEasy {
 
     public void inserisciDatiViaggiatore(List<Viaggiatore> elencoViaggiatori, Viaggiatore v){
         elencoViaggiatori.add(v);
+    }
+
+    public boolean validaDatiNuovaRecensione(String commentoAgenzia, String commentoTrasporto, String commentoAlloggio){
+        return !(commentoAgenzia.isBlank() || commentoTrasporto.isBlank() || commentoAlloggio.isBlank());
+    }
+
+    public boolean inserisciRecensione(Cliente cliente, Prenotazione prenotazione, String commento, int stelle, String riferimento){
+        String query = "INSERT INTO Recensione(Riferimento, Stelle, Commento, Cliente, Prenotazione) values (?, ?, ?, ?, ?);";
+        
+        try(PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setString(1, riferimento);
+            pstmt.setInt(2, stelle);
+            pstmt.setString(3, commento);
+            pstmt.setInt(4, cliente.getId());
+            pstmt.setInt(5, prenotazione.getId());
+
+
+            pstmt.executeUpdate();
+
+            int newId = 0;
+            try (Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery("SELECT last_insert_rowid();")) {
+                if (rs.next()) {
+                     newId = rs.getInt(1);
+                }
+            }
+            Recensione r = new Recensione(newId, riferimento, stelle, commento, cliente, prenotazione);
+            this.elencoRecensioni.put(newId, r);
+            cliente.addRecensione(r);
+            notifyRecensioneCreata(r);
+            return true;
+        } catch (SQLException e){
+            System.out.println("Errore inserimento nuova recensione: "+e);
+            return false;
+        }
     }
 
 }

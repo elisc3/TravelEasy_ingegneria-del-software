@@ -6,20 +6,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Cliente extends Utente {
     private PortafoglioVirtuale pv; 
     private CartaCredito cc;
     private TravelEasy te = null;
     private PortafoglioOre po;
-    private List<Prenotazione> elencoPrenotazioniEffettuate;
+    private Map<Integer, Prenotazione> elencoPrenotazioniEffettuate;
+    private Map<Integer, Recensione> elencoRecensioni;
 
     public Cliente(int id, String nome, String cognome, String Telefono, String ruolo, int Account, PortafoglioVirtuale pv, CartaCredito cc, PortafoglioOre po) {
         super(id, nome, cognome, Telefono, ruolo, Account);
         this.pv = pv;
         this.cc = cc;
         this.po = po;
-        this.elencoPrenotazioniEffettuate = new ArrayList<>();
+        this.elencoPrenotazioniEffettuate = new HashMap<>();
+        this.elencoRecensioni = new HashMap<>();
     }
     
     public PortafoglioVirtuale getPv() {
@@ -202,11 +206,28 @@ public class Cliente extends Utente {
 
 
     public void addPrenotazione(Prenotazione p){
-        this.elencoPrenotazioniEffettuate.add(p);
+        this.elencoPrenotazioniEffettuate.put(p.getId(), p);
     }
 
-    public List<Prenotazione> getElencoPrenotazioniEffettuate() {
+    public Map<Integer, Prenotazione> getElencoPrenotazioniEffettuate() {
         return this.elencoPrenotazioniEffettuate;
+    }
+
+    public void addRecensione(Recensione r){
+        this.elencoRecensioni.put(r.getId(), r);
+    }
+
+    public Recensione[] getRecensioneByPrenotazione(int idPrenotazione){
+        Recensione[] recensione = new Recensione[3];
+        int count = 0;
+        for (Recensione r: elencoRecensioni.values()){
+            if (r.getPrenotazione().getId() == idPrenotazione){
+                recensione[count++] = r;
+                if (count == 3)
+                    return recensione;
+            }   
+        }
+        return null;
     }
     
 }

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ class TravelEasyVisualizzaPrenotazioniOperatoreTest extends BaseTravelEasyTest {
 
     @Test
     void getPrenotazioni_allAvvio_restituiscePrenotazioniDaDatabase() {
-        List<Prenotazione> prenotazioni = te.getPrenotazioni();
+        Map<Integer, Prenotazione> prenotazioni = te.getPrenotazioni();
         assertEquals(1, prenotazioni.size());
         assertEquals("16-02-2026", prenotazioni.get(0).getDataPrenotazione());
     }
@@ -47,7 +48,7 @@ class TravelEasyVisualizzaPrenotazioniOperatoreTest extends BaseTravelEasyTest {
         boolean ok = te.registrazionePrenotazione(cliente, pacchetto, viaggiatori, 0.0f, 480.0f, 0.0f);
         assertTrue(ok);
 
-        List<Prenotazione> prenotazioni = te.getPrenotazioni();
+        Map<Integer, Prenotazione> prenotazioni = te.getPrenotazioni();
         assertEquals(2, prenotazioni.size());
         assertEquals(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-uuuu")),
             prenotazioni.get(1).getDataPrenotazione());

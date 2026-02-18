@@ -1,4 +1,4 @@
-package it.traveleasy;
+﻿package it.traveleasy;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -17,31 +17,33 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.util.List;
+import java.util.Map;
 import javax.swing.JOptionPane;
 
-public class OperatorePrenotazioniView implements PrenotazioneObserver {
+public class OperatorePrenotazioniView implements PrenotazioneObserver, RecensioneObserver {
     private final VBox root;
     private final TravelEasy te;
     private final boolean showModificaPrenotazioneButton;
     private final Connection conn;
     private VBox listContainer;
-    private List<Prenotazione> elencoPrenotazioni;
+    private Map<Integer, Prenotazione> elencoPrenotazioni;
 
-    public OperatorePrenotazioniView(List<Prenotazione> elencoPrenotazioni, TravelEasy te) {
+    public OperatorePrenotazioniView(Map<Integer, Prenotazione> elencoPrenotazioni, TravelEasy te) {
         this(elencoPrenotazioni, te, false, null);
     }
 
-    public OperatorePrenotazioniView(List<Prenotazione> elencoPrenotazioni, TravelEasy te, boolean showModificaPrenotazioneButton) {
+    public OperatorePrenotazioniView(Map<Integer, Prenotazione> elencoPrenotazioni, TravelEasy te, boolean showModificaPrenotazioneButton) {
         this(elencoPrenotazioni, te, showModificaPrenotazioneButton, null);
     }
 
-    public OperatorePrenotazioniView(List<Prenotazione> elencoPrenotazioni, TravelEasy te, boolean showModificaPrenotazioneButton, Connection conn) {
+    public OperatorePrenotazioniView(Map<Integer, Prenotazione> elencoPrenotazioni, TravelEasy te, boolean showModificaPrenotazioneButton, Connection conn) {
         this.elencoPrenotazioni = elencoPrenotazioni;
         this.te = te;
         this.showModificaPrenotazioneButton = showModificaPrenotazioneButton;
         this.conn = conn;
         if (showModificaPrenotazioneButton) {
             this.te.addPrenotazioneObserver(this);
+            this.te.addRecensioneObserver(this);
         }
         root = new VBox(12, buildHeader(), buildList());
     }
@@ -78,7 +80,7 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver {
         }
 
         listContainer.getChildren().clear();
-        for (Prenotazione p : elencoPrenotazioni) {
+        for (Prenotazione p : elencoPrenotazioni.values()) {
             PacchettoViaggio pacchetto = p.getPacchetto();
             Cliente cliente = p.getCliente();
             listContainer.getChildren().add(buildPrenotazioneCard(
@@ -126,6 +128,22 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver {
         stage.show();
     }
 
+    private void openRecensioneWindow(Prenotazione prenotazione) {
+        openRecensioneWindow(prenotazione, null, false);
+    }
+
+    private void openRecensioneWindow(Prenotazione prenotazione, Recensione[] recensione, boolean solaLettura) {
+        Stage stage = new Stage();
+        int idCliente = prenotazione.getCliente().getId();
+        ModuloRecensioniView view = new ModuloRecensioniView(te, idCliente, prenotazione, recensione, solaLettura);
+        Scene scene = new Scene(view.getRoot(), 780, 700);
+        scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
+        stage.setTitle(solaLettura ? "Travel Easy - Visualizza Recensione" : "Travel Easy - Inserisci Recensione");
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+    }
+
     private boolean almeno7GiorniDopoOggi(String data) {
         if (data == null || data.isBlank()) return false;
 
@@ -135,6 +153,20 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver {
         try {
             LocalDate d = LocalDate.parse(data, fmt);
             return !d.isBefore(LocalDate.now().plusDays(7));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean prenotazioneConclusa(String dataRitorno) {
+        if (dataRitorno == null || dataRitorno.isBlank()) return false;
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-uuuu")
+                .withResolverStyle(ResolverStyle.STRICT);
+
+        try {
+            LocalDate d = LocalDate.parse(dataRitorno, fmt);
+            return !d.isAfter(LocalDate.now());
         } catch (Exception e) {
             return false;
         }
@@ -179,7 +211,24 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver {
             String dataPartenza = pacchetto.getDataPartenza();
             editButton.setDisable(!almeno7GiorniDopoOggi(dataPartenza));
             editButton.setOnAction(e -> openModificaPrenotazioneWindow(prenotazione));
+
+            Button reviewButton = new Button("Inserisci Recensione");
+            reviewButton.getStyleClass().add("secondary-button");
+            reviewButton.setPrefWidth(180);
+            Recensione[] recensione = prenotazione.getCliente().getRecensioneByPrenotazione(prenotazione.getId());
+            // = 
+            boolean conclusa = prenotazioneConclusa(prenotazione.getPacchetto().getDataRitorno());
+            if (!conclusa) {
+                reviewButton.setDisable(true);
+            } else if (recensione != null) {
+                reviewButton.setText("Visualizza Recensione");
+                reviewButton.setOnAction(e -> openRecensioneWindow(prenotazione, recensione, true));
+            } else {
+                reviewButton.setOnAction(e -> openRecensioneWindow(prenotazione));
+            }
+
             actions.getChildren().add(editButton);
+            actions.getChildren().add(reviewButton);
         } else {
             Button checkInButton = new Button("Effettua check-in");
             checkInButton.getStyleClass().add("secondary-button");
@@ -208,15 +257,26 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver {
         if (!showModificaPrenotazioneButton || prenotazione == null) {
             return;
         }
-        if (!elencoPrenotazioni.contains(prenotazione)) {
+        if (!elencoPrenotazioni.containsKey(prenotazione.getId())) {
             return;
         }
+
         Platform.runLater(this::refreshPrenotazioniList);
     }
 
     public void dispose() {
         if (showModificaPrenotazioneButton) {
             te.removePrenotazioneObserver(this);
+            te.removeRecensioneObserver(this);
         }
+    }
+
+    @Override
+    public void onRecensioneCreata(Recensione recensione) {
+        if (!showModificaPrenotazioneButton || recensione == null) {
+            return;
+        }
+
+        Platform.runLater(this::refreshPrenotazioniList);
     }
 }
