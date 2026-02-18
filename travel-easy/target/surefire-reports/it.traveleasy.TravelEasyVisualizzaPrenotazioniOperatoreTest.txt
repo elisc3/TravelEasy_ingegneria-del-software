@@ -1,4 +1,44 @@
 -------------------------------------------------------------------------------
 Test set: it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest
 -------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.068 s -- in it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest
+Tests run: 4, Failures: 2, Errors: 2, Skipped: 0, Time elapsed: 1.659 s <<< FAILURE! -- in it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest
+it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest.getPrenotazioni_contieneElencoViaggiatoriCaricato -- Time elapsed: 0.467 s <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "it.traveleasy.Prenotazione.getElencoViaggiatori()" because "p" is null
+	at it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest.getPrenotazioni_contieneElencoViaggiatoriCaricato(TravelEasyVisualizzaPrenotazioniOperatoreTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest.getPrenotazioni_allAvvio_restituiscePrenotazioniDaDatabase -- Time elapsed: 0.381 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <1> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest.getPrenotazioni_allAvvio_restituiscePrenotazioniDaDatabase(TravelEasyVisualizzaPrenotazioniOperatoreTest.java:21)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest.getPrenotazioni_dopoNuovaPrenotazione_contieneNuovoElemento -- Time elapsed: 0.371 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest.getPrenotazioni_dopoNuovaPrenotazione_contieneNuovoElemento(TravelEasyVisualizzaPrenotazioniOperatoreTest.java:49)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest.getPrenotazioni_contieneDettagliClienteEPacchetto -- Time elapsed: 0.405 s <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "it.traveleasy.Prenotazione.getCliente()" because "p" is null
+	at it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest.getPrenotazioni_contieneDettagliClienteEPacchetto(TravelEasyVisualizzaPrenotazioniOperatoreTest.java:28)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

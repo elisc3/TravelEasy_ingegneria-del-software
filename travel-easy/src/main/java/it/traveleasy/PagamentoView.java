@@ -28,13 +28,19 @@ public class PagamentoView implements RicaricaObserver {
     private Label balanceLabel;
     private Button confirmButton;
     private float totale;
+    private float prezzoAssistenzaSpeciale;
     private boolean modificaPrenotazioneMode;
 
     public PagamentoView(TravelEasy te, int idUtente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori,Connection conn) {
+        this(te, idUtente, pacchetto, elencoViaggiatori, conn, 0.0F);
+    }
+
+    public PagamentoView(TravelEasy te, int idUtente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori,Connection conn, float prezzoAssistenzaSpeciale) {
         this.te = te;
         this.cliente = this.te.getClienteById(idUtente);
         this.elencoViaggiatori = elencoViaggiatori;
         this.pacchetto = pacchetto;
+        this.prezzoAssistenzaSpeciale = prezzoAssistenzaSpeciale;
         
         this.conn = conn;
         this.te.addRicaricaObserver(this);
@@ -44,12 +50,17 @@ public class PagamentoView implements RicaricaObserver {
     }
 
     public PagamentoView(TravelEasy te, Prenotazione prenotazione, PacchettoViaggio nuovoPacchetto, Connection conn) {
+        this(te, prenotazione, nuovoPacchetto, conn, 0.0F);
+    }
+
+    public PagamentoView(TravelEasy te, Prenotazione prenotazione, PacchettoViaggio nuovoPacchetto, Connection conn, float prezzoAssistenzaSpeciale) {
         this.te = te;
         this.cliente = prenotazione.getCliente();
         this.elencoViaggiatori = prenotazione.getElencoViaggiatori();
         this.pacchettoOriginale = prenotazione.getPacchetto();
         this.pacchetto = nuovoPacchetto;
         this.conn = conn;
+        this.prezzoAssistenzaSpeciale = prezzoAssistenzaSpeciale;
         this.modificaPrenotazioneMode = true;
         this.te.addRicaricaObserver(this);
         root = new StackPane();
@@ -80,11 +91,22 @@ public class PagamentoView implements RicaricaObserver {
         Label sectionTitle = new Label("Pagamento");
         sectionTitle.getStyleClass().add("section-title");
 
-        totale = te.getTotalePrenotazione(cliente, pacchetto, elencoViaggiatori);
-        float scontoApplicato = cliente.getPo().getSconto();
-        
+        float costoPrenotazione = te.getTotalePrenotazione(cliente, pacchetto, elencoViaggiatori);
+        float costoAssistenzaSpeciale = this.prezzoAssistenzaSpeciale;
+        if (costoAssistenzaSpeciale <= 0.0F) {
+            costoAssistenzaSpeciale = calcolaPrezzoAssistenzaSpeciale(elencoViaggiatori);
+        }
+        final float prezzoAssistenzaSpecialeCalcolato = costoAssistenzaSpeciale;
+        totale = costoPrenotazione + prezzoAssistenzaSpecialeCalcolato;
+        final float scontoApplicato = (cliente.getPo() != null) ? cliente.getPo().getSconto() : 0.0F;
 
-        Label totalLabel = new Label("Totale dovuto: EUR " + totale);
+        Label bookingCostLabel = new Label(String.format(java.util.Locale.US, "Costo Prenotazione: EUR %.2f", costoPrenotazione));
+        bookingCostLabel.getStyleClass().add("package-meta");
+
+        Label assistenzaLabel = new Label(String.format(java.util.Locale.US, "Prezzo Assistenza Speciale: EUR %.2f", prezzoAssistenzaSpecialeCalcolato));
+        assistenzaLabel.getStyleClass().add("package-meta");
+
+        Label totalLabel = new Label(String.format(java.util.Locale.US, "Totale dovuto: EUR %.2f", totale));
         totalLabel.getStyleClass().add("package-price");
 
         double saldoPortafoglio = cliente.getPv().getSaldo();
@@ -129,7 +151,7 @@ public class PagamentoView implements RicaricaObserver {
             else
                 percentualeOfferta = o.getScontoPercentuale();
             
-            if(!te.registrazionePrenotazione(cliente, pacchetto, elencoViaggiatori, scontoApplicato, totale, percentualeOfferta)){
+            if(!te.registrazionePrenotazione(cliente, pacchetto, elencoViaggiatori, scontoApplicato, totale, percentualeOfferta, prezzoAssistenzaSpecialeCalcolato)){
                 JOptionPane.showMessageDialog(null, "La registrazione della prenotazione non è andata a buon fine, stiamo effetuando il rimborso.", "ERRORE", 0);
                 if (!cliente.rimborsoOnPortafoglioDB(conn, totale)){
                     JOptionPane.showMessageDialog(null, "Rimborso fallito. Contattare l'assistenza.", "ERRORE", 0);
@@ -149,7 +171,7 @@ public class PagamentoView implements RicaricaObserver {
             openRechargeWindow();
         });
 
-        VBox content = new VBox(16, sectionTitle, totalLabel, balanceLabel, fidelityBox, confirmButton, rechargeButton);
+        VBox content = new VBox(16, sectionTitle, bookingCostLabel, assistenzaLabel, totalLabel, balanceLabel, fidelityBox, confirmButton, rechargeButton);
         content.setAlignment(Pos.CENTER_LEFT);
         return content;
     }
@@ -229,6 +251,23 @@ public class PagamentoView implements RicaricaObserver {
         stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
+    }
+
+    private float calcolaPrezzoAssistenzaSpeciale(List<Viaggiatore> viaggiatori) {
+        if (viaggiatori == null) {
+            return 0.0F;
+        }
+
+        float totaleAssistenza = 0.0F;
+        for (Viaggiatore v : viaggiatori) {
+            if (v.isSediaRotelle()) {
+                totaleAssistenza += 35.0F;
+            }
+            if (v.isCecita()) {
+                totaleAssistenza += 25.0F;
+            }
+        }
+        return totaleAssistenza;
     }
 
     @Override

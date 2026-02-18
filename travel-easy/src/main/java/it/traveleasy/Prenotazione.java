@@ -20,13 +20,12 @@ public class Prenotazione {
     private boolean checkedIn;
     
 
-    public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta) {
-        this(0, cliente, pacchetto, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta);
+    public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta, boolean checkin) {
+        this(0, cliente, pacchetto, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta, checkin);
         this.prezzoAssistenzaSpeciale = 0;
-        this.checkedIn = false;
     }
 
-    public Prenotazione(int id, Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta) {
+    public Prenotazione(int id, Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta, boolean checkin) {
         this.id = id;
         this.cliente = cliente;
         this.pacchetto = pacchetto;
@@ -36,7 +35,7 @@ public class Prenotazione {
         this.scontoApplicato = scontoApplicato;
         this.percentualeOfferta = percentualeOfferta;
         this.prezzoAssistenzaSpeciale = 0;
-        this.checkedIn = false;
+        this.checkedIn = checkin;
     }
 
     public int getId() {
@@ -125,10 +124,13 @@ public class Prenotazione {
 
     public boolean applicaSconto(Connection conn, float scontoApplicato) {
         
-        if (scontoApplicato % 3 == 0){
+        if (scontoApplicato > 0 && scontoApplicato % 3 == 0){
             int nVolte = (int) scontoApplicato / 3;
 
             PortafoglioOre po = this.cliente.getPo();
+            if (po == null) {
+                return true;
+            }
             po.setSconto(0);
             po.setOre(po.getOre() - nVolte*10);
 

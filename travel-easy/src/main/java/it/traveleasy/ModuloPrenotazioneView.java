@@ -195,4 +195,5 @@ public class ModuloPrenotazioneView {
         stage.setScene(scene);
         stage.show();
     }
+
 }

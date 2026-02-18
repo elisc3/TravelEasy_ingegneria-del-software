@@ -1,4 +1,44 @@
 -------------------------------------------------------------------------------
 Test set: it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest
 -------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.028 s -- in it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest
+Tests run: 4, Failures: 2, Errors: 2, Skipped: 0, Time elapsed: 1.547 s <<< FAILURE! -- in it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest
+it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest.elencoPrenotazioniCliente_contienePrenotazioneConDettagliValorizzati -- Time elapsed: 0.466 s <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "it.traveleasy.Prenotazione.getPacchetto()" because "p" is null
+	at it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest.elencoPrenotazioniCliente_contienePrenotazioneConDettagliValorizzati(TravelEasyVisualizzaPrenotazioniClienteTest.java:25)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest.elencoPrenotazioniCliente_ogniPrenotazioneHaListaViaggiatori -- Time elapsed: 0.375 s <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "it.traveleasy.Prenotazione.getElencoViaggiatori()" because "p" is null
+	at it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest.elencoPrenotazioniCliente_ogniPrenotazioneHaListaViaggiatori(TravelEasyVisualizzaPrenotazioniClienteTest.java:49)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest.elencoPrenotazioniCliente_allAvvio_contienePrenotazioniEffettuate -- Time elapsed: 0.309 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <1> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest.elencoPrenotazioniCliente_allAvvio_contienePrenotazioniEffettuate(TravelEasyVisualizzaPrenotazioniClienteTest.java:18)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest.elencoPrenotazioniCliente_dopoNuovaPrenotazione_vieneAggiornato -- Time elapsed: 0.384 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at it.traveleasy.TravelEasyVisualizzaPrenotazioniClienteTest.elencoPrenotazioniCliente_dopoNuovaPrenotazione_vieneAggiornato(TravelEasyVisualizzaPrenotazioniClienteTest.java:40)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

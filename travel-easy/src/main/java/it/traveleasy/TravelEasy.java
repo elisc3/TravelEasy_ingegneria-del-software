@@ -299,8 +299,13 @@ public class TravelEasy implements AssistenzaObserver{
                 String dataNascita = rs.getString("DataNascita");
                 String tipoDocumento = rs.getString("TipoDocumento");
                 String CodiceDocumento = rs.getString("CodiceDocumento");
+                boolean sediaRotelle = rs.getInt("SediaRotelle") == 1;
+                boolean cecita = rs.getInt("Cecità") == 1;
 
-                lista.add(new Viaggiatore(nome, cognome, dataNascita, tipoDocumento, CodiceDocumento));
+                Viaggiatore viaggiatore = new Viaggiatore(nome, cognome, dataNascita, tipoDocumento, CodiceDocumento);
+                viaggiatore.setSediaRotelle(sediaRotelle);
+                viaggiatore.setCecita(cecita);
+                lista.add(viaggiatore);
             }
             return lista;
         } catch (SQLException e){
@@ -327,14 +332,17 @@ public class TravelEasy implements AssistenzaObserver{
                 float prezzoTotale = rs.getFloat("PrezzoTotale");
                 float scontoApplicato = rs.getFloat("ScontoApplicato");
                 float percentualeOfferta = rs.getFloat("OffertaSpeciale");
-                
+                int checkedInInt = rs.getInt("CheckIn");
+                float prezzoAssistenzaSpeciale = rs.getFloat("PrezzoAssistenzaSpeciale");
+                boolean checkin = checkedInInt == 1;
                 
                 List<Viaggiatore> elencoViaggiatori = this.recuperaViaggiatoriByPrenotazione(id);
                 PacchettoViaggio pacchettoViaggio = elencoPacchetti.get(idPacchetto);
                 Cliente cliente = this.getClienteById(idCliente);
 
                
-                Prenotazione newPrenotazione = new Prenotazione(id, cliente, pacchettoViaggio, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta);
+                Prenotazione newPrenotazione = new Prenotazione(id, cliente, pacchettoViaggio, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta, checkin);
+                newPrenotazione.setPrezzoAssistenzaSpeciale(prezzoAssistenzaSpeciale);
                 mappa.put(id, newPrenotazione);
                 cliente.addPrenotazione(newPrenotazione);
                 
@@ -875,7 +883,10 @@ public class TravelEasy implements AssistenzaObserver{
         else
             prezzoVero = pacchetto.getPrezzo();
 
-        float sconto = cliente.getPo().getSconto();
+        float sconto = 0.0F;
+        if (cliente != null && cliente.getPo() != null) {
+            sconto = cliente.getPo().getSconto();
+        }
         float totaleSenzaSconto = prezzoVero*elencoViaggiatori.size();
         
 
@@ -892,7 +903,7 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     private boolean insertViaggiatoriDB(int idPrenotazione, Viaggiatore v){
-        String query = "INSERT INTO Viaggiatore (Nome, Cognome, DataNascita, TipoDocumento, CodiceDocumento, Prenotazione) values (?, ?, ?, ?, ?, ?);";
+        String query = "INSERT INTO Viaggiatore (Nome, Cognome, DataNascita, TipoDocumento, CodiceDocumento, Prenotazione, SediaRotelle, \"Cecità\") values (?, ?, ?, ?, ?, ?, ?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, v.getNome());
             pstmt.setString(2, v.getCognome());
@@ -900,6 +911,8 @@ public class TravelEasy implements AssistenzaObserver{
             pstmt.setString(4, v.getTipoDocumento());
             pstmt.setString(5, v.getCodiceDocumento());
             pstmt.setInt(6, idPrenotazione);
+            pstmt.setInt(7, v.isSediaRotelle() ? 1 : 0);
+            pstmt.setInt(8, v.isCecita() ? 1 : 0);
             pstmt.executeUpdate();
 
             return true;
@@ -911,7 +924,11 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     public boolean registrazionePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori, float scontoApplicato, float totaleAggiornato, float offertaApplicata){
-        String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale) values (?, ?, ?, ?, ?, ?);";
+        return registrazionePrenotazione(cliente, pacchetto, elencoViaggiatori, scontoApplicato, totaleAggiornato, offertaApplicata, 0.0F);
+    }
+
+    public boolean registrazionePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori, float scontoApplicato, float totaleAggiornato, float offertaApplicata, float prezzoAssistenzaSpeciale){
+        String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale, PrezzoAssistenzaSpeciale, CheckIn) values (?, ?, ?, ?, ?, ?, ?, ?);";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -922,6 +939,8 @@ public class TravelEasy implements AssistenzaObserver{
             pstmt.setFloat(4, totaleAggiornato);
             pstmt.setFloat(5, scontoApplicato);
             pstmt.setFloat(6, offertaApplicata);
+            pstmt.setFloat(7, prezzoAssistenzaSpeciale);
+            pstmt.setInt(8, 0);
             pstmt.executeUpdate();
 
             int newId = 0;
@@ -937,7 +956,8 @@ public class TravelEasy implements AssistenzaObserver{
                     return false;
             }
             
-            Prenotazione p = new Prenotazione(newId, cliente, pacchetto, dataPrenotazione, elencoViaggiatori, totaleAggiornato, scontoApplicato, offertaApplicata);
+            Prenotazione p = new Prenotazione(newId, cliente, pacchetto, dataPrenotazione, elencoViaggiatori, totaleAggiornato, scontoApplicato, offertaApplicata, false);
+            p.setPrezzoAssistenzaSpeciale(prezzoAssistenzaSpeciale);
             if (!p.applicaSconto(conn, scontoApplicato))
                 return false;
             if (!p.aggiornaOreViaggio(conn))
@@ -1068,7 +1088,7 @@ public class TravelEasy implements AssistenzaObserver{
 
             Recensione r = new Recensione(newId, riferimento, stelle, commento, dataRecensione, cliente, prenotazione);
             this.elencoRecensioni.put(newId, r);
-            cliente.addRecensione(r);
+            cliente.addRecensione(r); 
             notifyRecensioneCreata(r);
             return true;
         } catch (SQLException e){
@@ -1096,7 +1116,6 @@ public class TravelEasy implements AssistenzaObserver{
     public int getNTotaleRecensioni(){
         return this.elencoRecensioni.size()/3;
     }
-
     //*ASSISTENZA SPECIALE
     @Override public void onAssistenzaChanged(Prenotazione prenotazione, Viaggiatore viaggiatore, String tipoAssistenza, boolean valore) { 
         prenotazione.aggiornaAssistenza(viaggiatore, tipoAssistenza, valore); 

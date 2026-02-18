@@ -3,6 +3,7 @@ package it.traveleasy;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
+import java.sql.Connection;
 
 public class Viaggiatore {
     private String nome;
@@ -58,6 +59,10 @@ public class Viaggiatore {
 
     public void setCecita(boolean cecita) { 
         this.cecita = cecita; 
+    }
+
+    public void setCecitaDB(Connection conn, boolean cecita){
+        String query = "UPDATE Viaggiatore SET Cecità = ?;";
     }
 
     public int validazioneDatiPrenotazione(Viaggiatore v){

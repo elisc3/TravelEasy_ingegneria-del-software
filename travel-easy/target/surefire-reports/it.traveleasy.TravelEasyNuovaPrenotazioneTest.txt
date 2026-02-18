@@ -1,4 +1,56 @@
 -------------------------------------------------------------------------------
 Test set: it.traveleasy.TravelEasyNuovaPrenotazioneTest
 -------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.267 s -- in it.traveleasy.TravelEasyNuovaPrenotazioneTest
+Tests run: 4, Failures: 4, Errors: 0, Skipped: 0, Time elapsed: 1.657 s <<< FAILURE! -- in it.traveleasy.TravelEasyNuovaPrenotazioneTest
+it.traveleasy.TravelEasyNuovaPrenotazioneTest.registrazionePrenotazione_impostaDataPrenotazioneOdierna -- Time elapsed: 0.449 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at it.traveleasy.TravelEasyNuovaPrenotazioneTest.registrazionePrenotazione_impostaDataPrenotazioneOdierna(TravelEasyNuovaPrenotazioneTest.java:91)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+it.traveleasy.TravelEasyNuovaPrenotazioneTest.registrazionePrenotazione_conDatiValidi_inseriscePrenotazioneEViaggiatori -- Time elapsed: 0.453 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at it.traveleasy.TravelEasyNuovaPrenotazioneTest.registrazionePrenotazione_conDatiValidi_inseriscePrenotazioneEViaggiatori(TravelEasyNuovaPrenotazioneTest.java:35)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+it.traveleasy.TravelEasyNuovaPrenotazioneTest.registrazionePrenotazione_conOffertaAttiva_diminuisceDisponibilita -- Time elapsed: 0.349 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at it.traveleasy.TravelEasyNuovaPrenotazioneTest.registrazionePrenotazione_conOffertaAttiva_diminuisceDisponibilita(TravelEasyNuovaPrenotazioneTest.java:77)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+it.traveleasy.TravelEasyNuovaPrenotazioneTest.registrazionePrenotazione_conScontoFedelta_aggiornaPortafoglioOre -- Time elapsed: 0.386 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at it.traveleasy.TravelEasyNuovaPrenotazioneTest.registrazionePrenotazione_conScontoFedelta_aggiornaPortafoglioOre(TravelEasyNuovaPrenotazioneTest.java:51)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

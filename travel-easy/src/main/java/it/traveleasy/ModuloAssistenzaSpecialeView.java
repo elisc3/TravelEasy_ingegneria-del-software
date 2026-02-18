@@ -13,6 +13,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import java.util.List;
 
 public class ModuloAssistenzaSpecialeView {
 
@@ -21,12 +22,30 @@ public class ModuloAssistenzaSpecialeView {
     private final TravelEasy te;
     private final Prenotazione prenotazione;
     private final AssistenzaObserver observer;
+    private final List<Viaggiatore> viaggiatori;
+    private final DialogCloseHandler closeHandler;
+
+    public interface DialogCloseHandler {
+        void onConferma(List<Viaggiatore> viaggiatori);
+    }
 
     public ModuloAssistenzaSpecialeView(Connection conn, TravelEasy te, Prenotazione prenotazione, AssistenzaObserver observer) {
         this.conn = conn;
         this.te = te;
         this.prenotazione = prenotazione;
         this.observer = observer;
+        this.viaggiatori = prenotazione != null ? prenotazione.getElencoViaggiatori() : null;
+        this.closeHandler = null;
+        this.root = build();
+    }
+
+    public ModuloAssistenzaSpecialeView(List<Viaggiatore> viaggiatori, DialogCloseHandler closeHandler) {
+        this.conn = null;
+        this.te = null;
+        this.prenotazione = null;
+        this.observer = null;
+        this.viaggiatori = viaggiatori;
+        this.closeHandler = closeHandler;
         this.root = build();
     }
 
@@ -49,8 +68,10 @@ public class ModuloAssistenzaSpecialeView {
         list.getStyleClass().add("package-list");
 
         // Costruzione card per ogni viaggiatore
-        for (Viaggiatore v : prenotazione.getElencoViaggiatori()) {
-            list.getChildren().add(buildViaggiatoreCard(v));
+        if (viaggiatori != null) {
+            for (Viaggiatore v : viaggiatori) {
+                list.getChildren().add(buildViaggiatoreCard(v));
+            }
         }
 
         ScrollPane scrollPane = new ScrollPane(list);
@@ -62,8 +83,12 @@ public class ModuloAssistenzaSpecialeView {
         Button confirmButton = new Button("Conferma");
         confirmButton.getStyleClass().add("primary-button");
         confirmButton.setOnAction(e -> {
-            te.confermaAssistenzaSpeciale(prenotazione);
-            openPagamentoView();
+            if (te != null && prenotazione != null) {
+                te.confermaAssistenzaSpeciale(prenotazione);
+                openPagamentoView(prenotazione.getPrezzoAssistenzaSpeciale());
+            } else if (closeHandler != null) {
+                closeHandler.onConferma(viaggiatori);
+            }
         });
 
         content.getChildren().addAll(title, subtitle, scrollPane, confirmButton);
@@ -80,7 +105,11 @@ public class ModuloAssistenzaSpecialeView {
         sediaCheck.setSelected(v.isSediaRotelle());
 
         sediaCheck.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            observer.onAssistenzaChanged(prenotazione, v, "sediaRotelle", newVal);
+            if (observer != null && prenotazione != null) {
+                observer.onAssistenzaChanged(prenotazione, v, "sediaRotelle", newVal);
+            } else {
+                v.setSediaRotelle(newVal);
+            }
         });
 
         Label sediaPrice = new Label("EUR 35.00");
@@ -98,7 +127,11 @@ public class ModuloAssistenzaSpecialeView {
         cecitaCheck.setSelected(v.isCecita());
 
         cecitaCheck.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            observer.onAssistenzaChanged(prenotazione, v, "cecita", newVal);
+            if (observer != null && prenotazione != null) {
+                observer.onAssistenzaChanged(prenotazione, v, "cecita", newVal);
+            } else {
+                v.setCecita(newVal);
+            }
         });
 
         Label cecitaPrice = new Label("EUR 25.00");
@@ -118,21 +151,21 @@ public class ModuloAssistenzaSpecialeView {
         return card;
     }
 
-    private void openPagamentoView() {
-    Stage currentStage = (Stage) root.getScene().getWindow();
-    currentStage.close();
+    private void openPagamentoView(float prezzoAssistenzaSpeciale) {
+        Stage currentStage = (Stage) root.getScene().getWindow();
+        currentStage.close();
 
-    Stage stage = new Stage();
+        Stage stage = new Stage();
 
-    PagamentoView pagamentoView = new PagamentoView(te, prenotazione, prenotazione.getPacchetto(), this.conn);
+        PagamentoView pagamentoView = new PagamentoView(te, prenotazione, prenotazione.getPacchetto(), this.conn, prezzoAssistenzaSpeciale);
 
-    Scene scene = new Scene(pagamentoView.getRoot(), 740, 600);
-    scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
+        Scene scene = new Scene(pagamentoView.getRoot(), 740, 600);
+        scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
 
-    stage.setTitle("Travel Easy - Pagamento");
-    stage.setResizable(false);
-    stage.setScene(scene);
-    stage.show();
-}
+        stage.setTitle("Travel Easy - Pagamento");
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+    }
 
 }
