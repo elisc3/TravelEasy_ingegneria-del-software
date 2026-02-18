@@ -1125,6 +1125,101 @@ public class TravelEasy implements AssistenzaObserver{
         prenotazione.calcolaPrezzoAssistenzaSpeciale();
     }
 
+    private float calcolaRimborsoEliminazione(Prenotazione prenotazione) {
+        if (prenotazione == null || prenotazione.getPacchetto() == null) {
+            return -1.0F;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+        LocalDate dataPartenza = LocalDate.parse(prenotazione.getPacchetto().getDataPartenza(), formatter);
+        LocalDate oggi = LocalDate.now();
+        long giorniAllaPartenza = java.time.temporal.ChronoUnit.DAYS.between(oggi, dataPartenza);
+
+        if (giorniAllaPartenza < 2) {
+            return -1.0F;
+        }
+
+        float prezzoPrenotazione = prenotazione.getPrezzoTotale();
+        if (giorniAllaPartenza >= 7) {
+            return prezzoPrenotazione;
+        }
+        return prezzoPrenotazione * 0.5F;
+    }
+
+    public float getRimborsoEliminazionePrenotazione(Prenotazione prenotazione) {
+        return calcolaRimborsoEliminazione(prenotazione);
+    }
+
+    private boolean eliminaPrenotazioneDB(int idPrenotazione) {
+        String deleteRecensioni = "DELETE FROM Recensione WHERE Prenotazione = ?;";
+        String deleteViaggiatori = "DELETE FROM Viaggiatore WHERE Prenotazione = ?;";
+        String deletePrenotazione = "DELETE FROM Prenotazioni WHERE id = ?;";
+
+        try (PreparedStatement pstmtRecensioni = conn.prepareStatement(deleteRecensioni);
+             PreparedStatement pstmtViaggiatori = conn.prepareStatement(deleteViaggiatori);
+             PreparedStatement pstmtPrenotazione = conn.prepareStatement(deletePrenotazione)) {
+
+            pstmtRecensioni.setInt(1, idPrenotazione);
+            pstmtRecensioni.executeUpdate();
+
+            pstmtViaggiatori.setInt(1, idPrenotazione);
+            pstmtViaggiatori.executeUpdate();
+
+            pstmtPrenotazione.setInt(1, idPrenotazione);
+            int rows = pstmtPrenotazione.executeUpdate();
+            return rows == 1;
+        } catch (SQLException e) {
+            System.out.println("Errore eliminaPrenotazioneDB: " + e);
+            return false;
+        }
+    }
+
+    private boolean aggiornaOreEliminazione(Cliente cliente, PacchettoViaggio pacchetto) {
+        if (cliente == null || pacchetto == null || cliente.getPo() == null) {
+            return true;
+        }
+
+        PortafoglioOre po = cliente.getPo();
+        float oreAggiornate = po.getOre() - pacchetto.getOreViaggio();
+        if (oreAggiornate < 0.0F) {
+            oreAggiornate = 0.0F;
+        }
+        po.setOre(oreAggiornate);
+        po.aggiornaSconto();
+        return po.applicaScontoDB(conn);
+    }
+
+    public int eliminaPrenotazione(Prenotazione prenotazione) {
+        if (prenotazione == null || prenotazione.getCliente() == null) {
+            return -2;
+        }
+
+        float rimborso = calcolaRimborsoEliminazione(prenotazione);
+        if (rimborso < 0.0F) {
+            return -3;
+        }
+
+        Cliente cliente = prenotazione.getCliente();
+        if (!cliente.rimborsoOnPortafoglioDB(conn, rimborso)) {
+            return -1;
+        }
+
+        if (!aggiornaOreEliminazione(cliente, prenotazione.getPacchetto())) {
+            cliente.pagamentoOnPortafoglioDB(conn, rimborso);
+            return -2;
+        }
+
+        if (!eliminaPrenotazioneDB(prenotazione.getId())) {
+            cliente.pagamentoOnPortafoglioDB(conn, rimborso);
+            return -2;
+        }
+
+        elencoPrenotazioni.remove(prenotazione.getId());
+        cliente.getElencoPrenotazioniEffettuate().remove(prenotazione.getId());
+        notifyPrenotazioneModificata(prenotazione);
+        return 0;
+    }
+
     //*CHECK-IN
     public boolean effettuaCheckIn(Prenotazione p){
         if (p == null) {

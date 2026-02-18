@@ -311,6 +311,43 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
         stage.show();
     }
 
+    private void eliminaPrenotazioneCliente(Prenotazione prenotazione) {
+        float rimborso = te.getRimborsoEliminazionePrenotazione(prenotazione);
+        if (rimborso < 0.0F) {
+            JOptionPane.showMessageDialog(null, "Prenotazione non eliminabile: partenza entro 2 giorni.", "INFO", 1);
+            return;
+        }
+
+        String rimborsoFormatted = String.format(java.util.Locale.US, "%.2f", rimborso);
+        int conferma = JOptionPane.showConfirmDialog(
+            null,
+            "Confermi l'eliminazione della prenotazione?\nRimborso previsto: EUR " + rimborsoFormatted,
+            "Conferma eliminazione",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (conferma != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        int esitoEliminazione = te.eliminaPrenotazione(prenotazione);
+        if (esitoEliminazione == -1) {
+            JOptionPane.showMessageDialog(null, "Rimborso fallito: la prenotazione rimane valida.", "ERRORE", 0);
+            return;
+        }
+        if (esitoEliminazione == -2) {
+            JOptionPane.showMessageDialog(null, "Eliminazione prenotazione non riuscita. Riprovare.", "ERRORE", 0);
+            return;
+        }
+        if (esitoEliminazione == -3) {
+            JOptionPane.showMessageDialog(null, "Prenotazione non eliminabile: partenza entro 2 giorni.", "INFO", 1);
+            return;
+        }
+
+        JOptionPane.showMessageDialog(null, "Somma del rimborso: EUR " + rimborsoFormatted, "INFO", 1);
+        JOptionPane.showMessageDialog(null, "Rimborso confermato.", "INFO", 1);
+        refreshPrenotazioniList();
+    }
+
     private boolean almeno7GiorniDopoOggi(String data) {
         if (data == null || data.isBlank()) return false;
 
@@ -399,9 +436,15 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
             editTravelersButton.setPrefWidth(180);
             editTravelersButton.setOnAction(e -> openModificaViaggiatoriWindow(prenotazione));
 
+            Button deleteButton = new Button("Elimina Prenotazione");
+            deleteButton.getStyleClass().add("secondary-button");
+            deleteButton.setPrefWidth(180);
+            deleteButton.setOnAction(e -> eliminaPrenotazioneCliente(prenotazione));
+
             actions.getChildren().add(editButton);
             actions.getChildren().add(reviewButton);
             actions.getChildren().add(editTravelersButton);
+            actions.getChildren().add(deleteButton);
         } else {
             Button checkInButton = new Button("Effettua check-in");
             checkInButton.getStyleClass().add("secondary-button");
