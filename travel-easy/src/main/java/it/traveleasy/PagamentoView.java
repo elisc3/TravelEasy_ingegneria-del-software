@@ -197,8 +197,11 @@ public class PagamentoView implements RicaricaObserver {
         confirmButton = new Button("Conferma pagamento");
         confirmButton.getStyleClass().add("primary-button");
         float difference = totale - totaleOriginale;
-        if (difference > 0 && totale > saldoPortafoglio) {
-            confirmButton.setDisable(true);
+        if (difference > 0) {
+            if ( totale > saldoPortafoglio)
+                confirmButton.setDisable(false);
+            else
+                confirmButton.setDisable(true);
         } else {
             confirmButton.setDisable(false);
         }
@@ -222,6 +225,8 @@ public class PagamentoView implements RicaricaObserver {
                 JOptionPane.showMessageDialog(null, "La modifica della prenotazione non è andata a buon fine. Prego riprovare.", "ERRORE", 0);
                 return;   
             }
+
+            JOptionPane.showMessageDialog(null, "Modifica prenotazione effettuata!", "INFO", 1);
          });
 
         Button rechargeButton = new Button("Nuova ricarica portafoglio");

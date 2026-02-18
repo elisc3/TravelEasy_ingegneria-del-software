@@ -149,6 +149,10 @@ public class Prenotazione {
         return this.elencoViaggiatori;
     }
 
+    public void setElencoViaggiatori (List<Viaggiatore> elencoViaggiatori){
+        this.elencoViaggiatori = elencoViaggiatori;
+    }
+
     public void aggiornaAssistenza(Viaggiatore v, String tipoAssistenza, boolean valore) {
         switch (tipoAssistenza) {
             case "sediaRotelle":

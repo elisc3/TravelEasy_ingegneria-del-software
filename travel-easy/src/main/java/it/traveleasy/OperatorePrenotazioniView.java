@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -13,8 +15,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -128,6 +133,168 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
         stage.show();
     }
 
+    private void openModificaViaggiatoriWindow(Prenotazione prenotazione) {
+        VBox content = new VBox(12);
+        content.setPadding(new Insets(16));
+        content.getStyleClass().add("booking-content");
+
+        Label title = new Label("Modifica viaggiatori");
+        title.getStyleClass().add("section-title");
+
+        VBox formList = new VBox(12);
+        formList.getStyleClass().add("package-list");
+        List<TextField> nomeFields = new ArrayList<>();
+        List<TextField> cognomeFields = new ArrayList<>();
+        List<TextField> dataNascitaFields = new ArrayList<>();
+        List<ComboBox<String>> tipoDocumentoFields = new ArrayList<>();
+        List<TextField> codiceDocumentoFields = new ArrayList<>();
+        List<CheckBox> sediaRotelleChecks = new ArrayList<>();
+        List<CheckBox> cecitaChecks = new ArrayList<>();
+
+        int idx = 1;
+        for (Viaggiatore v : prenotazione.getElencoViaggiatori()) {
+            VBox card = new VBox(8);
+            card.getStyleClass().add("package-card");
+            card.setPadding(new Insets(12));
+
+            Label travelerTitle = new Label("Viaggiatore " + idx);
+            travelerTitle.getStyleClass().add("package-title");
+
+            TextField nomeField = new TextField(v.getNome());
+            nomeField.setPromptText("Nome");
+            nomeField.getStyleClass().add("input");
+
+            TextField cognomeField = new TextField(v.getCognome());
+            cognomeField.setPromptText("Cognome");
+            cognomeField.getStyleClass().add("input");
+
+            TextField dataNascitaField = new TextField(v.getDataNascita());
+            dataNascitaField.setPromptText("Data di nascita (dd-MM-uuuu)");
+            dataNascitaField.getStyleClass().add("input");
+
+            ComboBox<String> tipoDocumentoField = new ComboBox<>();
+            tipoDocumentoField.getItems().addAll("Carta d'identita", "Patente di guida", "Passaporto");
+            tipoDocumentoField.setPromptText("Tipo di documento");
+            tipoDocumentoField.getStyleClass().add("input");
+            String tipoDoc = v.getTipoDocumento();
+            if (tipoDoc != null && !tipoDoc.isBlank()) {
+                if (!tipoDocumentoField.getItems().contains(tipoDoc)) {
+                    tipoDocumentoField.getItems().add(tipoDoc);
+                }
+                tipoDocumentoField.setValue(tipoDoc);
+            }
+
+            TextField codiceDocumentoField = new TextField(v.getCodiceDocumento());
+            codiceDocumentoField.setPromptText("Codice documento");
+            codiceDocumentoField.getStyleClass().add("input");
+
+            CheckBox sediaRotelleCheck = new CheckBox();
+            sediaRotelleCheck.setSelected(v.isSediaRotelle());
+            Label sediaRotelleLabel = new Label("Sedia rotelle");
+            HBox sediaRotelleRow = new HBox(8, sediaRotelleCheck, sediaRotelleLabel);
+            sediaRotelleRow.setAlignment(Pos.CENTER_LEFT);
+
+            CheckBox cecitaCheck = new CheckBox();
+            cecitaCheck.setSelected(v.isCecita());
+            Label cecitaLabel = new Label("Cecita");
+            HBox cecitaRow = new HBox(8, cecitaCheck, cecitaLabel);
+            cecitaRow.setAlignment(Pos.CENTER_LEFT);
+
+            nomeFields.add(nomeField);
+            cognomeFields.add(cognomeField);
+            dataNascitaFields.add(dataNascitaField);
+            tipoDocumentoFields.add(tipoDocumentoField);
+            codiceDocumentoFields.add(codiceDocumentoField);
+            sediaRotelleChecks.add(sediaRotelleCheck);
+            cecitaChecks.add(cecitaCheck);
+
+            card.getChildren().addAll(
+                travelerTitle,
+                nomeField,
+                cognomeField,
+                dataNascitaField,
+                tipoDocumentoField,
+                codiceDocumentoField,
+                sediaRotelleRow,
+                cecitaRow
+            );
+
+            formList.getChildren().add(card);
+            idx++;
+        }
+
+        ScrollPane scrollPane = new ScrollPane(formList);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.getStyleClass().add("package-scroll");
+
+        Button confermaButton = new Button("Conferma");
+        confermaButton.getStyleClass().add("primary-button");
+        confermaButton.setOnAction(e -> {
+            List<Viaggiatore> nuoviViaggiatori = new ArrayList<>();
+
+            for (int i = 0; i < nomeFields.size(); i++) {
+                Viaggiatore nuovo = new Viaggiatore(
+                    nomeFields.get(i).getText(),
+                    cognomeFields.get(i).getText(),
+                    dataNascitaFields.get(i).getText(),
+                    tipoDocumentoFields.get(i).getValue(),
+                    codiceDocumentoFields.get(i).getText()
+                );
+                nuovo.setSediaRotelle(sediaRotelleChecks.get(i).isSelected());
+                nuovo.setCecita(cecitaChecks.get(i).isSelected());
+                nuoviViaggiatori.add(nuovo);
+            }
+
+            for (int i = 0; i < nuoviViaggiatori.size(); i++) {
+                Viaggiatore v = nuoviViaggiatori.get(i);
+                int pos = i + 1;
+                int esitoValidazioneDati;
+
+                try {
+                    esitoValidazioneDati = v.validazioneDatiPrenotazione(v);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Data inserita non valida in persona " + pos + ".", "ERRORE", 0);
+                    return;
+                }
+
+                if (esitoValidazioneDati == -1) {
+                    JOptionPane.showMessageDialog(null, "Hai dimenticato qualche campo in persona " + pos + ".", "ATTENZIONE", 2);
+                    return;
+                } else if (esitoValidazioneDati == -2) {
+                    JOptionPane.showMessageDialog(null, "Data inserita non valida in persona " + pos + ".", "ERRORE", 0);
+                    return;
+                } else if (esitoValidazioneDati == -3) {
+                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona " + pos + ".", "ERRORE", 0);
+                    return;
+                } else if (esitoValidazioneDati == -4) {
+                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona " + pos + ".", "ERRORE", 0);
+                    return;
+                } else if (esitoValidazioneDati == -5) {
+                    JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona " + pos + ".", "ERRORE", 0);
+                    return;
+                }
+            }
+
+            if(te.modificaViaggiatori(prenotazione, nuoviViaggiatori))
+                JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori effettuata!", "INFO", 1);
+            else
+                JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori fallita. Riprovare", "ERRORE", 0);
+            
+        });
+
+        content.getChildren().addAll(title, scrollPane, confermaButton);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(content, 720, 620);
+        scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
+        stage.setTitle("Travel Easy - Modifica Viaggiatori");
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+    }
+
     private void openRecensioneWindow(Prenotazione prenotazione) {
         openRecensioneWindow(prenotazione, null, false);
     }
@@ -227,8 +394,14 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
                 reviewButton.setOnAction(e -> openRecensioneWindow(prenotazione));
             }
 
+            Button editTravelersButton = new Button("Modifica Viaggiatori");
+            editTravelersButton.getStyleClass().add("secondary-button");
+            editTravelersButton.setPrefWidth(180);
+            editTravelersButton.setOnAction(e -> openModificaViaggiatoriWindow(prenotazione));
+
             actions.getChildren().add(editButton);
             actions.getChildren().add(reviewButton);
+            actions.getChildren().add(editTravelersButton);
         } else {
             Button checkInButton = new Button("Effettua check-in");
             checkInButton.getStyleClass().add("secondary-button");

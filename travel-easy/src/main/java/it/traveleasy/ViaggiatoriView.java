@@ -57,13 +57,20 @@ public class ViaggiatoriView {
         Label title = new Label("Viaggiatore " + index);
         title.getStyleClass().add("package-title");
 
-        VBox info = new VBox(8,
+        VBox info = new VBox(8);
+        info.getChildren().addAll(
             buildRow("Nome", viaggiatore.getNome()),
             buildRow("Cognome", viaggiatore.getCognome()),
             buildRow("Data di nascita", viaggiatore.getDataNascita()),
             buildRow("Tipo di documento", viaggiatore.getTipoDocumento()),
             buildRow("Codice documento", viaggiatore.getCodiceDocumento())
         );
+        if (viaggiatore.isSediaRotelle()) {
+            info.getChildren().add(buildRow("Sedia a rotelle", "Si"));
+        }
+        if (viaggiatore.isCecita()) {
+            info.getChildren().add(buildRow("Cecita", "Si"));
+        }
         info.getStyleClass().add("package-card");
         info.setPadding(new Insets(16, 20, 16, 20));
 
