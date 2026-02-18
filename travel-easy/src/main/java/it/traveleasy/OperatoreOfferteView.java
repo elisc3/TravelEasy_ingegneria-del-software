@@ -30,6 +30,11 @@ public class OperatoreOfferteView implements OffertaObserver  {
         javafx.application.Platform.runLater(() -> aggiornaCardOfferta(offerta));
     }
 
+    @Override
+    public void onOffertaEliminata(PacchettoViaggio pacchetto) {
+        javafx.application.Platform.runLater(() -> ripristinaCardOfferta(pacchetto));
+    }
+
 
 
     public OperatoreOfferteView(TravelEasy te) {
@@ -197,6 +202,21 @@ public class OperatoreOfferteView implements OffertaObserver  {
         btn.setDisable(true);
         priceBox.getChildren().setAll(
             buildPriceBox(p.getPrezzo(), o.getScontoPercentuale(), o.getPrezzoScontato()).getChildren()
+        );
+    }
+
+    private void ripristinaCardOfferta(PacchettoViaggio pacchetto) {
+        if (pacchetto == null) return;
+        int idPacchetto = pacchetto.getId();
+        Button btn = bottoneOffertaByPacchetto.get(idPacchetto);
+        VBox priceBox = priceBoxByPacchetto.get(idPacchetto);
+        PacchettoViaggio p = pacchettoById.get(idPacchetto);
+        if (btn == null || priceBox == null || p == null) return;
+
+        btn.setDisable(false);
+        btn.setOnAction(e -> openOffertaWindow(p));
+        priceBox.getChildren().setAll(
+            buildPriceBox(p.getPrezzo(), 0, p.getPrezzo()).getChildren()
         );
     }
 

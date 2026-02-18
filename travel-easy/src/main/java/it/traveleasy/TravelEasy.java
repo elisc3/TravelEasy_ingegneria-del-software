@@ -807,6 +807,12 @@ public class TravelEasy {
         }
     }
 
+    private void notifyOffertaEliminata(PacchettoViaggio pacchetto) {
+        for (OffertaObserver observer : new ArrayList<>(offertaObservers)) {
+            observer.onOffertaEliminata(pacchetto);
+        }
+    }
+
     public void addRicaricaObserver(RicaricaObserver observer) {
         if (observer != null && !ricaricaObservers.contains(observer)) ricaricaObservers.add(observer);
     }
@@ -942,6 +948,10 @@ public class TravelEasy {
             if (o != null){
                 if(!o.diminuisciDisponibilità(conn))
                     return false;
+                if (o.getDisponibilità() <= 0) {
+                    if (!rimuoviOffertaEsaurita(o))
+                        return false;
+                }
             }
 
             
@@ -950,6 +960,33 @@ public class TravelEasy {
             System.out.println("Errore registrazionePrenotazione: "+e);
             return false;
         }
+    }
+
+    private boolean rimuoviOffertaEsaurita(OffertaSpeciale offerta) {
+        if (offerta == null) {
+            return true;
+        }
+
+        if (!eliminaOfferteDB(offerta)) {
+            return false;
+        }
+
+        PacchettoViaggio pacchettoRimosso = null;
+        for (PacchettoViaggio p : elencoOfferte.keySet()) {
+            if (p.getId() == offerta.getPacchetto().getId()) {
+                pacchettoRimosso = p;
+                break;
+            }
+        }
+
+        if (pacchettoRimosso != null) {
+            elencoOfferte.remove(pacchettoRimosso);
+            notifyOffertaEliminata(pacchettoRimosso);
+        } else {
+            notifyOffertaEliminata(offerta.getPacchetto());
+        }
+
+        return true;
     }
 
     public boolean modificaPacchettoPrenotazione(Prenotazione prenotazione, PacchettoViaggio nuovoPacchetto) {

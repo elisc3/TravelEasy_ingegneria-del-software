@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -27,7 +28,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 
-public class HomeView {
+public class HomeView implements OffertaObserver {
     VBox content = new VBox(24);
 
     private final BorderPane root;
@@ -54,6 +55,7 @@ public class HomeView {
         root.setTop(buildHeader());
         root.setCenter(buildContent());
         BorderPane.setMargin(root.getCenter(), new Insets(24, 40, 40, 40));
+        this.te.addOffertaObserver(this);
 
         te.eliminaOfferte();
     }
@@ -292,5 +294,32 @@ public class HomeView {
 
         VBox wrapper = new VBox(12, header, scrollPane);
         return wrapper;
+    }
+
+    @Override
+    public void onOffertaCreata(OffertaSpeciale offerta) {
+        refreshPackageListIfVisible();
+    }
+
+    @Override
+    public void onOffertaEliminata(PacchettoViaggio pacchetto) {
+        refreshPackageListIfVisible();
+    }
+
+    private void refreshPackageListIfVisible() {
+        Platform.runLater(() -> {
+            if (content.getChildren().size() <= 1) {
+                return;
+            }
+            content.getChildren().remove(1);
+            VBox updated = buildPackageList();
+            if (updated != null) {
+                content.getChildren().add(updated);
+            }
+        });
+    }
+
+    public void dispose() {
+        te.removeOffertaObserver(this);
     }
 }
