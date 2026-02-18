@@ -4,10 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Cliente extends Utente {
     private PortafoglioVirtuale pv; 
@@ -216,6 +214,13 @@ public class Cliente extends Utente {
 
     public void addRecensione(Recensione r){
         this.elencoRecensioni.put(r.getId(), r);
+    }
+
+    public boolean aggiornaOreViaggio(Connection conn, float oreViaggio){
+        if (this.po == null) {
+            return false;
+        }
+        return this.po.incrementaOre(conn, oreViaggio);
     }
 
     public Recensione[] getRecensioneByPrenotazione(int idPrenotazione){

@@ -1,8 +1,6 @@
 package it.traveleasy;
-import java.util.List;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.util.List;
 
 public class Prenotazione {
     private int id;
@@ -11,12 +9,14 @@ public class Prenotazione {
     private String dataPrenotazione;
     private List<Viaggiatore> elencoViaggiatori;
     private float prezzoTotale;
+    private float prezzoAssistenzaSpeciale;
     private float scontoApplicato;
     private float percentualeOfferta;
     
 
     public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta) {
         this(0, cliente, pacchetto, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta);
+        this.prezzoAssistenzaSpeciale = 0;
     }
 
     public Prenotazione(int id, Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta) {
@@ -28,6 +28,7 @@ public class Prenotazione {
         this.prezzoTotale = prezzoTotale;
         this.scontoApplicato = scontoApplicato;
         this.percentualeOfferta = percentualeOfferta;
+        this.prezzoAssistenzaSpeciale = 0;
     }
 
     public int getId() {
@@ -92,10 +93,10 @@ public class Prenotazione {
 
 
     public boolean aggiornaOreViaggio(Connection conn){
-        if (this.cliente == null || this.cliente.getPo() == null || this.pacchetto == null) {
+        if (this.cliente == null || this.pacchetto == null) {
             return false;
         }
-        return this.cliente.getPo().incrementaOre(conn, this.pacchetto.getOreViaggio());
+        return this.cliente.aggiornaOreViaggio(conn, this.pacchetto.getOreViaggio());
     }
 
     public boolean applicaSconto(Connection conn, float scontoApplicato) {
@@ -121,4 +122,33 @@ public class Prenotazione {
     public List<Viaggiatore> getElencoViaggiatori() {
         return this.elencoViaggiatori;
     }
+
+    public void aggiornaAssistenza(Viaggiatore v, String tipoAssistenza, boolean valore) {
+        switch (tipoAssistenza) {
+            case "sediaRotelle":
+                v.setSediaRotelle(valore);
+                break;
+            case "cecita":
+                v.setCecita(valore);
+                break;
+        }
+    }
+
+    public void calcolaPrezzoAssistenzaSpeciale() {
+        float costoSediaRotelle = 35.0f; 
+        float costoCecita = 25.0f; 
+        float totaleAssistenza = 0.0f;
+
+        for (Viaggiatore v : elencoViaggiatori) {
+            if (v.isSediaRotelle()) {
+                totaleAssistenza += costoSediaRotelle;
+            }
+            if (v.isCecita()) {
+                totaleAssistenza += costoCecita;
+            }
+        }
+
+        this.prezzoAssistenzaSpeciale = totaleAssistenza;
+    }
+
 }

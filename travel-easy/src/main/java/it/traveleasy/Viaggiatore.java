@@ -10,7 +10,9 @@ public class Viaggiatore {
     private String dataNascita;
     private String tipoDocumento;
     private String codiceDocumento;
-    
+    private boolean sediaRotelle;
+    private boolean cecita;
+   
 
     public Viaggiatore(String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
         this.nome = nome;
@@ -18,6 +20,8 @@ public class Viaggiatore {
         this.dataNascita = dataNascita;
         this.tipoDocumento = tipoDocumento;
         this.codiceDocumento = codiceDocumento;
+        this.sediaRotelle = false;
+        this.cecita = false;
     }
 
     public String getNome(){
@@ -38,6 +42,22 @@ public class Viaggiatore {
 
     public String getCodiceDocumento(){
         return codiceDocumento;
+    }
+    
+    public boolean isSediaRotelle() { 
+        return sediaRotelle; 
+    }
+
+    public void setSediaRotelle(boolean sediaRotelle) { 
+        this.sediaRotelle = sediaRotelle; 
+    }
+
+    public boolean isCecita() { 
+        return cecita; 
+    }
+
+    public void setCecita(boolean cecita) { 
+        this.cecita = cecita; 
     }
 
     public int validazioneDatiPrenotazione(Viaggiatore v){

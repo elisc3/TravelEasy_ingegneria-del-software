@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 
 
-public class TravelEasy {
+public class TravelEasy implements AssistenzaObserver{
     private Map<String, Account> elencoAccount;
     private Connection conn;
     private Map<Integer, CompagniaTrasporto> elencoCompagnie;
@@ -1095,5 +1095,14 @@ public class TravelEasy {
 
     public int getNTotaleRecensioni(){
         return this.elencoRecensioni.size()/3;
+    }
+
+    //*ASSISTENZA SPECIALE
+    @Override public void onAssistenzaChanged(Prenotazione prenotazione, Viaggiatore viaggiatore, String tipoAssistenza, boolean valore) { 
+        prenotazione.aggiornaAssistenza(viaggiatore, tipoAssistenza, valore); 
+    }
+
+    public void confermaAssistenzaSpeciale(Prenotazione prenotazione){
+        prenotazione.calcolaPrezzoAssistenzaSpeciale();
     }
 }
