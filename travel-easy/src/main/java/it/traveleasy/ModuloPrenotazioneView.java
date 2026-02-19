@@ -24,14 +24,16 @@ public class ModuloPrenotazioneView {
     private final TravelEasy te;
     private final List<VBox> listaPersonCards;
     private final List<Viaggiatore> listaViaggiatori;
-
+    private PacchettoViaggio pacchetto;
     public interface DialogCloseHandler {
         void onConferma(List<Viaggiatore> viaggiatori);
+
     }
 
     public ModuloPrenotazioneView(DialogCloseHandler closeHandler, PacchettoViaggio pacchetto, TravelEasy te) {
         this.closeHandler = closeHandler;
         this.te = te;
+        this.pacchetto = pacchetto;
         this.listaViaggiatori = new ArrayList<>();
         this.listaPersonCards = new ArrayList<>();
         this.root = build();
@@ -121,7 +123,7 @@ public class ModuloPrenotazioneView {
         confirmButton.getStyleClass().add("primary-button");
         confirmButton.setOnAction(e -> {
             listaViaggiatori.clear();
-
+            int pos = 1;
             for (VBox card : listaPersonCards) {
                 DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-uuuu");
                 DatePicker birthDate = (DatePicker) card.getChildren().get(3);
@@ -135,20 +137,13 @@ public class ModuloPrenotazioneView {
                 ComboBox<String> docTypeField = (ComboBox<String>) card.getChildren().get(4);
                 TextField docField = (TextField) card.getChildren().get(5);
 
-                Viaggiatore v = new Viaggiatore(
-                    nameField.getText(),
-                    surnameField.getText(),
-                    data,
-                    docTypeField.getValue(),
-                    docField.getText()
-                );
-                te.inserisciDatiViaggiatore(listaViaggiatori, v);
-            }
-
-            for (int i = 0; i < listaViaggiatori.size(); i++) {
-                Viaggiatore v = listaViaggiatori.get(i);
-                int esitoValidazioneDati = v.validazioneDatiPrenotazione(v);
-                int pos = i + 1;
+                
+                String nome = nameField.getText();
+                String cognome = surnameField.getText();
+                String tipoDocumento = docTypeField.getValue();
+                String codiceDocumento = docField.getText();
+                
+                int esitoValidazioneDati = te.validazioneViaggiatore(nome, cognome, data, tipoDocumento, codiceDocumento);
                 if (esitoValidazioneDati == -1) {
                     JOptionPane.showMessageDialog(null, "Hai dimenticato qualche campo in persona " + pos + ".", "ATTENZIONE", 2);
                     return;
@@ -165,8 +160,39 @@ public class ModuloPrenotazioneView {
                     JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona " + pos + ".", "ERRORE", 0);
                     return;
                 }
+                pos++;
             }
 
+            int newIdPrenotazione = te.createPrenotazione(pacchetto, idUtente);
+
+            for (VBox card: listaPersonCards){
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+                DatePicker birthDate = (DatePicker) card.getChildren().get(3);
+                LocalDate d = birthDate.getValue();
+                String data = (d == null) ? "" : d.format(fmt);
+
+                TextField nameField = (TextField) card.getChildren().get(1);
+                TextField surnameField = (TextField) card.getChildren().get(2);
+
+                @SuppressWarnings("unchecked")
+                ComboBox<String> docTypeField = (ComboBox<String>) card.getChildren().get(4);
+                TextField docField = (TextField) card.getChildren().get(5);
+
+                String nome = nameField.getText();
+                String cognome = surnameField.getText();
+                String tipoDocumento = docTypeField.getValue();
+                String codiceDocumento = docField.getText();
+                
+                if (!te.createViaggiatore(newIdPrenotazione, nome, cognome, data, tipoDocumento, codiceDocumento)){
+                    JOptionPane.showMessageDialog(null, "Qualcosa è andato storto. Riprovare.", "ERRORE", 0);
+                    return;
+                }
+
+            }
+
+            listaViaggiatori = te.getViaggiatoriByPrenotazione(newIdPrenotazione);
+            if (listaViaggiatori == null)
+                return;
             openAssistenzaSpecialeWindow();
         });
 

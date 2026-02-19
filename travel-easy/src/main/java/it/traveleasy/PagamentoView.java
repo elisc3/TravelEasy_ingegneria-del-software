@@ -148,7 +148,7 @@ public class PagamentoView {
             else
                 percentualeOfferta = o.getScontoPercentuale();
             
-            if(!te.registrazionePrenotazione(cliente, pacchetto, elencoViaggiatori, scontoApplicato, totale, percentualeOfferta, prezzoAssistenzaSpecialeCalcolato)){
+            if(!te.registrazionePrenotazione(prenotazione.getId(), scontoApplicato, totale, percentualeOfferta, prezzoAssistenzaSpecialeCalcolato)){
                 JOptionPane.showMessageDialog(null, "La registrazione della prenotazione non è andata a buon fine, stiamo effetuando il rimborso.", "ERRORE", 0);
                 if (!cliente.rimborsoOnPortafoglioDB(conn, totale)){
                     JOptionPane.showMessageDialog(null, "Rimborso fallito. Contattare l'assistenza.", "ERRORE", 0);

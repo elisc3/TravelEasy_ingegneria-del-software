@@ -7,6 +7,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class Prenotazione {
     private int id;
@@ -21,9 +23,22 @@ public class Prenotazione {
     private boolean checkedIn;
     
 
-    public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta, boolean checkin) {
-        this(0, cliente, pacchetto, dataPrenotazione, elencoViaggiatori, prezzoTotale, scontoApplicato, percentualeOfferta, checkin);
+    public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, float prezzoTotale, float scontoApplicato, float percentualeOfferta, boolean checkin) {
+        this(0, cliente, pacchetto, dataPrenotazione, prezzoTotale, scontoApplicato, percentualeOfferta, checkin);
         this.prezzoAssistenzaSpeciale = 0;
+    }
+
+    public Prenotazione(int id, Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, float prezzoTotale, float scontoApplicato, float percentualeOfferta, boolean checkin) {
+        this.id = id;
+        this.cliente = cliente;
+        this.pacchetto = pacchetto;
+        this.dataPrenotazione = dataPrenotazione;
+        this.elencoViaggiatori = new ArrayList<>();
+        this.prezzoTotale = prezzoTotale;
+        this.scontoApplicato = scontoApplicato;
+        this.percentualeOfferta = percentualeOfferta;
+        this.prezzoAssistenzaSpeciale = 0;
+        this.checkedIn = checkin;
     }
 
     public Prenotazione(int id, Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta, boolean checkin) {
@@ -209,5 +224,40 @@ public class Prenotazione {
             return false;
         }
     }    
+
+    private boolean insertViaggiatoriDB(Connection conn, Viaggiatore v){
+        String query = "INSERT INTO Viaggiatore (Nome, Cognome, DataNascita, TipoDocumento, CodiceDocumento, Prenotazione, SediaRotelle, \"Cecità\") values (?, ?, ?, ?, ?, ?, ?, ?);";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, v.getNome());
+            pstmt.setString(2, v.getCognome());
+            pstmt.setString(3, v.getDataNascita());
+            pstmt.setString(4, v.getTipoDocumento());
+            pstmt.setString(5, v.getCodiceDocumento());
+            pstmt.setInt(6, id);
+            pstmt.setInt(7, v.isSediaRotelle() ? 1 : 0);
+            pstmt.setInt(8, v.isCecita() ? 1 : 0);
+            pstmt.executeUpdate();
+
+            return true;
+        } catch (SQLException e){
+            System.out.println("Errore insertViaggiatoriDB: "+e);
+            return false;
+        }
+    }
+
+    public boolean createViaggiatore(Connection conn, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
+        
+        
+        Viaggiatore v = new Viaggiatore(nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
+        if (!this.insertViaggiatoriDB(conn, v))
+            return false;
+
+        this.elencoViaggiatori.add(v);
+        return true;
+    }
+
+    public List<Viaggiatore> getViaggiatori(){
+        return Collections.unmodifiableList(elencoViaggiatori);
+    }
 
 }
