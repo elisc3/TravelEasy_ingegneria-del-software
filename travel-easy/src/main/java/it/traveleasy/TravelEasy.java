@@ -1143,22 +1143,6 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
-    //!DELEGA
-    private boolean aggiornaOreEliminazione(Cliente cliente, PacchettoViaggio pacchetto) {
-        if (cliente == null || pacchetto == null || cliente.getPo() == null) {
-            return true;
-        }
-
-        PortafoglioOre po = cliente.getPo();
-        float oreAggiornate = po.getOre() - pacchetto.getOreViaggio();
-        if (oreAggiornate < 0.0F) {
-            oreAggiornate = 0.0F;
-        }
-        po.setOre(oreAggiornate);
-        po.aggiornaSconto();
-        return po.applicaScontoDB(conn);
-    }
-
     public int eliminaPrenotazione(Prenotazione prenotazione) {
         if (prenotazione == null || prenotazione.getCliente() == null) {
             return -2;
@@ -1174,10 +1158,8 @@ public class TravelEasy implements AssistenzaObserver{
             return -1;
         }
 
-        if (!aggiornaOreEliminazione(cliente, prenotazione.getPacchetto())) {
-            cliente.pagamentoOnPortafoglioDB(conn, rimborso);
-            return -2;
-        }
+        if(!cliente.levaOreViaggio(conn, prenotazione.getPacchetto().getOreViaggio()))
+            return -1;
 
         if (!eliminaPrenotazioneDB(prenotazione.getId())) {
             cliente.pagamentoOnPortafoglioDB(conn, rimborso);

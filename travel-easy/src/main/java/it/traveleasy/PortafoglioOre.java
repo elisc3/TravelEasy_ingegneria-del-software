@@ -63,9 +63,23 @@ public class PortafoglioOre {
         if(this.ore >= 10) {
             int n = (int) (this.ore / 10);
             this.sconto = n * 3;
-            //this.ore -= n*10
+            this.ore -= n*10;
         }
 
+        return true;
+    }
+
+    public boolean decrementaOre(Connection conn, float ore) {
+        float oreSconto = this.sconto / 3 * 10;
+        this.ore += oreSconto;
+        this.ore -= ore;
+
+        aggiornaSconto();
+
+        if(!applicaScontoDB(conn)) {
+            return false;
+        }
+        
         return true;
     }
 

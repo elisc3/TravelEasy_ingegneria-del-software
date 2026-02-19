@@ -220,6 +220,13 @@ public class Cliente extends Utente {
         return this.po.incrementaOre(conn, oreViaggio);
     }
 
+    public boolean levaOreViaggio(Connection conn, float oreViaggio){
+        if (this.po == null) {
+            return false;
+        }
+        return this.po.decrementaOre(conn, oreViaggio);
+    }
+
     public Recensione[] getRecensioneByPrenotazione(int idPrenotazione){
         Recensione[] recensione = new Recensione[nRiferimentiRecensione];
         int count = 0;
