@@ -958,6 +958,7 @@ public class TravelEasy implements AssistenzaObserver{
             p.setScontoApplicato(scontoApplicato);
             p.setOffertaApplicata(offertaApplicata);
             p.setPrezzoAssistenzaSpeciale(prezzoAssistenzaSpeciale);
+
             if (!p.applicaSconto(conn, scontoApplicato))
                 return false;
             if (!p.aggiornaOreViaggio(conn))
@@ -1124,16 +1125,11 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     private boolean eliminaPrenotazioneDB(int idPrenotazione) {
-        String deleteRecensioni = "DELETE FROM Recensione WHERE Prenotazione = ?;";
         String deleteViaggiatori = "DELETE FROM Viaggiatore WHERE Prenotazione = ?;";
         String deletePrenotazione = "DELETE FROM Prenotazioni WHERE id = ?;";
 
-        try (PreparedStatement pstmtRecensioni = conn.prepareStatement(deleteRecensioni);
-             PreparedStatement pstmtViaggiatori = conn.prepareStatement(deleteViaggiatori);
+        try (PreparedStatement pstmtViaggiatori = conn.prepareStatement(deleteViaggiatori);
              PreparedStatement pstmtPrenotazione = conn.prepareStatement(deletePrenotazione)) {
-
-            pstmtRecensioni.setInt(1, idPrenotazione);
-            pstmtRecensioni.executeUpdate();
 
             pstmtViaggiatori.setInt(1, idPrenotazione);
             pstmtViaggiatori.executeUpdate();
@@ -1299,10 +1295,12 @@ public class TravelEasy implements AssistenzaObserver{
             pstmt.executeUpdate();
 
             int newId = 0;
-            try (Statement st = conn.createStatement();
-                ResultSet rs = st.executeQuery("SELECT last_insert_rowid();")) {
+            query = "SELECT last_insert_rowid();";
+
+            try (PreparedStatement pstmt2 = conn.prepareStatement(query)) {
+                ResultSet rs = pstmt2.executeQuery();
                 if (rs.next()) {
-                     newId = rs.getInt(1);
+                    newId = rs.getInt(1);
                 }
             }
 

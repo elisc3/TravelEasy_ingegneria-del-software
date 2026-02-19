@@ -106,18 +106,18 @@ public class Cliente extends Utente {
 
         this.cc = new CartaCredito("", "", "", "", idPortafoglioVirtuale, this, conn);
         
-        query = "INSERT INTO PortafoglioOre (Utente, Ore, Sconto) VALUES (?, ?, ?);";
+        query = "INSERT INTO PortafoglioOre (Ore, Sconto, proprietario) VALUES (?, ?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, this.getId());
-            pstmt.setFloat(2, 0.0F);
-            pstmt.setInt(3, 0);
+            pstmt.setFloat(1, 0.0F);
+            pstmt.setInt(2, 0);
+            pstmt.setInt(3, this.getId());
             pstmt.executeUpdate();
         } catch (SQLException e){
             System.out.println("Errore creazione Portafoglio Ore: "+e);
             return false;
         }
 
-         query = "SELECT id FROM PortafoglioOre WHERE Utente = ?;";
+         query = "SELECT id FROM PortafoglioOre WHERE proprietario = ?;";
          int idPortafoglioOre = 0;
          try (PreparedStatement pstmt = conn.prepareStatement(query)) {
              pstmt.setInt(1, this.getId());

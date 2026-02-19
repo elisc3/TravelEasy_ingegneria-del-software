@@ -199,7 +199,7 @@ public class ModuloPrenotazioneView {
             listaViaggiatori = te.getViaggiatoriByPrenotazione(newIdPrenotazione);
             if (listaViaggiatori == null)
                 return;
-            openAssistenzaSpecialeWindow(newIdPrenotazione);
+            openAssistenzaSpecialeWindow(newIdPrenotazione, listaViaggiatori);
         });
 
         ScrollPane scrollPane = new ScrollPane(peopleForm);
@@ -212,20 +212,16 @@ public class ModuloPrenotazioneView {
         return content;
     }
 
-    private void openAssistenzaSpecialeWindow(int idPrenotazione) {
-        Stage stage = new Stage();
-        ModuloAssistenzaSpecialeView view = new ModuloAssistenzaSpecialeView(listaViaggiatori, viaggiatori -> {
-            stage.close();
+    private void openAssistenzaSpecialeWindow(int idPrenotazione, List<Viaggiatore> viaggiatori) {
+        ModuloAssistenzaSpecialeView view = new ModuloAssistenzaSpecialeView(viaggiatori, assistenzaSpeciale -> {
             if (closeHandler != null) {
-                closeHandler.onConferma(idPrenotazione, viaggiatori);
+                closeHandler.onConferma(idPrenotazione, assistenzaSpeciale);
             }
         });
-        Scene scene = new Scene(view.getRoot(), 740, 600);
-        scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
-        stage.setTitle("Travel Easy - Assistenza Speciale");
-        stage.setResizable(false);
-        stage.setScene(scene);
+
+        Stage stage = new Stage();
+        stage.setTitle("Assistenza speciale");
+        stage.setScene(new Scene(view.getRoot(), 400, 500));
         stage.show();
     }
-
 }

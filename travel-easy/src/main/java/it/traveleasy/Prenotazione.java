@@ -5,10 +5,9 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter; 
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class Prenotazione {
     private int id;
@@ -148,11 +147,7 @@ public class Prenotazione {
             if (po == null) {
                 return true;
             }
-            po.setSconto(0);
-            po.setOre(po.getOre() - nVolte*10);
-
-            if (!po.applicaScontoDB(conn))
-                return false;    
+            po.setSconto(0); 
         }
 
         return true;
