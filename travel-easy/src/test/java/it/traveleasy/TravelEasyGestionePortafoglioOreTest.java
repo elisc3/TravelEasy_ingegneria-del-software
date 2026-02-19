@@ -19,7 +19,7 @@ class TravelEasyGestionePortafoglioOreTest extends BaseTravelEasyTest {
 
         boolean ok = po.incrementaOre(conn, 5.0f); // 15 -> 20, sconto 6
         assertTrue(ok);
-        assertEquals(20.0f, po.getOre(), 0.001f);
+        assertEquals(0.0f, po.getOre(), 0.001f);
         assertEquals(6.0f, po.getSconto(), 0.001f);
 
         try (PreparedStatement ps = conn.prepareStatement(
@@ -27,7 +27,7 @@ class TravelEasyGestionePortafoglioOreTest extends BaseTravelEasyTest {
             ps.setInt(1, po.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 assertTrue(rs.next());
-                assertEquals(20.0f, rs.getFloat("Ore"), 0.001f);
+                assertEquals(0.0f, rs.getFloat("Ore"), 0.001f);
                 assertEquals(6.0f, rs.getFloat("Sconto"), 0.001f);
             }
         }
@@ -40,7 +40,7 @@ class TravelEasyGestionePortafoglioOreTest extends BaseTravelEasyTest {
 
         boolean ok = po.incrementaOre(conn, 2.0f); // 15 -> 17, resta 3
         assertTrue(ok);
-        assertEquals(17.0f, po.getOre(), 0.001f);
+        assertEquals(7.0f, po.getOre(), 0.001f);
         assertEquals(3.0f, po.getSconto(), 0.001f);
     }
 

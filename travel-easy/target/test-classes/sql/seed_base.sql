@@ -36,9 +36,9 @@ VALUES
 INSERT INTO OffertaSpeciale (id, Pacchetto, ScontoPercentuale, PrezzoScontato, DataFine, "Disponibilità") VALUES
     (1, 1, 25.0, 900.0, '16-04-2026', 8);
 
-INSERT INTO Prenotazioni (id, Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale) VALUES
-    (1, 1, 1, '16-02-2026', 900.0, 3.0, 25.0);
+INSERT INTO Prenotazioni (id, Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale, PrezzoAssistenzaSpeciale, CheckIn) VALUES
+    (1, 1, 1, '16-02-2026', 900.0, 3.0, 25.0, 0.0, 0);
 
-INSERT INTO Viaggiatore (id, Nome, Cognome, DataNascita, TipoDocumento, CodiceDocumento, Prenotazione) VALUES
-    (1, 'Mario', 'Rossi', '01-01-1990', 'Passaporto', 'AA1234567', 1),
-    (2, 'Luigi', 'Verdi', '12-07-1988', 'Patente di guida', 'AB12345678', 1);
+INSERT INTO Viaggiatore (id, Nome, Cognome, DataNascita, TipoDocumento, CodiceDocumento, Prenotazione, SediaRotelle, "Cecità") VALUES
+    (1, 'Mario', 'Rossi', '01-01-1990', 'Passaporto', 'AA1234567', 1, 0, 0),
+    (2, 'Luigi', 'Verdi', '12-07-1988', 'Patente di guida', 'AB12345678', 1, 0, 0);

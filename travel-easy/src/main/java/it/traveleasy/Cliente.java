@@ -205,6 +205,10 @@ public class Cliente extends Utente {
         this.elencoPrenotazioniEffettuate.put(p.getId(), p);
     }
 
+    public void removePrenotazione(int idPrenotazione){
+        this.elencoPrenotazioniEffettuate.remove(idPrenotazione);
+    }
+
     public Map<Integer, Prenotazione> getElencoPrenotazioniEffettuate() {
         return Collections.unmodifiableMap(this.elencoPrenotazioniEffettuate);
     }

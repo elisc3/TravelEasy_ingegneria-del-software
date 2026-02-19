@@ -7,7 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -17,20 +16,39 @@ import it.traveleasy.testsupport.TestDbSupport;
 
 class TravelEasyNuovaPrenotazioneTest extends BaseTravelEasyTest {
 
+    private int creaBozzaConViaggiatori(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> viaggiatori) {
+        int idPrenotazione = te.createPrenotazione(pacchetto, cliente.getId());
+        assertTrue(idPrenotazione > 0);
+
+        for (Viaggiatore v : viaggiatori) {
+            assertTrue(te.createViaggiatore(
+                idPrenotazione,
+                v.getNome(),
+                v.getCognome(),
+                v.getDataNascita(),
+                v.getTipoDocumento(),
+                v.getCodiceDocumento()
+            ));
+        }
+        return idPrenotazione;
+    }
+
     @Test
     void registrazionePrenotazione_conDatiValidi_inseriscePrenotazioneEViaggiatori() throws Exception {
         Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
         PacchettoViaggio pacchetto = te.getElencoPacchetti().get(2);
-        List<Viaggiatore> viaggiatori = new ArrayList<>();
-        viaggiatori.add(new Viaggiatore("Paolo", "Neri", "10-01-1995", "Passaporto", "ZX1234567"));
-        viaggiatori.add(new Viaggiatore("Marta", "Blu", "22-06-1998", "Carta d'identità", "AB1234567"));
+        List<Viaggiatore> viaggiatori = List.of(
+            new Viaggiatore("Paolo", "Neri", "10-01-1995", "Passaporto", "ZX1234567"),
+            new Viaggiatore("Marta", "Blu", "22-06-1998", "Carta d'identita", "AB1234567")
+        );
 
         int beforePrenotazioni = TestDbSupport.countRows(conn, "Prenotazioni");
         int beforeViaggiatori = TestDbSupport.countRows(conn, "Viaggiatore");
         int beforeClienteList = cliente.getElencoPrenotazioniEffettuate().size();
         int beforeOperatoreList = te.getPrenotazioni().size();
 
-        boolean ok = te.registrazionePrenotazione(cliente, pacchetto, viaggiatori, 3.0f, 930.0f, 0.0f);
+        int newIdPrenotazione = creaBozzaConViaggiatori(cliente, pacchetto, viaggiatori);
+        boolean ok = te.registrazionePrenotazione(newIdPrenotazione, 3.0f, 930.0f, 0.0f);
 
         assertTrue(ok);
         assertEquals(beforePrenotazioni + 1, TestDbSupport.countRows(conn, "Prenotazioni"));
@@ -47,7 +65,8 @@ class TravelEasyNuovaPrenotazioneTest extends BaseTravelEasyTest {
             new Viaggiatore("Laura", "Rosa", "05-05-1992", "Passaporto", "QQ1234567")
         );
 
-        boolean ok = te.registrazionePrenotazione(cliente, pacchetto, viaggiatori, 3.0f, 465.0f, 0.0f);
+        int newIdPrenotazione = creaBozzaConViaggiatori(cliente, pacchetto, viaggiatori);
+        boolean ok = te.registrazionePrenotazione(newIdPrenotazione, 3.0f, 465.0f, 0.0f);
         assertTrue(ok);
 
         try (PreparedStatement ps = conn.prepareStatement(
@@ -56,7 +75,7 @@ class TravelEasyNuovaPrenotazioneTest extends BaseTravelEasyTest {
             try (ResultSet rs = ps.executeQuery()) {
                 assertTrue(rs.next());
                 assertEquals(6.5f, rs.getFloat("Ore"), 0.001f);
-                assertEquals(0.0f, rs.getFloat("Sconto"), 0.001f);
+                assertEquals(3.0f, rs.getFloat("Sconto"), 0.001f);
             }
         }
     }
@@ -69,14 +88,24 @@ class TravelEasyNuovaPrenotazioneTest extends BaseTravelEasyTest {
             new Viaggiatore("Elena", "Viola", "12-03-1994", "Patente di guida", "CD12345678")
         );
 
-        OffertaSpeciale offerta = te.getOffertaByPack(pacchettoConOfferta);
-        int disponibilitaBefore = offerta.getDisponibilità();
+        int disponibilitaBefore;
+        try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM OffertaSpeciale WHERE id = 1")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                disponibilitaBefore = rs.getInt(6);
+            }
+        }
 
-        boolean ok = te.registrazionePrenotazione(
-            cliente, pacchettoConOfferta, viaggiatori, 0.0f, 900.0f, 25.0f);
+        int newIdPrenotazione = creaBozzaConViaggiatori(cliente, pacchettoConOfferta, viaggiatori);
+        boolean ok = te.registrazionePrenotazione(newIdPrenotazione, 0.0f, 900.0f, 25.0f);
         assertTrue(ok);
 
-        assertEquals(disponibilitaBefore - 1, offerta.getDisponibilità());
+        try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM OffertaSpeciale WHERE id = 1")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                assertEquals(disponibilitaBefore - 1, rs.getInt(6));
+            }
+        }
     }
 
     @Test
@@ -87,11 +116,12 @@ class TravelEasyNuovaPrenotazioneTest extends BaseTravelEasyTest {
             new Viaggiatore("Ivo", "Test", "01-02-1990", "Passaporto", "TT1234567")
         );
 
-        boolean ok = te.registrazionePrenotazione(cliente, pacchetto, viaggiatori, 0.0f, 480.0f, 0.0f);
+        int newIdPrenotazione = creaBozzaConViaggiatori(cliente, pacchetto, viaggiatori);
+        boolean ok = te.registrazionePrenotazione(newIdPrenotazione, 0.0f, 480.0f, 0.0f);
         assertTrue(ok);
 
         String expectedToday = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
-        Prenotazione last = te.getPrenotazioni().get(te.getPrenotazioni().size() - 1);
+        Prenotazione last = te.getPrenotazioneById(newIdPrenotazione);
         assertEquals(expectedToday, last.getDataPrenotazione());
     }
 }

@@ -1290,7 +1290,7 @@ public class TravelEasy implements AssistenzaObserver{
         elencoPrenotazioni.remove(idPrenotazione);
         Cliente cliente = p.getCliente();
         if (cliente != null) {
-            cliente.getElencoPrenotazioniEffettuate().remove(idPrenotazione);
+            cliente.removePrenotazione(idPrenotazione);
         }
         notifyPrenotazioneModificata(p);
         return true;

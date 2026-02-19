@@ -98,7 +98,9 @@ CREATE TABLE Prenotazioni (
     DataPrenotazione TEXT NOT NULL,
     PrezzoTotale REAL NOT NULL DEFAULT 0.0,
     ScontoApplicato REAL NOT NULL DEFAULT 0.0,
-    OffertaSpeciale REAL NOT NULL DEFAULT 0.0
+    OffertaSpeciale REAL NOT NULL DEFAULT 0.0,
+    PrezzoAssistenzaSpeciale REAL NOT NULL DEFAULT 0.0,
+    CheckIn INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE Viaggiatore (
@@ -108,5 +110,7 @@ CREATE TABLE Viaggiatore (
     DataNascita TEXT NOT NULL,
     TipoDocumento TEXT NOT NULL,
     CodiceDocumento TEXT NOT NULL,
-    Prenotazione INTEGER NOT NULL
+    Prenotazione INTEGER NOT NULL,
+    SediaRotelle INTEGER NOT NULL DEFAULT 0,
+    "Cecità" INTEGER NOT NULL DEFAULT 0
 );
