@@ -17,12 +17,18 @@ import javax.swing.JOptionPane;
 public class RicaricaView {
     private TravelEasy te;
     private Cliente cliente;
+    private final Runnable onRicaricaCompletata;
 
     private final StackPane root;
 
     public RicaricaView(TravelEasy te, int idUtente) {
+        this(te, idUtente, null);
+    }
+
+    public RicaricaView(TravelEasy te, int idUtente, Runnable onRicaricaCompletata) {
         this.te = te;
         this.cliente = te.getClienteById(idUtente);
+        this.onRicaricaCompletata = onRicaricaCompletata;
 
 
         root = new StackPane();
@@ -125,6 +131,9 @@ public class RicaricaView {
                     if (cc.insertOnPortafoglio(idUtente, Float.parseFloat(amount.getText()))) {
                         JOptionPane.showMessageDialog(null, "Ricarica avvenuta con successo!", "INFO", 1);
                         te.ricaricaEffettuata(idUtente);
+                        if (onRicaricaCompletata != null) {
+                            onRicaricaCompletata.run();
+                        }
                     } else {
                         JOptionPane.showMessageDialog(null, "Si è verificato un problema", "ERRORE", 2);
                     }
@@ -159,6 +168,9 @@ public class RicaricaView {
                     JOptionPane.showMessageDialog(null, "Ricarica avvenuta con successo!", "INFO", 1);
                     System.out.println("Ricarica avvenuta con sucecsso");
                     te.ricaricaEffettuata(idUtente);
+                    if (onRicaricaCompletata != null) {
+                        onRicaricaCompletata.run();
+                    }
                 }
                 else{
                     JOptionPane.showMessageDialog(null, "Si è verificato un problema", "ERRORE", 0);
@@ -175,4 +187,5 @@ public class RicaricaView {
         return card;
     }
 }
+
 

@@ -1,6 +1,5 @@
 package it.traveleasy;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -16,7 +15,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 
-public class PagamentoView implements RicaricaObserver {
+public class PagamentoView {
 
     private final StackPane root;
     private TravelEasy te;
@@ -43,7 +42,6 @@ public class PagamentoView implements RicaricaObserver {
         this.prezzoAssistenzaSpeciale = prezzoAssistenzaSpeciale;
         
         this.conn = conn;
-        this.te.addRicaricaObserver(this);
         root = new StackPane();
         root.getStyleClass().add("payment-root");
         root.getChildren().add(buildCard(null));
@@ -62,7 +60,6 @@ public class PagamentoView implements RicaricaObserver {
         this.conn = conn;
         this.prezzoAssistenzaSpeciale = prezzoAssistenzaSpeciale;
         this.modificaPrenotazioneMode = true;
-        this.te.addRicaricaObserver(this);
         root = new StackPane();
         root.getStyleClass().add("payment-root");
         root.getChildren().add(buildCard(prenotazione));
@@ -249,7 +246,7 @@ public class PagamentoView implements RicaricaObserver {
 
     private void openRechargeWindow() {
         Stage stage = new Stage();
-        RicaricaView view = new RicaricaView(te, cliente.getId());
+        RicaricaView view = new RicaricaView(te, cliente.getId(), this::refreshAfterRecharge);
         Scene scene = new Scene(view.getRoot(), 520, 460);
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Ricarica");
@@ -275,20 +272,19 @@ public class PagamentoView implements RicaricaObserver {
         return totaleAssistenza;
     }
 
-    @Override
-    public void onRicaricaEffettuata(int idUtente, double nuovoSaldo) {
-        if (cliente == null || cliente.getId() != idUtente) {
+    private void refreshAfterRecharge() {
+        if (cliente == null || cliente.getPv() == null || balanceLabel == null || confirmButton == null) {
             return;
         }
 
-        Platform.runLater(() -> {
-            balanceLabel.setText("Saldo attuale portafoglio: EUR " + nuovoSaldo);
-            if (totale > nuovoSaldo) {
-                confirmButton.setDisable(true);
-            } else {
-                confirmButton.setDisable(false);
-            }
-        });
+        double nuovoSaldo = cliente.getPv().getSaldo();
+        String saldoFormat = String.format(java.util.Locale.US, "%.2f", nuovoSaldo);
+        balanceLabel.setText("Saldo attuale portafoglio: EUR " + saldoFormat);
+        if (totale > nuovoSaldo) {
+            confirmButton.setDisable(true);
+        } else {
+            confirmButton.setDisable(false);
+        }
     }
 }
 
