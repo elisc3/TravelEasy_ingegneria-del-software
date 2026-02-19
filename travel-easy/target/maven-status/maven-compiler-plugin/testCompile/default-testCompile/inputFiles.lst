@@ -1,6 +1,9 @@
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\testsupport\BaseTravelEasyTest.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\testsupport\TestDbSupport.java
+C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyAssistenzaSpecialeTest.java
+C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyCheckInTest.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyEliminaAccountTest.java
+C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyEliminaPrenotazioneTest.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyGestionePortafoglioOreTest.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyLoginTest.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyModificaPrenotazioneTest.java
@@ -8,6 +11,7 @@ C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\s
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyNuovaPrenotazioneTest.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyNuovoPacchettoTest.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyProfiloUtenteTest.java
+C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyRecensioniTest.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyRegistrazioneTest.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyRicaricaPortafoglioTest.java
 C:\Users\pisan\Documents\GitHub\TravelEasy_ingegneria-del-software\travel-easy\src\test\java\it\traveleasy\TravelEasyRicercaPacchettiTest.java

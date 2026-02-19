@@ -2,6 +2,7 @@ PRAGMA foreign_keys = OFF;
 
 DROP TABLE IF EXISTS Viaggiatore;
 DROP TABLE IF EXISTS Prenotazioni;
+DROP TABLE IF EXISTS Recensione;
 DROP TABLE IF EXISTS OffertaSpeciale;
 DROP TABLE IF EXISTS PacchettiViaggio;
 DROP TABLE IF EXISTS Alloggio;
@@ -113,4 +114,14 @@ CREATE TABLE Viaggiatore (
     Prenotazione INTEGER NOT NULL,
     SediaRotelle INTEGER NOT NULL DEFAULT 0,
     "Cecità" INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE Recensione (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    Riferimento TEXT NOT NULL,
+    Stelle INTEGER NOT NULL,
+    Commento TEXT NOT NULL,
+    Cliente INTEGER NOT NULL,
+    Prenotazione INTEGER NOT NULL,
+    DataRecensione TEXT NOT NULL
 );

@@ -1,6 +1,7 @@
 package it.traveleasy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,8 +16,35 @@ import it.traveleasy.testsupport.BaseTravelEasyTest;
 class TravelEasyModificaPrenotazioneTest extends BaseTravelEasyTest {
 
     @Test
+    void modificaPacchettoPrenotazione_aggiornaPacchettoETotale() throws Exception {
+        Prenotazione p = te.getPrenotazioneById(1);
+        assertNotNull(p);
+
+        PacchettoViaggio nuovoPacchetto = te.getElencoPacchetti().get(2);
+        assertNotNull(nuovoPacchetto);
+
+        boolean ok = te.modificaPacchettoPrenotazione(p, nuovoPacchetto);
+        assertTrue(ok);
+        assertEquals(nuovoPacchetto.getId(), p.getPacchetto().getId());
+
+        float expectedTotale = te.getTotalePrenotazione(p.getCliente(), nuovoPacchetto, p.getElencoViaggiatori());
+        assertEquals(expectedTotale, p.getPrezzoTotale(), 0.001f);
+
+        try (PreparedStatement ps = conn.prepareStatement(
+            "SELECT Pacchetto, PrezzoTotale FROM Prenotazioni WHERE id = ?")) {
+            ps.setInt(1, p.getId());
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                assertEquals(nuovoPacchetto.getId(), rs.getInt("Pacchetto"));
+                assertEquals(expectedTotale, rs.getFloat("PrezzoTotale"), 0.001f);
+            }
+        }
+    }
+
+    @Test
     void modificaViaggiatori_sostituisceInteramenteIRecordDellaPrenotazione() throws Exception {
         Prenotazione p = te.getPrenotazioneById(1);
+        assertNotNull(p);
 
         Viaggiatore v1 = new Viaggiatore("Anna", "Nuova", "10-10-1992", "Passaporto", "PP1234567");
         v1.setSediaRotelle(true);
@@ -36,18 +64,18 @@ class TravelEasyModificaPrenotazioneTest extends BaseTravelEasyTest {
         }
 
         try (PreparedStatement rowPs = conn.prepareStatement(
-            "SELECT Nome, Cognome, SediaRotelle, \"Cecità\" FROM Viaggiatore WHERE Prenotazione = ? ORDER BY id")) {
+            "SELECT * FROM Viaggiatore WHERE Prenotazione = ? ORDER BY id")) {
             rowPs.setInt(1, p.getId());
             try (ResultSet rs = rowPs.executeQuery()) {
                 assertTrue(rs.next());
                 assertEquals("Anna", rs.getString("Nome"));
                 assertEquals("Nuova", rs.getString("Cognome"));
-                assertEquals(1, rs.getInt("SediaRotelle"));
+                assertEquals(1, rs.getInt(8));
 
                 assertTrue(rs.next());
                 assertEquals("Luca", rs.getString("Nome"));
                 assertEquals("Nuovo", rs.getString("Cognome"));
-                assertEquals(1, rs.getInt("Cecità"));
+                assertEquals(1, rs.getInt(9));
             }
         }
     }
