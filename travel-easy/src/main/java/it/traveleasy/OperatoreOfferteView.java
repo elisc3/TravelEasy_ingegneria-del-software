@@ -17,31 +17,20 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class OperatoreOfferteView implements OffertaObserver  {
+public class OperatoreOfferteView {
     private final VBox root;
-    private TravelEasy te;
+    private final Label sectionTitle;
+    private final TravelEasy te;
     private Map<Integer, PacchettoViaggio> elencoPacchetti;
     private final Map<Integer, Button> bottoneOffertaByPacchetto = new HashMap<>();
     private final Map<Integer, VBox> priceBoxByPacchetto = new HashMap<>();
     private final Map<Integer, PacchettoViaggio> pacchettoById = new HashMap<>();
 
-    @Override
-    public void onOffertaCreata(OffertaSpeciale offerta) {
-        javafx.application.Platform.runLater(() -> aggiornaCardOfferta(offerta));
-    }
-
-    @Override
-    public void onOffertaEliminata(PacchettoViaggio pacchetto) {
-        javafx.application.Platform.runLater(() -> ripristinaCardOfferta(pacchetto));
-    }
-
-
 
     public OperatoreOfferteView(TravelEasy te) {
-        Label sectionTitle = new Label("Elenco pacchetti viaggio disponibili");
-        sectionTitle.getStyleClass().add("section-title");
         this.te = te;
-        this.te.addOffertaObserver(this);
+        this.sectionTitle = new Label("Elenco pacchetti viaggio disponibili");
+        sectionTitle.getStyleClass().add("section-title");
         VBox list = new VBox(16);
         list.getStyleClass().add("package-list");
 
@@ -183,7 +172,7 @@ public class OperatoreOfferteView implements OffertaObserver  {
 
     private void openOffertaWindow(PacchettoViaggio p) {
         Stage stage = new Stage();
-        ModuloOffertaView view = new ModuloOffertaView(te, p);
+        ModuloOffertaView view = new ModuloOffertaView(te, p, this::refresh);
         Scene scene = new Scene(view.getRoot(), 520, 420);
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Inserisci Offerta");
@@ -192,36 +181,7 @@ public class OperatoreOfferteView implements OffertaObserver  {
         stage.show();
     }
 
-    private void aggiornaCardOfferta(OffertaSpeciale o) {
-        int idPacchetto = o.getPacchetto().getId();
-        Button btn = bottoneOffertaByPacchetto.get(idPacchetto);
-        VBox priceBox = priceBoxByPacchetto.get(idPacchetto);
-        PacchettoViaggio p = pacchettoById.get(idPacchetto);
-        if (btn == null || priceBox == null || p == null) return;
-
-        btn.setDisable(true);
-        priceBox.getChildren().setAll(
-            buildPriceBox(p.getPrezzo(), o.getScontoPercentuale(), o.getPrezzoScontato()).getChildren()
-        );
-    }
-
-    private void ripristinaCardOfferta(PacchettoViaggio pacchetto) {
-        if (pacchetto == null) return;
-        int idPacchetto = pacchetto.getId();
-        Button btn = bottoneOffertaByPacchetto.get(idPacchetto);
-        VBox priceBox = priceBoxByPacchetto.get(idPacchetto);
-        PacchettoViaggio p = pacchettoById.get(idPacchetto);
-        if (btn == null || priceBox == null || p == null) return;
-
-        btn.setDisable(false);
-        btn.setOnAction(e -> openOffertaWindow(p));
-        priceBox.getChildren().setAll(
-            buildPriceBox(p.getPrezzo(), 0, p.getPrezzo()).getChildren()
-        );
-    }
-
     public void dispose() {
-        te.removeOffertaObserver(this);
     }
 
     private void refresh() {
@@ -246,9 +206,7 @@ public class OperatoreOfferteView implements OffertaObserver  {
     scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
     scrollPane.getStyleClass().add("package-scroll");
 
-    root.getChildren().setAll(
-        new VBox(12, new Label("Elenco pacchetti viaggio disponibili"), scrollPane)
-    );
+    root.getChildren().setAll(sectionTitle, scrollPane);
 }
 
 

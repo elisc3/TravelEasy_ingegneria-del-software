@@ -63,6 +63,7 @@ public class PortafoglioOre {
         if(this.ore >= 10) {
             int n = (int) (this.ore / 10);
             this.sconto = n * 3;
+            //this.ore -= n*10
         }
 
         return true;

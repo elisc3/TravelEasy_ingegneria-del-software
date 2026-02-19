@@ -16,8 +16,14 @@ import javafx.scene.layout.VBox;
 
 public class ModuloOffertaView {
     private final VBox root;
+    private final Runnable onOffertaInserita;
 
     public ModuloOffertaView(TravelEasy te, PacchettoViaggio p) {
+        this(te, p, null);
+    }
+
+    public ModuloOffertaView(TravelEasy te, PacchettoViaggio p, Runnable onOffertaInserita) {
+        this.onOffertaInserita = onOffertaInserita;
         Label sectionTitle = new Label("Inserisci offerta");
         sectionTitle.getStyleClass().add("section-title");
 
@@ -88,6 +94,9 @@ public class ModuloOffertaView {
                 JOptionPane.showMessageDialog(null, "Inserimento nuova offerta fallito!", "ERRORE", 0);
             } else {
                 te.aggiornaOfferte(newOffertaSpeciale);
+                if (this.onOffertaInserita != null) {
+                    this.onOffertaInserita.run();
+                }
                 JOptionPane.showMessageDialog(null, "Inserimento nuova offerta avvenuto con successo!", "INFO", 1);
             }
         });
