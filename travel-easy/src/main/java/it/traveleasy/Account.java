@@ -9,16 +9,15 @@ public class Account {
     private String email;
     private String password;
     private String ruolo;
-    private Connection conn;
     private Utente utente;
+    //!MAGARI SI LEVA
     private TravelEasy te = null;
 
-    public Account(Connection conn, int id, String email, String password, String ruolo, Utente utente) {
+    public Account(int id, String email, String password, String ruolo, Utente utente) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.ruolo = ruolo;
-        this.conn = conn;
         this.utente = utente;
         this.id = id;
 

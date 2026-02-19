@@ -1,5 +1,11 @@
 package it.traveleasy;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -10,12 +16,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 
 public class OperatoreOfferteView implements OffertaObserver  {
     private final VBox root;
@@ -223,6 +223,34 @@ public class OperatoreOfferteView implements OffertaObserver  {
     public void dispose() {
         te.removeOffertaObserver(this);
     }
+
+    private void refresh() {
+    elencoPacchetti = te.getElencoPacchetti();
+
+    VBox newList = new VBox(16);
+    newList.getStyleClass().add("package-list");
+
+    bottoneOffertaByPacchetto.clear();
+    priceBoxByPacchetto.clear();
+    pacchettoById.clear();
+
+    for (PacchettoViaggio p : elencoPacchetti.values()) {
+        if (p.isVisibilità() == 1) {
+            newList.getChildren().add(buildPacchettoCard(p));
+        }
+    }
+
+    ScrollPane scrollPane = new ScrollPane(newList);
+    scrollPane.setFitToWidth(true);
+    scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+    scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+    scrollPane.getStyleClass().add("package-scroll");
+
+    root.getChildren().setAll(
+        new VBox(12, new Label("Elenco pacchetti viaggio disponibili"), scrollPane)
+    );
+}
+
 
 
 }

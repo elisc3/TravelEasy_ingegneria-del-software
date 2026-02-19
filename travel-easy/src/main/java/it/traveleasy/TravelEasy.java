@@ -107,7 +107,7 @@ public class TravelEasy implements AssistenzaObserver{
                         return null;
                     }
 
-                    mappa.put(email, new Account(conn, id, email, password, ruolo, cliente));
+                    mappa.put(email, new Account(id, email, password, ruolo, cliente));
                     
                 }
                 return mappa;
@@ -366,15 +366,6 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
-    
-    //!ELIMINALA DOPO AVER AGGIUSTATO
-    private void aggiungiPrenotazione(Prenotazione p){
-        elencoPrenotazioni.put(p.getId(), p);
-    }
-     public void aggiornaElencoPacchetti(PacchettoViaggio p){
-        this.elencoPacchetti.put(p.getId(), p);
-    }
-
     public Map<Integer, Prenotazione> getPrenotazioni(){
         return Collections.unmodifiableMap(this.elencoPrenotazioni);
     }
@@ -471,7 +462,7 @@ public class TravelEasy implements AssistenzaObserver{
             }
     }
 
-    public String registrazione(Connection conn, String nome, String cognome, String email, String password, String confermaPassword, String telefono){
+    public String registrazione(String nome, String cognome, String email, String password, String confermaPassword, String telefono){
         if (!validazioneDati(nome, cognome, email, password, confermaPassword, telefono)) {
             System.out.println("registrazione: validazioneDati fallita");
             return "errore";
@@ -502,7 +493,7 @@ public class TravelEasy implements AssistenzaObserver{
             return "errore";
         }
 
-        Account newAccount = new Account(conn, idAccount, email, password, "Cliente", null);
+        Account newAccount = new Account(idAccount, email, password, "Cliente", null);
 
         int idCliente = newAccount.createClient(conn, nome, cognome, telefono);
 
@@ -731,7 +722,8 @@ public class TravelEasy implements AssistenzaObserver{
                      newId = rs.getInt(1);
                 }
             }
-            this.aggiornaElencoPacchetti(new PacchettoViaggio(newId, codice, titolo, citta, nazione, dataPartenza, dataRitorno, descrizione, prezzo, oreViaggio, visibilità, idCompagniaTrasporto, idAlloggio, conn));
+            PacchettoViaggio p = new PacchettoViaggio(newId, codice, titolo, citta, nazione, dataPartenza, dataRitorno, descrizione, prezzo, oreViaggio, visibilità, idCompagniaTrasporto, idAlloggio, conn);
+            elencoPacchetti.put(p.getId(), p);
             return true;
         } catch (SQLException e){
             System.out.println("Errore nuovo pacchetto: "+e);
@@ -974,7 +966,7 @@ public class TravelEasy implements AssistenzaObserver{
                 return false;
             if (!p.aggiornaOreViaggio(conn))
                 return false;
-            this.aggiungiPrenotazione(p);
+            this.elencoPrenotazioni.put(p.getId(), p);
             cliente.addPrenotazione(p);
             OffertaSpeciale o = this.elencoOfferte.get(pacchetto);
             if (o != null){

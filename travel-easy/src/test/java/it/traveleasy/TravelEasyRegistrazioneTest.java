@@ -19,7 +19,7 @@ class TravelEasyRegistrazioneTest extends BaseTravelEasyTest {
         int accountsBefore = TestDbSupport.countRows(conn, "Account");
         String email = "nuovo.utente@example.com";
 
-        String result = te.registrazione(conn, "Nuovo", "Utente", email, "pwd123", "pwd123", "333444555");
+        String result = te.registrazione("Nuovo", "Utente", email, "pwd123", "pwd123", "333444555");
 
         assertEquals(email, result);
         assertEquals(accountsBefore + 1, TestDbSupport.countRows(conn, "Account"));
@@ -31,7 +31,7 @@ class TravelEasyRegistrazioneTest extends BaseTravelEasyTest {
         int accountsBefore = TestDbSupport.countRows(conn, "Account");
 
         String result = te.registrazione(
-            conn, "Mario", "Rossi", "cliente@example.com", "pwd123", "pwd123", "333111222");
+            "Mario", "Rossi", "cliente@example.com", "pwd123", "pwd123", "333111222");
 
         assertEquals("errore", result);
         assertEquals(accountsBefore, TestDbSupport.countRows(conn, "Account"));
@@ -40,21 +40,21 @@ class TravelEasyRegistrazioneTest extends BaseTravelEasyTest {
     @Test
     void registrazione_conEmailNonValida_restituisceErrore() {
         String result = te.registrazione(
-            conn, "Nome", "Cognome", "email-non-valida", "pwd123", "pwd123", "333111000");
+            "Nome", "Cognome", "email-non-valida", "pwd123", "pwd123", "333111000");
         assertEquals("errore", result);
     }
 
     @Test
     void registrazione_conPasswordDiverse_restituisceErrore() {
         String result = te.registrazione(
-            conn, "Nome", "Cognome", "u2@example.com", "pwd123", "pwd456", "333111000");
+            "Nome", "Cognome", "u2@example.com", "pwd123", "pwd456", "333111000");
         assertEquals("errore", result);
     }
 
     @Test
     void registrazione_conDatiValidi_creaPortafoglioVirtuale() throws Exception {
         String email = "wallet.test@example.com";
-        String result = te.registrazione(conn, "Wallet", "Test", email, "pwd123", "pwd123", "333765432");
+        String result = te.registrazione("Wallet", "Test", email, "pwd123", "pwd123", "333765432");
         assertEquals(email, result);
 
         try (PreparedStatement ps = conn.prepareStatement(

@@ -11,6 +11,7 @@ import java.util.Map;
 public class Cliente extends Utente {
     private PortafoglioVirtuale pv; 
     private CartaCredito cc;
+    //!MAGARI SI LEVA
     private TravelEasy te = null;
     private PortafoglioOre po;
     private Map<Integer, Prenotazione> elencoPrenotazioniEffettuate;
@@ -104,8 +105,7 @@ public class Cliente extends Utente {
 
 
         this.cc = new CartaCredito("", "", "", "", idPortafoglioVirtuale, this, conn);
-        //te.aggiornaElencoCarte(this.getId(), cc);
-
+        
         query = "INSERT INTO PortafoglioOre (Utente, Ore, Sconto) VALUES (?, ?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, this.getId());

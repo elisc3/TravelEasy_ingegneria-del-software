@@ -59,7 +59,7 @@ public class SignupView {
         signupButton.setMaxWidth(Double.MAX_VALUE);
 
         signupButton.setOnAction(e -> {
-            String res = te.registrazione(this.conn, nameField.getText(), surnameField.getText(), emailField.getText(), passwordField.getText(), confirmPasswordField.getText(), phoneField.getText());
+            String res = te.registrazione(nameField.getText(), surnameField.getText(), emailField.getText(), passwordField.getText(), confirmPasswordField.getText(), phoneField.getText());
              if (!res.equals("errore")) {
                 System.out.println("Registrazione avvenuta con successo");
                 App.showHome(stage, res);
