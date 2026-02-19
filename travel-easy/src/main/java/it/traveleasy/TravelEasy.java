@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -217,7 +218,6 @@ public class TravelEasy implements AssistenzaObserver{
             } 
     }
 
-
     private Map<Integer, PacchettoViaggio> recuperaPacchetti(){
         String query = "SELECT * from PacchettiViaggio";
 
@@ -249,10 +249,6 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
-    public void aggiornaElencoPacchetti(PacchettoViaggio p){
-        this.elencoPacchetti.put(p.getId(), p);
-    }
-
     private Map<PacchettoViaggio, OffertaSpeciale> recuperaOfferte(){
         String query = "SELECT * FROM OffertaSpeciale";
         Map<PacchettoViaggio, OffertaSpeciale> mappa = new HashMap<>();
@@ -279,10 +275,26 @@ public class TravelEasy implements AssistenzaObserver{
 
     }
 
-    public void aggiornaOfferte(OffertaSpeciale o){
-        this.elencoOfferte.put(o.getPacchetto(), o);
-        notifyOffertaCreata(o);
-    }
+   private PortafoglioVirtuale getPortafoglioByClienteDB(int idCliente){
+        String query = "SELECT * FROM PortafoglioVirtuale WHERE Utente = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setInt(1, idCliente);
+
+            ResultSet rs = pstmt.executeQuery();
+            PortafoglioVirtuale pv = null;
+            while(rs.next()){
+                int id = rs.getInt("id");
+                int idClienteD = rs.getInt("Utente");
+                double saldo = rs.getDouble("Saldo");
+                pv = new PortafoglioVirtuale(id, idClienteD, saldo);
+            }
+            return pv;
+        } catch (SQLException e) {
+            System.out.println("Errore getPortafoglioByClienteDB: "+e);
+            return null;
+        }
+    } 
 
     private List<Viaggiatore> recuperaViaggiatoriByPrenotazione(int idPrenotazione){
         String query = "SELECT * from Viaggiatore WHERE Prenotazione = ?;";
@@ -355,13 +367,16 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     
-
+    //!ELIMINALA DOPO AVER AGGIUSTATO
     private void aggiungiPrenotazione(Prenotazione p){
         elencoPrenotazioni.put(p.getId(), p);
     }
+     public void aggiornaElencoPacchetti(PacchettoViaggio p){
+        this.elencoPacchetti.put(p.getId(), p);
+    }
 
     public Map<Integer, Prenotazione> getPrenotazioni(){
-        return this.elencoPrenotazioni;
+        return Collections.unmodifiableMap(this.elencoPrenotazioni);
     }
 
     private Map<Integer, Recensione> recuperaRecensioni(){
@@ -394,6 +409,7 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
+    //*RICERCA PACCHETTO
     public List<PacchettoViaggio> ricercaPacchetti(String città, String dataAndata, String dataRitorno, float prezzoMassimo){
            //metodo per uc2
            
@@ -414,15 +430,6 @@ public class TravelEasy implements AssistenzaObserver{
             }
             return pacchettiTrovati;
     }
-
-    public CompagniaTrasporto getCompagniaTrasportoByPacchetto(int idCompagnia){
-        return this.elencoCompagnie.get(idCompagnia);   
-    }
-
-    public Alloggio getAlloggioByPacchetto(int idAlloggio){
-        return this.elencoAlloggi.get(idAlloggio);
-    }
-
 
     //*REGISTRAZIONE
     private boolean checkEmail(String emailByUser){
@@ -557,6 +564,7 @@ public class TravelEasy implements AssistenzaObserver{
         return true;
     }    
     
+    //*NUOVA RICARICA
     public float validazioneDatiNuovaRicarica(String numeroCarta, String scadenza, String cvv, String importo){
         if (numeroCarta.equals("") || scadenza.equals("") || cvv.equals("") || importo.equals(""))
             return -1.0F;
@@ -592,8 +600,6 @@ public class TravelEasy implements AssistenzaObserver{
         return null;
     }
 
-
-
     public boolean insertCartaCredito(int idUtente, String numeroCarta, String scadenza, String cvv, String circuito){
         String query = "UPDATE CartaCredito SET NumeroCarta = ?, Scadenza = ?, cvv = ?, Circuito = ?, PortafoglioVirtuale = ? WHERE Utente = ?;";
 
@@ -622,6 +628,7 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
+    //*INSERIMENTO PACCHETTO
     public float validazioneDatiNuovoPacchetto(String titolo, String citta, String nazione, String descrizione, String prezzo, String compagnia, String alloggio, String dataPartenza, String dataRitorno){
         if (titolo.equals("") || citta.equals("") || nazione.equals("") || descrizione.equals("") || prezzo.equals("") || compagnia.equals("") || alloggio.equals("") || dataPartenza.equals("") || dataRitorno.equals(""))
             return -1.0F;
@@ -667,7 +674,6 @@ public class TravelEasy implements AssistenzaObserver{
         // partenza <= arrivo
         return !date1.isAfter(date2);
     }
-
 
     public boolean nuovoPacchetto(Connection conn, String codice, String titolo, String citta, String nazione, String descrizione, float prezzo, float oreViaggio, int visibilità, String compagnia, String alloggio, String dataPartenza, String dataRitorno){
         String query = "INSERT INTO PacchettiViaggio (Città, Titolo, Nazione, DataPartenza, DataRitorno, Descrizione, Prezzo, Visibilità, CompagniaTrasporto, Alloggio, Codice, OreViaggio) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
@@ -734,7 +740,7 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     public Map<Integer, PacchettoViaggio> getElencoPacchetti(){
-        return this.elencoPacchetti;
+        return Collections.unmodifiableMap(this.elencoPacchetti);
     }
 
     public OffertaSpeciale getOffertaByPack(PacchettoViaggio p){
@@ -748,27 +754,8 @@ public class TravelEasy implements AssistenzaObserver{
         return this.elencoOfferte.get(p);
     }
 
-    private PortafoglioVirtuale getPortafoglioByClienteDB(int idCliente){
-        String query = "SELECT * FROM PortafoglioVirtuale WHERE Utente = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            pstmt.setInt(1, idCliente);
-
-            ResultSet rs = pstmt.executeQuery();
-            PortafoglioVirtuale pv = null;
-            while(rs.next()){
-                int id = rs.getInt("id");
-                int idClienteD = rs.getInt("Utente");
-                double saldo = rs.getDouble("Saldo");
-                pv = new PortafoglioVirtuale(id, idClienteD, saldo);
-            }
-            return pv;
-        } catch (SQLException e) {
-            System.out.println("Errore getPortafoglioByClienteDB: "+e);
-            return null;
-        }
-    }
-
+    
+    //*ELIMINAZIONE OFFERTE SCADUTE O ESAURITE
     public boolean eliminaOfferteDB(OffertaSpeciale o){
         String query = "DELETE FROM OffertaSpeciale WHERE id = ?;";
 
@@ -801,6 +788,34 @@ public class TravelEasy implements AssistenzaObserver{
         return true;
     }
 
+    private boolean rimuoviOffertaEsaurita(OffertaSpeciale offerta) {
+        if (offerta == null) {
+            return true;
+        }
+
+        if (!eliminaOfferteDB(offerta)) {
+            return false;
+        }
+
+        PacchettoViaggio pacchettoRimosso = null;
+        for (PacchettoViaggio p : elencoOfferte.keySet()) {
+            if (p.getId() == offerta.getPacchetto().getId()) {
+                pacchettoRimosso = p;
+                break;
+            }
+        }
+
+        if (pacchettoRimosso != null) {
+            elencoOfferte.remove(pacchettoRimosso);
+            notifyOffertaEliminata(pacchettoRimosso);
+        } else {
+            notifyOffertaEliminata(offerta.getPacchetto());
+        }
+
+        return true;
+    }
+
+    //*OBSERVER
     public void addOffertaObserver(OffertaObserver observer) {
         if (observer != null && !offertaObservers.contains(observer)) offertaObservers.add(observer);
     }
@@ -874,8 +889,10 @@ public class TravelEasy implements AssistenzaObserver{
 
     
 
+    //*PRENOTAZIONE
+
+    //!RIVEDI
     public float getTotalePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori){
-        //DEVONO ESSERE AGGIUNTI SCONTI FEDELTà, DOPO L'IMPLEMENTAZIONE DI UC13
         OffertaSpeciale o = elencoOfferte.get(pacchetto);
         float prezzoVero = 0.0F;
         if (o != null)
@@ -893,15 +910,8 @@ public class TravelEasy implements AssistenzaObserver{
         return totaleSenzaSconto - totaleSenzaSconto*sconto/100;
     }
 
-    public Cliente getClienteById(int idCliente){
-        for (Account a: elencoAccount.values()){
-            Cliente c = a.getCliente();
-            if (c.getId() == idCliente)
-                return c;
-        }
-        return null;
-    }
-
+    
+    //!DELEGA
     private boolean insertViaggiatoriDB(int idPrenotazione, Viaggiatore v){
         String query = "INSERT INTO Viaggiatore (Nome, Cognome, DataNascita, TipoDocumento, CodiceDocumento, Prenotazione, SediaRotelle, \"Cecità\") values (?, ?, ?, ?, ?, ?, ?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -923,10 +933,12 @@ public class TravelEasy implements AssistenzaObserver{
 
     }
 
+    //!RIVEDI
     public boolean registrazionePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori, float scontoApplicato, float totaleAggiornato, float offertaApplicata){
         return registrazionePrenotazione(cliente, pacchetto, elencoViaggiatori, scontoApplicato, totaleAggiornato, offertaApplicata, 0.0F);
     }
 
+    //!RIVEDI
     public boolean registrazionePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori, float scontoApplicato, float totaleAggiornato, float offertaApplicata, float prezzoAssistenzaSpeciale){
         String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale, PrezzoAssistenzaSpeciale, CheckIn) values (?, ?, ?, ?, ?, ?, ?, ?);";
 
@@ -982,33 +994,12 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
-    private boolean rimuoviOffertaEsaurita(OffertaSpeciale offerta) {
-        if (offerta == null) {
-            return true;
-        }
-
-        if (!eliminaOfferteDB(offerta)) {
-            return false;
-        }
-
-        PacchettoViaggio pacchettoRimosso = null;
-        for (PacchettoViaggio p : elencoOfferte.keySet()) {
-            if (p.getId() == offerta.getPacchetto().getId()) {
-                pacchettoRimosso = p;
-                break;
-            }
-        }
-
-        if (pacchettoRimosso != null) {
-            elencoOfferte.remove(pacchettoRimosso);
-            notifyOffertaEliminata(pacchettoRimosso);
-        } else {
-            notifyOffertaEliminata(offerta.getPacchetto());
-        }
-
-        return true;
+    //!RIVEDI
+    public void inserisciDatiViaggiatore(List<Viaggiatore> elencoViaggiatori, Viaggiatore v){
+        elencoViaggiatori.add(v);
     }
 
+    //*MODIFICA PACCHETTI
     public boolean modificaPacchettoPrenotazione(Prenotazione prenotazione, PacchettoViaggio nuovoPacchetto) {
         if (prenotazione == null || nuovoPacchetto == null) {
             return false;
@@ -1050,14 +1041,8 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
-    public Account getAccountToHomeView(String email){
-        return this.elencoAccount.get(email);
-    }
-
-    public void inserisciDatiViaggiatore(List<Viaggiatore> elencoViaggiatori, Viaggiatore v){
-        elencoViaggiatori.add(v);
-    }
-
+    //*RECENSIONI
+    //!RIVEDI
     public boolean validaDatiNuovaRecensione(String commentoAgenzia, String commentoTrasporto, String commentoAlloggio){
         return !(commentoAgenzia.isBlank() || commentoTrasporto.isBlank() || commentoAlloggio.isBlank());
     }
@@ -1098,7 +1083,7 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     public Map<Integer, Recensione> getRecensioni(){
-        return this.elencoRecensioni;
+        return Collections.unmodifiableMap(this.elencoRecensioni);
     }
 
     public float getMediaRecensioni(String riferimento){
@@ -1116,6 +1101,7 @@ public class TravelEasy implements AssistenzaObserver{
     public int getNTotaleRecensioni(){
         return this.elencoRecensioni.size()/3;
     }
+    
     //*ASSISTENZA SPECIALE
     @Override public void onAssistenzaChanged(Prenotazione prenotazione, Viaggiatore viaggiatore, String tipoAssistenza, boolean valore) { 
         prenotazione.aggiornaAssistenza(viaggiatore, tipoAssistenza, valore); 
@@ -1125,6 +1111,7 @@ public class TravelEasy implements AssistenzaObserver{
         prenotazione.calcolaPrezzoAssistenzaSpeciale();
     }
 
+    //*ELIMINAZIONE PRENOTAZIONE
     private float calcolaRimborsoEliminazione(Prenotazione prenotazione) {
         if (prenotazione == null || prenotazione.getPacchetto() == null) {
             return -1.0F;
@@ -1174,6 +1161,7 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
+    //!DELEGA
     private boolean aggiornaOreEliminazione(Cliente cliente, PacchettoViaggio pacchetto) {
         if (cliente == null || pacchetto == null || cliente.getPo() == null) {
             return true;
@@ -1234,6 +1222,7 @@ public class TravelEasy implements AssistenzaObserver{
         return p.checkIn(conn);
     }
 
+    //!DELEGA
     private boolean modificaViaggiatoreDB(int idPrenotazione, Viaggiatore v){
         String query = "UPDATE Viaggiatore SET Nome = ?, Cognome = ?, DataNascita = ?, TipoDocumento = ?, CodiceDocumento = ?, SediaRotelle = ?, Cecità = ? WHERE Prenotazione = ?;";
 
@@ -1267,6 +1256,7 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
+    //!RIVEDI
     public boolean modificaViaggiatori(Prenotazione p, List<Viaggiatore> nuoviDati){
         int idPrenotazione = p.getId();
         for (Viaggiatore v: nuoviDati){
@@ -1275,5 +1265,32 @@ public class TravelEasy implements AssistenzaObserver{
         }
         p.setElencoViaggiatori(nuoviDati);
         return true;
+    }
+
+    //*METODI VARI
+    public void aggiornaOfferte(OffertaSpeciale o){
+        this.elencoOfferte.put(o.getPacchetto(), o);
+        notifyOffertaCreata(o);
+    }
+
+    public CompagniaTrasporto getCompagniaTrasportoByPacchetto(int idCompagnia){
+        return this.elencoCompagnie.get(idCompagnia);   
+    }
+
+    public Alloggio getAlloggioByPacchetto(int idAlloggio){
+        return this.elencoAlloggi.get(idAlloggio);
+    }
+
+    public Cliente getClienteById(int idCliente){
+        for (Account a: elencoAccount.values()){
+            Cliente c = a.getCliente();
+            if (c.getId() == idCliente)
+                return c;
+        }
+        return null;
+    }
+
+    public Account getAccountToHomeView(String email){
+        return this.elencoAccount.get(email);
     }
 }

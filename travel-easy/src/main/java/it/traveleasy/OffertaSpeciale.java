@@ -5,14 +5,12 @@ import java.sql.SQLException;
 
 public class OffertaSpeciale {
     private int id;
-    //private int idPacchetto;
     private PacchettoViaggio pacchetto;
     private float scontoPercentuale;
     private float prezzoScontato;
     private String dataFine;
     private int Disponibilità;
-    //private boolean visibilità;
-
+    
     public OffertaSpeciale(int id, PacchettoViaggio pacchetto, float scontoPercentuale, float prezzoScontato, String dataFine, int Disponibilità /*, boolean visibilità*/) {
         this.id = id;
         this.pacchetto = pacchetto;
@@ -20,7 +18,6 @@ public class OffertaSpeciale {
         this.prezzoScontato = prezzoScontato;
         this.dataFine = dataFine;
         this.Disponibilità = Disponibilità;
-        //this.visibilità = visibilità;
     }
 
     public int getId() {
@@ -70,14 +67,6 @@ public class OffertaSpeciale {
     public void setDisponibilità(int Disponibilità) {
         this.Disponibilità = Disponibilità;
     }
-
-    /*public boolean isVisibilità() {
-        return visibilità;
-    }
-
-    public void setVisibilità(boolean visibilità) {
-        this.visibilità = visibilità;
-    }*/
 
     private boolean diminuisciDisponibilitàDB(Connection conn){
         String query = "UPDATE OffertaSpeciale SET Disponibilità = Disponibilità - 1 WHERE id = ?;";

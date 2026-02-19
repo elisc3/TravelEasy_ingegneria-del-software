@@ -64,6 +64,7 @@ public class Account {
         this.utente = utente;
     }
 
+    //*CREAZIONE CLIENTE
     public int createClient(Connection conn, String nome, String cognome, String telefono) {
 
         String query = "INSERT INTO Utenti (Nome, Cognome, Telefono, Ruolo, Account) values (?, ?, ?, ?, ?);";
@@ -111,6 +112,7 @@ public class Account {
         return idUtente;
     }
 
+    //*ELIMINAZIONE CLIENTE
     public boolean eliminaCliente(Connection conn){
         Cliente cliente = this.getCliente();
         if (cliente == null)
@@ -131,6 +133,7 @@ public class Account {
         }
     }
 
+    //*VARIE
     public PortafoglioVirtuale getPortafoglioVirtuale() {
         if (utente instanceof Cliente) {
             return ((Cliente) utente).getPv();
@@ -156,13 +159,6 @@ public class Account {
     public Cliente getCliente(){
         if (this.utente instanceof Cliente)
             return ((Cliente) utente);
-        return null;
-    }
-
-    public PortafoglioOre getPortafoglioOre() {
-        if (utente instanceof Cliente) {
-            return ((Cliente) utente).getPo();
-        }
         return null;
     }
 }

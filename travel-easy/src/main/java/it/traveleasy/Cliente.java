@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,18 +52,13 @@ public class Cliente extends Utente {
 
     public void incrementaPortafoglio(float importo){
         this.pv.incrementaSaldo(importo);
-        //System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
     }
 
     public void decrementaPortafoglio(float importo){
         this.pv.decrementaSaldo(importo);
-        //System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
     }
 
-    public void stampaSaldoPortafoglio(){
-        //System.out.println("Saldo aggiornato della classe cliente: "+this.pv.getSaldo());
-    }
-
+    //*CREAZIONE OGGETTI CONNESSI
     public boolean metodiPagamento(Connection conn){
         String query = "INSERT INTO PortafoglioVirtuale (Utente, Saldo) VALUES (?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -139,6 +135,7 @@ public class Cliente extends Utente {
         return true;
     }
 
+    //*ELIMINAZIONE OGGETTI CONNESSI
     public boolean eliminaMetodiPagamento(Connection conn){
         String query = "DELETE FROM CartaCredito WHERE Utente = ?;";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -170,6 +167,8 @@ public class Cliente extends Utente {
         return true;
     }
     
+    //*PAGAMENTO
+    //!RIVEDIAMOLE (2)
     public boolean pagamentoOnPortafoglioDB(Connection conn, float importo){
         String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo - ? WHERE Utente = ?;";
 
@@ -202,14 +201,12 @@ public class Cliente extends Utente {
         }
     }
 
-
-
     public void addPrenotazione(Prenotazione p){
         this.elencoPrenotazioniEffettuate.put(p.getId(), p);
     }
 
     public Map<Integer, Prenotazione> getElencoPrenotazioniEffettuate() {
-        return this.elencoPrenotazioniEffettuate;
+        return Collections.unmodifiableMap(this.elencoPrenotazioniEffettuate);
     }
 
     public void addRecensione(Recensione r){

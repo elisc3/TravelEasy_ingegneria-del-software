@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter; 
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 
 public class Prenotazione {
@@ -122,6 +123,7 @@ public class Prenotazione {
         return this.cliente.aggiornaOreViaggio(conn, this.pacchetto.getOreViaggio());
     }
 
+    //!RIVEDI
     public boolean applicaSconto(Connection conn, float scontoApplicato) {
         
         if (scontoApplicato > 0 && scontoApplicato % 3 == 0){
@@ -141,18 +143,16 @@ public class Prenotazione {
         return true;
     }
 
-    public int getNViaggiatori(){
-        return this.elencoViaggiatori.size();
-    }
-
     public List<Viaggiatore> getElencoViaggiatori() {
-        return this.elencoViaggiatori;
+        return Collections.unmodifiableList(this.elencoViaggiatori);
     }
 
+    //!RIVEDI
     public void setElencoViaggiatori (List<Viaggiatore> elencoViaggiatori){
         this.elencoViaggiatori = elencoViaggiatori;
     }
 
+    //*ASSISTENZA SPECIALE
     public void aggiornaAssistenza(Viaggiatore v, String tipoAssistenza, boolean valore) {
         switch (tipoAssistenza) {
             case "sediaRotelle":
@@ -181,6 +181,7 @@ public class Prenotazione {
         this.prezzoAssistenzaSpeciale = totaleAssistenza;
     }
 
+    //*CHEK-IN
     public boolean checkIn(Connection conn) {
         if(this.pacchetto == null){
             return false;
