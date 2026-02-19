@@ -153,12 +153,16 @@ public class PagamentoView {
                 percentualeOfferta = o.getScontoPercentuale();
             
             if(!te.registrazionePrenotazione(prenotazione.getId(), scontoApplicato, totale, percentualeOfferta, prezzoAssistenzaSpecialeCalcolato)){
-                JOptionPane.showMessageDialog(null, "La registrazione della prenotazione non è andata a buon fine, stiamo effetuando il rimborso.", "ERRORE", 0);
+                JOptionPane.showMessageDialog(null, "La registrazione della prenotazione non e andata a buon fine, stiamo effetuando il rimborso.", "ERRORE", 0);
                 if (!cliente.rimborsoOnPortafoglioDB(conn, totale)){
                     JOptionPane.showMessageDialog(null, "Rimborso fallito. Contattare l'assistenza.", "ERRORE", 0);
                     return;
                 } else {
-                    JOptionPane.showMessageDialog(null, "Il rimborso è stato effettuato", "INFO", 1);
+                    if (!te.annullaPrenotazioneBozza(prenotazione.getId())) {
+                        JOptionPane.showMessageDialog(null, "Il rimborso e stato effettuato ma la prenotazione bozza non e stata rimossa. Contattare l'assistenza.", "ERRORE", 0);
+                        return;
+                    }
+                    JOptionPane.showMessageDialog(null, "Il rimborso e stato effettuato e la prenotazione bozza e stata annullata.", "INFO", 1);
                     return;
                 }
             }
@@ -199,10 +203,10 @@ public class PagamentoView {
         confirmButton.getStyleClass().add("primary-button");
         float difference = totale - totaleOriginale;
         if (difference > 0) {
-            if ( totale > saldoPortafoglio)
-                confirmButton.setDisable(false);
-            else
+            if (totale > saldoPortafoglio)
                 confirmButton.setDisable(true);
+            else
+                confirmButton.setDisable(false);
         } else {
             confirmButton.setDisable(false);
         }

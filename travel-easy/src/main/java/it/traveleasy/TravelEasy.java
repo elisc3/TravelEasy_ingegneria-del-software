@@ -907,27 +907,9 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     
-    //!DELEGA
-    private boolean insertViaggiatoriDB(int idPrenotazione, Viaggiatore v){
-        String query = "INSERT INTO Viaggiatore (Nome, Cognome, DataNascita, TipoDocumento, CodiceDocumento, Prenotazione, SediaRotelle, \"Cecità\") values (?, ?, ?, ?, ?, ?, ?, ?);";
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, v.getNome());
-            pstmt.setString(2, v.getCognome());
-            pstmt.setString(3, v.getDataNascita());
-            pstmt.setString(4, v.getTipoDocumento());
-            pstmt.setString(5, v.getCodiceDocumento());
-            pstmt.setInt(6, idPrenotazione);
-            pstmt.setInt(7, v.isSediaRotelle() ? 1 : 0);
-            pstmt.setInt(8, v.isCecita() ? 1 : 0);
-            pstmt.executeUpdate();
 
-            return true;
-        } catch (SQLException e){
-            System.out.println("Errore insertViaggiatoriDB: "+e);
-            return false;
-        }
 
-    }
+
 
     //!RIVEDI
     public boolean registrazionePrenotazione(int idPrenotazione, float scontoApplicato, float totaleAggiornato, float offertaApplicata){
@@ -1186,49 +1168,17 @@ public class TravelEasy implements AssistenzaObserver{
         return p.checkIn(conn);
     }
 
-    //!DELEGA
-    private boolean modificaViaggiatoreDB(int idPrenotazione, Viaggiatore v){
-        String query = "UPDATE Viaggiatore SET Nome = ?, Cognome = ?, DataNascita = ?, TipoDocumento = ?, CodiceDocumento = ?, SediaRotelle = ?, Cecità = ? WHERE Prenotazione = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            int cecitaToDb;
-            if (v.isCecita())
-                cecitaToDb = 1;
-            else
-                cecitaToDb = 0;
-
-            int sediaRotelleToDB;
-            if (v.isSediaRotelle())
-                sediaRotelleToDB = 1;
-            else
-                sediaRotelleToDB = 0;
-
-            pstmt.setString(1, v.getNome());
-            pstmt.setString(2, v.getCognome());
-            pstmt.setString(3, v.getDataNascita());
-            pstmt.setString(4, v.getTipoDocumento());
-            pstmt.setString(5, v.getCodiceDocumento());
-            pstmt.setInt(6, sediaRotelleToDB);
-            pstmt.setInt(7, cecitaToDb);
-            pstmt.setInt(8, idPrenotazione);
-            
-            pstmt.executeUpdate();
-            return true;
-        } catch (SQLException e){
-            System.out.println("Errore modificaViaggiatoreDB: "+e);
-            return false;
-        }
-    }
-
     //!RIVEDI
     public boolean modificaViaggiatori(Prenotazione p, List<Viaggiatore> nuoviDati){
-        int idPrenotazione = p.getId();
-        for (Viaggiatore v: nuoviDati){
-            if (!this.modificaViaggiatoreDB(idPrenotazione, v))
-                return false;
+        if (p == null || nuoviDati == null) {
+            return false;
         }
-        p.setElencoViaggiatori(nuoviDati);
-        return true;
+
+        if (p.replaceViaggiatori(conn, nuoviDati)) {
+            notifyPrenotazioneModificata(p);
+            return true;
+        }
+        return false;
     }
 
     //*METODI VARI
@@ -1325,6 +1275,25 @@ public class TravelEasy implements AssistenzaObserver{
         }
 
         return p.createViaggiatore(conn, nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
+    }
+
+    public boolean annullaPrenotazioneBozza(int idPrenotazione) {
+        Prenotazione p = this.elencoPrenotazioni.get(idPrenotazione);
+        if (p == null) {
+            return false;
+        }
+
+        if (!p.eliminaBozzaDaDB(conn)) {
+            return false;
+        }
+
+        elencoPrenotazioni.remove(idPrenotazione);
+        Cliente cliente = p.getCliente();
+        if (cliente != null) {
+            cliente.getElencoPrenotazioniEffettuate().remove(idPrenotazione);
+        }
+        notifyPrenotazioneModificata(p);
+        return true;
     }
 
     public List<Viaggiatore> getViaggiatoriByPrenotazione(int idPrenotazione){

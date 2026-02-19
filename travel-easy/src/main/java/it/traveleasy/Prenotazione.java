@@ -240,6 +240,107 @@ public class Prenotazione {
         }
     }
 
+
+    private boolean deleteViaggiatoriDB(Connection conn) {
+        String query = "DELETE FROM Viaggiatore WHERE Prenotazione = ?;";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Errore deleteViaggiatoriDB: " + e);
+            return false;
+        }
+    }
+
+    public boolean replaceViaggiatori(Connection conn, List<Viaggiatore> nuoviDati) {
+        if (conn == null || nuoviDati == null || id <= 0) {
+            return false;
+        }
+
+        boolean oldAutoCommit = true;
+        try {
+            oldAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+
+            if (!deleteViaggiatoriDB(conn)) {
+                conn.rollback();
+                return false;
+            }
+
+            for (Viaggiatore v : nuoviDati) {
+                if (!insertViaggiatoriDB(conn, v)) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            conn.commit();
+            this.elencoViaggiatori = new ArrayList<>(nuoviDati);
+            return true;
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackEx) {
+                System.out.println("Errore rollback replaceViaggiatori: " + rollbackEx);
+            }
+            System.out.println("Errore replaceViaggiatori: " + e);
+            return false;
+        } finally {
+            try {
+                conn.setAutoCommit(oldAutoCommit);
+            } catch (SQLException e) {
+                System.out.println("Errore ripristino autocommit replaceViaggiatori: " + e);
+            }
+        }
+    }
+
+    public boolean eliminaBozzaDaDB(Connection conn) {
+        if (conn == null || id <= 0) {
+            return false;
+        }
+
+        boolean oldAutoCommit = true;
+        String deletePrenotazione = "DELETE FROM Prenotazioni WHERE id = ?;";
+
+        try {
+            oldAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+
+            if (!deleteViaggiatoriDB(conn)) {
+                conn.rollback();
+                return false;
+            }
+
+            try (PreparedStatement pstmt = conn.prepareStatement(deletePrenotazione)) {
+                pstmt.setInt(1, id);
+                int rows = pstmt.executeUpdate();
+                if (rows != 1) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            conn.commit();
+            this.elencoViaggiatori.clear();
+            return true;
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackEx) {
+                System.out.println("Errore rollback eliminaBozzaDaDB: " + rollbackEx);
+            }
+            System.out.println("Errore eliminaBozzaDaDB: " + e);
+            return false;
+        } finally {
+            try {
+                conn.setAutoCommit(oldAutoCommit);
+            } catch (SQLException e) {
+                System.out.println("Errore ripristino autocommit eliminaBozzaDaDB: " + e);
+            }
+        }
+    }
+
     public boolean createViaggiatore(Connection conn, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
         
         

@@ -247,13 +247,19 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
                 nuoviViaggiatori.add(nuovo);
             }
 
-            /*for (int i = 0; i < nuoviViaggiatori.size(); i++) {
+            for (int i = 0; i < nuoviViaggiatori.size(); i++) {
                 Viaggiatore v = nuoviViaggiatori.get(i);
                 int pos = i + 1;
                 int esitoValidazioneDati;
 
                 try {
-                    esitoValidazioneDati = v.validazioneDatiPrenotazione(v);
+                    esitoValidazioneDati = te.validazioneViaggiatore(
+                        v.getNome(),
+                        v.getCognome(),
+                        v.getDataNascita(),
+                        v.getTipoDocumento(),
+                        v.getCodiceDocumento()
+                    );
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Data inserita non valida in persona " + pos + ".", "ERRORE", 0);
                     return;
@@ -275,7 +281,7 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
                     JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona " + pos + ".", "ERRORE", 0);
                     return;
                 }
-            }*/
+            }
 
             if(te.modificaViaggiatori(prenotazione, nuoviViaggiatori))
                 JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori effettuata!", "INFO", 1);
