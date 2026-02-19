@@ -30,11 +30,11 @@ public class PagamentoView {
     private float prezzoAssistenzaSpeciale;
     private boolean modificaPrenotazioneMode;
 
-    public PagamentoView(TravelEasy te, int idUtente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori,Connection conn) {
-        this(te, idUtente, pacchetto, elencoViaggiatori, conn, 0.0F);
+    public PagamentoView(TravelEasy te, int idUtente, int idPrenotazione, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori,Connection conn) {
+        this(te, idUtente, idPrenotazione, pacchetto, elencoViaggiatori, conn, 0.0F);
     }
 
-    public PagamentoView(TravelEasy te, int idUtente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori,Connection conn, float prezzoAssistenzaSpeciale) {
+    public PagamentoView(TravelEasy te, int idUtente, int idPrenotazione, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori,Connection conn, float prezzoAssistenzaSpeciale) {
         this.te = te;
         this.cliente = this.te.getClienteById(idUtente);
         this.elencoViaggiatori = elencoViaggiatori;
@@ -44,7 +44,7 @@ public class PagamentoView {
         this.conn = conn;
         root = new StackPane();
         root.getStyleClass().add("payment-root");
-        root.getChildren().add(buildCard(null));
+        root.getChildren().add(buildCard(this.te.getPrenotazioneById(idPrenotazione)));
     }
 
     public PagamentoView(TravelEasy te, Prenotazione prenotazione, PacchettoViaggio nuovoPacchetto, Connection conn) {
@@ -137,6 +137,10 @@ public class PagamentoView {
             confirmButton.setDisable(false);
 
         confirmButton.setOnAction(e -> {
+            if (prenotazione == null) {
+                JOptionPane.showMessageDialog(null, "Prenotazione non trovata. Riprovare.", "ERRORE", 0);
+                return;
+            }
             if(!cliente.pagamentoOnPortafoglioDB(conn, totale)){
                 JOptionPane.showMessageDialog(null, "Errore durante il pagamento, riprovare.", "ERRORE", 0);
                 return;

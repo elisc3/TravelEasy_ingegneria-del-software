@@ -208,7 +208,7 @@ public class Prenotazione {
         long giorniMancanti = ChronoUnit.DAYS.between(oggi, dataPartenza);
 
         if (giorniMancanti <= 2) {
-            String query = "UPDATE Prenotazione SET checkIn = 1 WHERE id = ?;";
+            String query = "UPDATE Prenotazioni SET checkIn = 1 WHERE id = ?;";
             try (PreparedStatement pstmt = conn.prepareStatement(query)) {
                 pstmt.setInt(1, this.id);
                 pstmt.executeUpdate();

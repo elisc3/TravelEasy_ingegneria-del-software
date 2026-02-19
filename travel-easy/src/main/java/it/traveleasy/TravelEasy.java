@@ -370,6 +370,10 @@ public class TravelEasy implements AssistenzaObserver{
         return Collections.unmodifiableMap(this.elencoPrenotazioni);
     }
 
+    public Prenotazione getPrenotazioneById(int idPrenotazione) {
+        return this.elencoPrenotazioni.get(idPrenotazione);
+    }
+
     private Map<Integer, Recensione> recuperaRecensioni(){
         String query = "SELECT * FROM Recensione;";
         Map<Integer, Recensione> elencoRecensioni = new HashMap<>();
@@ -1281,7 +1285,7 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     public int createPrenotazione(PacchettoViaggio pacchetto, int idUtente){
-        String query = "INSERT INTO Prenotazione (Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale, PrezzoAssistenzaSpeciale, CheckIn) values (?, ?, ?, ?, ?, ?, ?, ?);";
+        String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale, PrezzoAssistenzaSpeciale, CheckIn) values (?, ?, ?, ?, ?, ?, ?, ?);";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)){
             pstmt.setInt(1, idUtente);
@@ -1303,10 +1307,12 @@ public class TravelEasy implements AssistenzaObserver{
             }
 
             Cliente c = getClienteById(idUtente);
-            Prenotazione p = new Prenotazione(c, pacchetto, "", 0.0F, 0.0F, 0.0F, false);
+            Prenotazione p = new Prenotazione(newId, c, pacchetto, "", 0.0F, 0.0F, 0.0F, false);
 
             elencoPrenotazioni.put(newId, p);
-            c.addPrenotazione(p);
+            if (c != null) {
+                c.addPrenotazione(p);
+            }
             return newId;
         } catch (SQLException e){
             System.out.println("Errore createPrenotazione: "+e);
@@ -1316,12 +1322,18 @@ public class TravelEasy implements AssistenzaObserver{
 
     public boolean createViaggiatore(int idPrenotazione, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
         Prenotazione p = this.elencoPrenotazioni.get(idPrenotazione);
+        if (p == null) {
+            return false;
+        }
 
         return p.createViaggiatore(conn, nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
     }
 
     public List<Viaggiatore> getViaggiatoriByPrenotazione(int idPrenotazione){
         Prenotazione p = this.elencoPrenotazioni.get(idPrenotazione);
+        if (p == null) {
+            return null;
+        }
 
         return p.getElencoViaggiatori();
     }

@@ -152,20 +152,20 @@ public class PacchettoVacanzaCard {
         dialogPane.setPrefWidth(720);
         dialogPane.setPrefHeight(600);
 
-        ModuloPrenotazioneView view = new ModuloPrenotazioneView(viaggiatori -> {
+        ModuloPrenotazioneView view = new ModuloPrenotazioneView((idPrenotazione, viaggiatori) -> {
             Stage dialogStage = (Stage) dialogPane.getScene().getWindow();
             dialogStage.close();
-            openPaymentWindow(viaggiatori);
-        }, pacchetto, te);
+            openPaymentWindow(idPrenotazione, viaggiatori);
+        }, pacchetto, te, idUtente);
 
         dialogPane.setContent(view.getRoot());
         dialogPane.getButtonTypes().setAll(ButtonType.CLOSE);
         dialog.showAndWait();
     }
 
-    private void openPaymentWindow(List<Viaggiatore> viaggiatori) {
+    private void openPaymentWindow(int idPrenotazione, List<Viaggiatore> viaggiatori) {
         Stage stage = new Stage();
-        PagamentoView view = new PagamentoView(te, idUtente, pacchetto, viaggiatori, conn);
+        PagamentoView view = new PagamentoView(te, idUtente, idPrenotazione, pacchetto, viaggiatori, conn);
         Scene scene = new Scene(view.getRoot(), App.WIDTH, App.HEIGHT);
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Pagamento");

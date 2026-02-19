@@ -23,17 +23,19 @@ public class ModuloPrenotazioneView {
     private final DialogCloseHandler closeHandler;
     private final TravelEasy te;
     private final List<VBox> listaPersonCards;
-    private final List<Viaggiatore> listaViaggiatori;
+    private List<Viaggiatore> listaViaggiatori;
     private PacchettoViaggio pacchetto;
     public interface DialogCloseHandler {
-        void onConferma(List<Viaggiatore> viaggiatori);
+        void onConferma(int idPrenotazione, List<Viaggiatore> viaggiatori);
 
     }
+    private int idUtente;
 
-    public ModuloPrenotazioneView(DialogCloseHandler closeHandler, PacchettoViaggio pacchetto, TravelEasy te) {
+    public ModuloPrenotazioneView(DialogCloseHandler closeHandler, PacchettoViaggio pacchetto, TravelEasy te, int idUtente) {
         this.closeHandler = closeHandler;
         this.te = te;
         this.pacchetto = pacchetto;
+        this.idUtente = idUtente;
         this.listaViaggiatori = new ArrayList<>();
         this.listaPersonCards = new ArrayList<>();
         this.root = build();
@@ -164,6 +166,10 @@ public class ModuloPrenotazioneView {
             }
 
             int newIdPrenotazione = te.createPrenotazione(pacchetto, idUtente);
+            if (newIdPrenotazione <= 0) {
+                JOptionPane.showMessageDialog(null, "Creazione prenotazione fallita. Riprovare.", "ERRORE", 0);
+                return;
+            }
 
             for (VBox card: listaPersonCards){
                 DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-uuuu");
@@ -193,7 +199,7 @@ public class ModuloPrenotazioneView {
             listaViaggiatori = te.getViaggiatoriByPrenotazione(newIdPrenotazione);
             if (listaViaggiatori == null)
                 return;
-            openAssistenzaSpecialeWindow();
+            openAssistenzaSpecialeWindow(newIdPrenotazione);
         });
 
         ScrollPane scrollPane = new ScrollPane(peopleForm);
@@ -206,12 +212,12 @@ public class ModuloPrenotazioneView {
         return content;
     }
 
-    private void openAssistenzaSpecialeWindow() {
+    private void openAssistenzaSpecialeWindow(int idPrenotazione) {
         Stage stage = new Stage();
         ModuloAssistenzaSpecialeView view = new ModuloAssistenzaSpecialeView(listaViaggiatori, viaggiatori -> {
             stage.close();
             if (closeHandler != null) {
-                closeHandler.onConferma(viaggiatori);
+                closeHandler.onConferma(idPrenotazione, viaggiatori);
             }
         });
         Scene scene = new Scene(view.getRoot(), 740, 600);
