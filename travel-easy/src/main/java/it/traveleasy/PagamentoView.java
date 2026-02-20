@@ -29,6 +29,8 @@ public class PagamentoView {
     private float totale;
     private float prezzoAssistenzaSpeciale;
     private boolean modificaPrenotazioneMode;
+    private boolean modificaAssistenzaSpecialeMode;
+    private float vecchioPrezzoAssistenzaSpeciale;
 
     public PagamentoView(TravelEasy te, int idUtente, int idPrenotazione, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori,Connection conn) {
         this(te, idUtente, idPrenotazione, pacchetto, elencoViaggiatori, conn, 0.0F);
@@ -65,6 +67,20 @@ public class PagamentoView {
         root.getChildren().add(buildCard(prenotazione));
     }
 
+    public PagamentoView(TravelEasy te, Prenotazione prenotazione, float vecchioPrezzoAssistenzaSpeciale, Connection conn) {
+        this.te = te;
+        this.cliente = prenotazione.getCliente();
+        this.elencoViaggiatori = prenotazione.getElencoViaggiatori();
+        this.pacchettoOriginale = prenotazione.getPacchetto();
+        this.pacchetto = prenotazione.getPacchetto();
+        this.conn = conn;
+        this.vecchioPrezzoAssistenzaSpeciale = vecchioPrezzoAssistenzaSpeciale;
+        this.modificaAssistenzaSpecialeMode = true;
+        root = new StackPane();
+        root.getStyleClass().add("payment-root");
+        root.getChildren().add(buildCard(prenotazione));
+    }
+
     public StackPane getRoot() {
         return root;
     }
@@ -81,6 +97,10 @@ public class PagamentoView {
     }
 
     private VBox buildContent(Prenotazione prenotazione) {
+        if (modificaAssistenzaSpecialeMode) {
+            return buildContentModificaAssistenzaSpeciale(prenotazione);
+        }
+
         if (modificaPrenotazioneMode) {
             return buildContentModificaPrenotazione(prenotazione);
         }
@@ -177,6 +197,62 @@ public class PagamentoView {
         });
 
         VBox content = new VBox(16, sectionTitle, bookingCostLabel, assistenzaLabel, totalLabel, balanceLabel, fidelityBox, confirmButton, rechargeButton);
+        content.setAlignment(Pos.CENTER_LEFT);
+        return content;
+    }
+
+    private VBox buildContentModificaAssistenzaSpeciale(Prenotazione prenotazione) {
+        Label sectionTitle = new Label("Pagamento modifica assistenza speciale");
+        sectionTitle.getStyleClass().add("section-title");
+
+        float nuovoPrezzoAssistenza = prenotazione.getPrezzoAssistenzaSpeciale();
+        float totaleOriginale = prenotazione.getPrezzoTotale();
+        float nuovoTotale = totaleOriginale - vecchioPrezzoAssistenzaSpeciale + nuovoPrezzoAssistenza;
+
+        Label oldTotalLabel = new Label(String.format("Totale attuale: EUR %.2f", totaleOriginale));
+        oldTotalLabel.getStyleClass().add("package-meta");
+
+        Label newTotalLabel = new Label(String.format("Nuovo totale: EUR %.2f", nuovoTotale));
+        newTotalLabel.getStyleClass().add("package-price");
+
+        double saldoPortafoglio = cliente.getPv().getSaldo();
+        String saldoFormat = String.format(java.util.Locale.US, "%.2f", saldoPortafoglio);
+        balanceLabel = new Label("Saldo attuale portafoglio: EUR " + saldoFormat);
+        balanceLabel.getStyleClass().add("package-meta");
+
+        float difference = nuovoTotale - totaleOriginale;
+        confirmButton = new Button("Conferma pagamento");
+        confirmButton.getStyleClass().add("primary-button");
+        if (difference > 0) {
+            confirmButton.setDisable(difference > saldoPortafoglio);
+        } else {
+            confirmButton.setDisable(false);
+        }
+
+        confirmButton.setOnAction(e -> {
+            if (difference < 0) {
+                float rimborso = -difference;
+                if (!cliente.rimborsoOnPortafoglioDB(conn, rimborso)) {
+                    JOptionPane.showMessageDialog(null, "Il rimborso non e andato a buon fine. Prego riprovare.", "ERRORE", 0);
+                    return;
+                }
+            } else if (difference > 0) {
+                if (!cliente.pagamentoOnPortafoglioDB(conn, difference)) {
+                    JOptionPane.showMessageDialog(null, "Il pagamento non e andato a buon fine. Prego riprovare.", "ERRORE", 0);
+                    return;
+                }
+            }
+
+            prenotazione.setPrezzoAssistenzaSpeciale(nuovoPrezzoAssistenza);
+            prenotazione.setPrezzoTotale(nuovoTotale);
+            JOptionPane.showMessageDialog(null, "Modifica assistenza speciale effettuata!", "INFO", 1);
+        });
+
+        Button rechargeButton = new Button("Nuova ricarica portafoglio");
+        rechargeButton.getStyleClass().add("secondary-button");
+        rechargeButton.setOnAction(e -> openRechargeWindow());
+
+        VBox content = new VBox(16, sectionTitle, oldTotalLabel, newTotalLabel, balanceLabel, confirmButton, rechargeButton);
         content.setAlignment(Pos.CENTER_LEFT);
         return content;
     }

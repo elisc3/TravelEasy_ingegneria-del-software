@@ -46,6 +46,7 @@ class TravelEasyRecensioniTest extends BaseTravelEasyTest {
         assertNotNull(recensioni);
         assertEquals(3, recensioni.length);
 
+        
         Set<String> riferimenti = Arrays.stream(recensioni)
             .filter(r -> r != null)
             .map(Recensione::getRiferimento)

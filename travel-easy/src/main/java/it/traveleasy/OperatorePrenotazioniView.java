@@ -32,6 +32,7 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
     private final Connection conn;
     private VBox listContainer;
     private Map<Integer, Prenotazione> elencoPrenotazioni;
+    private float vecchioPrezzoAssistenzaSpeciale;
 
     public OperatorePrenotazioniView(Map<Integer, Prenotazione> elencoPrenotazioni, TravelEasy te) {
         this(elencoPrenotazioni, te, false, null);
@@ -132,6 +133,18 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
         stage.setScene(scene);
         stage.show();
     }
+    private void openPagamentoModificaAssistenzaWindow(Prenotazione prenotazione) {
+        Stage stage = new Stage();
+        PagamentoView view = new PagamentoView(te, prenotazione, vecchioPrezzoAssistenzaSpeciale, conn);
+        Scene scene = new Scene(view.getRoot(), 740, 600);
+        scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
+        stage.setTitle("Travel Easy - Pagamento");
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    
 
     private void openModificaViaggiatoriWindow(Prenotazione prenotazione) {
         VBox content = new VBox(12);
@@ -231,22 +244,46 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
 
         Button confermaButton = new Button("Conferma");
         confermaButton.getStyleClass().add("primary-button");
+        this.vecchioPrezzoAssistenzaSpeciale = prenotazione.getPrezzoAssistenzaSpeciale();
         confermaButton.setOnAction(e -> {
-            List<Viaggiatore> nuoviViaggiatori = new ArrayList<>();
+            //List<Viaggiatore> nuoviViaggiatori = new ArrayList<>();
 
             for (int i = 0; i < nomeFields.size(); i++) {
-                Viaggiatore nuovo = new Viaggiatore(
+                /*Viaggiatore nuovo = new Viaggiatore(
                     nomeFields.get(i).getText(),
                     cognomeFields.get(i).getText(),
                     dataNascitaFields.get(i).getText(),
                     tipoDocumentoFields.get(i).getValue(),
                     codiceDocumentoFields.get(i).getText()
-                );
-                nuovo.setSediaRotelle(sediaRotelleChecks.get(i).isSelected());
-                nuovo.setCecita(cecitaChecks.get(i).isSelected());
-                nuoviViaggiatori.add(nuovo);
-            }
+                );*/
+                //nuovo.setSediaRotelle(sediaRotelleChecks.get(i).isSelected());
+                //nuovo.setCecita(cecitaChecks.get(i).isSelected());
 
+                String nome = nomeFields.get(i).getText();
+                String cognome = cognomeFields.get(i).getText();
+                String dataNascita = dataNascitaFields.get(i).getText();
+                String tipoDocumento = tipoDocumentoFields.get(i).getValue();
+                String codiceDocumento = codiceDocumentoFields.get(i).getText();
+                boolean cecita = cecitaChecks.get(i).isSelected();
+                boolean sediaRotelle = sediaRotelleChecks.get(i).isSelected();
+
+                /*Viaggiatore nuovo = new Viaggiatore(nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
+                nuovo.setCecita(cecita);
+                nuovo.setSediaRotelle(sediaRotelle);
+                nuoviViaggiatori.add(nuovo);*/
+
+                te.modificaViaggiatori(prenotazione, nome, cognome, dataNascita, tipoDocumento, codiceDocumento, cecita, sediaRotelle, i);
+                //nuoviViaggiatori.add(nuovo);
+            }
+            
+            prenotazione.calcolaPrezzoAssistenzaSpeciale();
+
+            if (prenotazione.replaceViaggiatoriDB(conn)){
+                JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori effettuata!", "INFO", 1);
+            } else {
+                JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori fallita. Riprovare", "ERRORE", 0);
+            }
+            List<Viaggiatore> nuoviViaggiatori = prenotazione.getElencoViaggiatori();
             for (int i = 0; i < nuoviViaggiatori.size(); i++) {
                 Viaggiatore v = nuoviViaggiatori.get(i);
                 int pos = i + 1;
@@ -283,11 +320,17 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
                 }
             }
 
-            if(te.modificaViaggiatori(prenotazione, nuoviViaggiatori))
+        boolean assistenzaModificata = te.assistenzaSpecialeModificata(prenotazione.getPrezzoAssistenzaSpeciale(), vecchioPrezzoAssistenzaSpeciale);
+            if (assistenzaModificata) {
+                Stage currentStage = (Stage) content.getScene().getWindow();
+                currentStage.close();
+                openPagamentoModificaAssistenzaWindow(prenotazione);
+                return;
+            }            /*if(te.modificaViaggiatori(prenotazione, nuoviViaggiatori))
                 JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori effettuata!", "INFO", 1);
             else
                 JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori fallita. Riprovare", "ERRORE", 0);
-            
+            */
         });
 
         content.getChildren().addAll(title, scrollPane, confermaButton);
@@ -335,7 +378,7 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
             return;
         }
 
-        int esitoEliminazione = te.eliminaPrenotazione(prenotazione);
+        int esitoEliminazione = te.eliminaPrenotazione(prenotazione, rimborso);
         if (esitoEliminazione == -1) {
             JOptionPane.showMessageDialog(null, "Rimborso fallito: la prenotazione rimane valida.", "ERRORE", 0);
             return;

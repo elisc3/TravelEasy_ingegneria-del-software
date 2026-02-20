@@ -45,6 +45,26 @@ public class Viaggiatore {
         return codiceDocumento;
     }
     
+    public void setNome(String nome) {
+    this.nome = nome;
+    }
+
+    public void setCognome(String cognome) {
+        this.cognome = cognome;
+    }
+
+    public void setDataNascita(String dataNascita) {
+        this.dataNascita = dataNascita;
+    }
+
+    public void setTipoDocumento(String tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
+    }
+
+    public void setCodiceDocumento(String codiceDocumento) {
+        this.codiceDocumento = codiceDocumento;
+    }
+
     public boolean isSediaRotelle() { 
         return sediaRotelle; 
     }

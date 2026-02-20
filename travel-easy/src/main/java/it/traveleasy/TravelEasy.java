@@ -1175,12 +1175,12 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
-    public int eliminaPrenotazione(Prenotazione prenotazione) {
+    public int eliminaPrenotazione(Prenotazione prenotazione, float rimborso) {
         if (prenotazione == null || prenotazione.getCliente() == null) {
             return -2;
         }
 
-        float rimborso = calcolaRimborsoEliminazione(prenotazione);
+        //float rimborso = calcolaRimborsoEliminazione(prenotazione);
         if (rimborso < 0.0F) {
             return -3;
         }
@@ -1219,16 +1219,19 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     //!RIVEDI
-    public boolean modificaViaggiatori(Prenotazione p, List<Viaggiatore> nuoviDati){
-        if (p == null || nuoviDati == null) {
-            return false;
-        }
+    public boolean modificaViaggiatori(Prenotazione p, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento, boolean cecita, boolean sediaRotelle, int index){
+        
 
-        if (p.replaceViaggiatori(conn, nuoviDati)) {
+        p.replaceViaggiatori(conn, nome, cognome, dataNascita, tipoDocumento, codiceDocumento, cecita, sediaRotelle, index);
+        if (true) {
             notifyPrenotazioneModificata(p);
             return true;
         }
         return false;
+    }
+
+    public boolean assistenzaSpecialeModificata(float nuovoPrezzo, float vecchioPrezzo) {
+        return nuovoPrezzo != vecchioPrezzo;
     }
 
     //*METODI VARI
