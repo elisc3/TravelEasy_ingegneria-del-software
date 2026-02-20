@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.swing.JOptionPane;
 
 
 public class TravelEasy implements AssistenzaObserver{
@@ -670,7 +669,7 @@ public class TravelEasy implements AssistenzaObserver{
         return !date1.isAfter(date2);
     }
 
-    public boolean nuovoPacchetto(Connection conn, String codice, String titolo, String citta, String nazione, String descrizione, float prezzo, float oreViaggio, int visibilità, String compagnia, String alloggio, String dataPartenza, String dataRitorno){
+    public int nuovoPacchetto(Connection conn, String codice, String titolo, String citta, String nazione, String descrizione, float prezzo, float oreViaggio, int visibilità, String compagnia, String alloggio, String dataPartenza, String dataRitorno){
         String query = "INSERT INTO PacchettiViaggio (Città, Titolo, Nazione, DataPartenza, DataRitorno, Descrizione, Prezzo, Visibilità, CompagniaTrasporto, Alloggio, Codice, OreViaggio) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         int idAlloggio = 0;
@@ -690,18 +689,15 @@ public class TravelEasy implements AssistenzaObserver{
         }
 
         if (!this.coerenzaDate(dataPartenza, dataRitorno)){
-            JOptionPane.showMessageDialog(null, "Date inserite non valide. Prego ricontrollare.", "ERRORE", 0);
-            return false;
+            return -1;
         }
 
         int esitoPacchettiDuplicati = this.controllaPacchettiDuplicati(codice, citta, nazione, dataPartenza, dataRitorno, idCompagniaTrasporto, idAlloggio, prezzo);
 
         if (esitoPacchettiDuplicati == -2){
-            JOptionPane.showMessageDialog(null, "Esiste già un pacchetto con queste caratteristiche", "ATTENZIONE", 2);
-            return false; 
+            return -2; 
         } else if (esitoPacchettiDuplicati == -1){
-            JOptionPane.showMessageDialog(null, "Il codice inserito appartiene a un pacchetto già esistente.", "ERRORE", 0);
-            return false;
+            return -3;
         }
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -728,10 +724,10 @@ public class TravelEasy implements AssistenzaObserver{
             }
             PacchettoViaggio p = new PacchettoViaggio(newId, codice, titolo, citta, nazione, dataPartenza, dataRitorno, descrizione, prezzo, oreViaggio, visibilità, idCompagniaTrasporto, idAlloggio, conn);
             elencoPacchetti.put(p.getId(), p);
-            return true;
+            return 0;
         } catch (SQLException e){
             System.out.println("Errore nuovo pacchetto: "+e);
-            return false;
+            return -4;
         }
     }
 

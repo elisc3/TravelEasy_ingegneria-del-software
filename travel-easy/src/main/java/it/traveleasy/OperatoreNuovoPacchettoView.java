@@ -152,9 +152,21 @@ public class OperatoreNuovoPacchettoView {
             }
 
             
-
-            if (te.nuovoPacchetto(conn, codice, titolo, citta, nazione, descrizione, prezzoF, oreViaggioF, visibilità, compagnia, alloggio, dataPartenzaValue, dataRitornoValue))
-                JOptionPane.showMessageDialog(null, "Il pacchetto #"+ codice + " e' stato inserito con successo!", "INFO", 1);
+            int esitoNuovoPacchetto = te.nuovoPacchetto(conn, codice, titolo, citta, nazione, descrizione, prezzoF, oreViaggioF, visibilità, compagnia, alloggio, dataPartenzaValue, dataRitornoValue);
+            if (esitoNuovoPacchetto == -1){
+                JOptionPane.showMessageDialog(null, "Date inserite non valide. Prego ricontrollare.", "ERRORE", 0);
+                return;
+            } else if (esitoNuovoPacchetto == -2){
+                JOptionPane.showMessageDialog(null, "Esiste già un pacchetto con queste caratteristiche.", "ERRORE", 0);
+                return;
+            } else if (esitoNuovoPacchetto == -3){
+                 JOptionPane.showMessageDialog(null, "Esiste già un pacchetto con queste caratteristiche", "ERRORE", 0);
+                return;
+            } else if (esitoNuovoPacchetto == -4){
+                JOptionPane.showMessageDialog(null, "Inserimento nuovo pacchetto fallito.", "ERRORE", 0);
+                return;
+            }
+            JOptionPane.showMessageDialog(null, "Il pacchetto #"+ codice + " e' stato inserito con successo!", "INFO", 1);
 
 
 
