@@ -2,16 +2,16 @@ package it.traveleasy;
 
 public class Recensione {
     private int id;
-    private String riferimento;
+    //private String riferimento;
     private int stelle;
     private String commento;
     private String data;
     private Cliente cliente;
     private Prenotazione prenotazione;
 
-    public Recensione(int id, String riferimento, int stelle, String commento, String data, Cliente cliente, Prenotazione prenotazione) {
+    public Recensione(int id, /*String riferimento,*/ int stelle, String commento, String data, Cliente cliente, Prenotazione prenotazione) {
         this.id = id;
-        this.riferimento = riferimento;
+        //this.riferimento = riferimento;
         this.stelle = stelle;
         this.commento = commento;
         this.data = data;
@@ -27,13 +27,13 @@ public class Recensione {
         this.id = id;
     }
 
-    public String getRiferimento() {
+    /*public String getRiferimento() {
         return riferimento;
     }
 
     public void setRiferimento(String riferimento) {
         this.riferimento = riferimento;
-    }
+    }*/
 
     public int getStelle() {
         return stelle;

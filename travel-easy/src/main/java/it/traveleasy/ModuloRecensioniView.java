@@ -118,12 +118,13 @@ public class ModuloRecensioniView {
     private void popolaRecensioneInSolaLettura(Recensione[] recensione, SectionControls sezioneAgenzia, SectionControls sezioneTrasporto, SectionControls sezioneAlloggio) {
         for (int i = 0; i < nRiferimenti; i++){
             SectionControls target = null;
-            String riferimento = recensione[i].getRiferimento();
-            if ("Agenzia".equalsIgnoreCase(riferimento)) {
+            //String riferimento = recensione[i].getRiferimento();
+            Recensione r = recensione[i];
+            if (r instanceof RecensioneAgenzia) {
                 target = sezioneAgenzia;
-            } else if ("Trasporto".equalsIgnoreCase(riferimento)) {
+            } else if (r instanceof RecensioneTrasporto) {
                 target = sezioneTrasporto;
-            } else if ("Alloggio".equalsIgnoreCase(riferimento)) {
+            } else if (r instanceof RecensioneAlloggio) {
                 target = sezioneAlloggio;
             }
 

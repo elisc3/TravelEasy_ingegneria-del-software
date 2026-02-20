@@ -391,9 +391,27 @@ public class TravelEasy implements AssistenzaObserver{
                 Cliente cliente = getClienteById(idCliente);
                 Prenotazione prenotazione = elencoPrenotazioni.get(idPrenotazione);
 
-                Recensione r = new Recensione(id, riferimento, stelle, commento, data, cliente, prenotazione);
-                elencoRecensioni.put(id, r);
-                cliente.addRecensione(r);
+                RecensioneAgenzia rAgenzia;
+                RecensioneTrasporto rTrasporto;
+                RecensioneAlloggio rAlloggio;
+
+                switch (riferimento){
+                    case "Agenzia":
+                        rAgenzia = new RecensioneAgenzia(idPrenotazione, stelle, commento, data, cliente, prenotazione);
+                        elencoRecensioni.put(id, rAgenzia);
+                        cliente.addRecensione(rAgenzia);
+                        break;
+                    case "Trasporto":
+                        rTrasporto = new RecensioneTrasporto(idPrenotazione, stelle, commento, data, cliente, prenotazione);
+                        elencoRecensioni.put(id, rTrasporto);
+                        cliente.addRecensione(rTrasporto);
+                        break;
+                    case "Alloggio":
+                        rAlloggio = new RecensioneAlloggio(idPrenotazione, stelle, commento, data, cliente, prenotazione);
+                        elencoRecensioni.put(id, rAlloggio);
+                        cliente.addRecensione(rAlloggio);
+                        break;
+                }
             }
             return elencoRecensioni;
 
@@ -1035,11 +1053,29 @@ public class TravelEasy implements AssistenzaObserver{
                 }
             }
 
-
-            Recensione r = new Recensione(newId, riferimento, stelle, commento, dataRecensione, cliente, prenotazione);
-            this.elencoRecensioni.put(newId, r);
-            cliente.addRecensione(r); 
-            notifyRecensioneCreata(r);
+            RecensioneAgenzia rAgenzia;
+            RecensioneTrasporto rTrasporto;
+            RecensioneAlloggio rAlloggio;
+            switch (riferimento){
+                case "Agenzia":
+                    rAgenzia = new RecensioneAgenzia(newId, stelle, commento, dataRecensione, cliente, prenotazione);
+                    this.elencoRecensioni.put(newId, rAgenzia);
+                    cliente.addRecensione(rAgenzia); 
+                    notifyRecensioneCreata(rAgenzia);
+                    break;
+                case "Alloggio":
+                    rAlloggio = new RecensioneAlloggio(newId, stelle, commento, dataRecensione, cliente, prenotazione);
+                    this.elencoRecensioni.put(newId, rAlloggio);
+                    cliente.addRecensione(rAlloggio); 
+                    notifyRecensioneCreata(rAlloggio);
+                    break;
+                case "Trasporto":
+                    rTrasporto = new RecensioneTrasporto(newId, stelle, commento, dataRecensione, cliente, prenotazione);
+                    this.elencoRecensioni.put(newId, rTrasporto);
+                    cliente.addRecensione(rTrasporto); 
+                    notifyRecensioneCreata(rTrasporto);
+                    break;
+            }
             return true;
         } catch (SQLException e){
             System.out.println("Errore inserimento nuova recensione: "+e);
@@ -1055,9 +1091,27 @@ public class TravelEasy implements AssistenzaObserver{
         int somma = 0;
         int nRecensioni = 0;
         for (Recensione r: elencoRecensioni.values()){
-            if (r.getRiferimento().equals(riferimento)){
-                somma += r.getStelle();
-                nRecensioni++;
+
+            int stelle = r.getStelle();
+            switch (riferimento) {
+                case "Agenzia":
+                    if (r instanceof RecensioneAgenzia){
+                        somma += stelle;
+                        nRecensioni++;
+                    }
+                    break;
+                case "Trasporto":
+                    if (r instanceof RecensioneTrasporto){
+                        somma += stelle;
+                        nRecensioni++;
+                    }
+                    break;
+                case "Alloggio":
+                    if (r instanceof RecensioneAlloggio){
+                        somma += stelle;
+                        nRecensioni++;
+                    }
+                    break;
             }
         }
         return (float)somma/nRecensioni;
