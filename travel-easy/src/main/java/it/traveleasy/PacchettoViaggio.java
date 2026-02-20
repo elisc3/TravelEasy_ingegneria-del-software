@@ -187,8 +187,8 @@ public class PacchettoViaggio {
         return provaN;
     }
 
-
-    public OffertaSpeciale nuovaOfferta(float percentuale, String dataFine, int disponibilità){
+    
+    public OffertaSpeciale createNuovaOfferta(float percentuale, String dataFine, int disponibilità){
         String query = "INSERT INTO OffertaSpeciale (Pacchetto, ScontoPercentuale, PrezzoScontato, DataFine, Disponibilità) values (?, ?, ?, ?, ?);";
         
         float prezzoScontato = prezzo - prezzo*percentuale/100;

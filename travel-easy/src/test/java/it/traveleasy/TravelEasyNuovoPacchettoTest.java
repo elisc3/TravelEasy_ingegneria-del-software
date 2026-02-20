@@ -46,7 +46,7 @@ class TravelEasyNuovoPacchettoTest extends BaseTravelEasyTest {
         String dataPartenza = LocalDate.now().plusDays(20).format(fmt);
         String dataRitorno = LocalDate.now().plusDays(25).format(fmt);
 
-        boolean created = te.nuovoPacchetto(
+        int createdInt = te.nuovoPacchetto(
             conn,
             "PKG9001",
             "Londra Sprint",
@@ -62,6 +62,7 @@ class TravelEasyNuovoPacchettoTest extends BaseTravelEasyTest {
             dataRitorno
         );
 
+        boolean created = createdInt == 0;
         assertTrue(created);
         assertEquals(before + 1, TestDbSupport.countRows(conn, "PacchettiViaggio"));
 

@@ -88,7 +88,7 @@ public class ModuloOffertaView {
                 return;
             }
 
-            OffertaSpeciale newOffertaSpeciale = p.nuovaOfferta(percentualeF, dataFineValue, maxPacchettiI);
+            OffertaSpeciale newOffertaSpeciale = p.createNuovaOfferta(percentualeF, dataFineValue, maxPacchettiI);
 
             if (newOffertaSpeciale == null){
                 JOptionPane.showMessageDialog(null, "Inserimento nuova offerta fallito!", "ERRORE", 0);

@@ -43,7 +43,7 @@ class TravelEasyNuovaOffertaSpecialeTest extends BaseTravelEasyTest {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         String fine = LocalDate.now().plusDays(5).format(fmt);
 
-        OffertaSpeciale offerta = p.nuovaOfferta(20.0f, fine, 10);
+        OffertaSpeciale offerta = p.createNuovaOfferta(20.0f, fine, 10);
 
         assertNotNull(offerta);
         assertEquals(before + 1, TestDbSupport.countRows(conn, "OffertaSpeciale"));
