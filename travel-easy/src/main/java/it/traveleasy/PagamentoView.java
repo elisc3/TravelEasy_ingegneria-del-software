@@ -242,7 +242,7 @@ public class PagamentoView {
                     return;
                 }
             }
-
+            
             prenotazione.setPrezzoAssistenzaSpeciale(nuovoPrezzoAssistenza);
             prenotazione.setPrezzoTotale(nuovoTotale);
             JOptionPane.showMessageDialog(null, "Modifica assistenza speciale effettuata!", "INFO", 1);

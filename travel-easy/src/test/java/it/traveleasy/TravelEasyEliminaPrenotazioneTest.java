@@ -29,8 +29,9 @@ class TravelEasyEliminaPrenotazioneTest extends BaseTravelEasyTest {
         Prenotazione p = te.getPrenotazioneById(1);
         assertNotNull(p);
         p.setPacchetto(pacchettoConPartenzaTra(10));
+        float rimborso = te.getRimborsoEliminazionePrenotazione(p);
 
-        int esito = te.eliminaPrenotazione(p);
+        int esito = te.eliminaPrenotazione(p, rimborso);
         assertEquals(0, esito);
 
         try (PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM Prenotazioni WHERE id = ?")) {
@@ -55,8 +56,9 @@ class TravelEasyEliminaPrenotazioneTest extends BaseTravelEasyTest {
         Prenotazione p = te.getPrenotazioneById(1);
         assertNotNull(p);
         p.setPacchetto(pacchettoConPartenzaTra(1));
+        float rimborso = te.getRimborsoEliminazionePrenotazione(p);
 
-        int esito = te.eliminaPrenotazione(p);
+        int esito = te.eliminaPrenotazione(p, rimborso);
         assertEquals(-3, esito);
     }
 }

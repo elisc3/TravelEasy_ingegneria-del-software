@@ -49,7 +49,12 @@ class TravelEasyRecensioniTest extends BaseTravelEasyTest {
         
         Set<String> riferimenti = Arrays.stream(recensioni)
             .filter(r -> r != null)
-            .map(Recensione::getRiferimento)
+            .map(r -> {
+                if (r instanceof RecensioneAgenzia) return "Agenzia";
+                if (r instanceof RecensioneTrasporto) return "Trasporto";
+                if (r instanceof RecensioneAlloggio) return "Alloggio";
+                return "Sconosciuto";
+            })
             .collect(Collectors.toSet());
 
         assertEquals(Set.of("Agenzia", "Trasporto", "Alloggio"), riferimenti);

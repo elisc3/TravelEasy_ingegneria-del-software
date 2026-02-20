@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 import it.traveleasy.testsupport.BaseTravelEasyTest;
@@ -51,8 +49,31 @@ class TravelEasyModificaPrenotazioneTest extends BaseTravelEasyTest {
         Viaggiatore v2 = new Viaggiatore("Luca", "Nuovo", "11-11-1991", "Patente di guida", "PT12345678");
         v2.setCecita(true);
 
-        boolean ok = te.modificaViaggiatori(p, List.of(v1, v2));
-        assertTrue(ok);
+        boolean ok1 = te.modificaViaggiatori(
+            p,
+            v1.getNome(),
+            v1.getCognome(),
+            v1.getDataNascita(),
+            v1.getTipoDocumento(),
+            v1.getCodiceDocumento(),
+            v1.isCecita(),
+            v1.isSediaRotelle(),
+            0
+        );
+        boolean ok2 = te.modificaViaggiatori(
+            p,
+            v2.getNome(),
+            v2.getCognome(),
+            v2.getDataNascita(),
+            v2.getTipoDocumento(),
+            v2.getCodiceDocumento(),
+            v2.isCecita(),
+            v2.isSediaRotelle(),
+            1
+        );
+        assertTrue(ok1);
+        assertTrue(ok2);
+        assertTrue(p.replaceViaggiatoriDB(conn));
 
         try (PreparedStatement countPs = conn.prepareStatement(
             "SELECT COUNT(*) FROM Viaggiatore WHERE Prenotazione = ?")) {
