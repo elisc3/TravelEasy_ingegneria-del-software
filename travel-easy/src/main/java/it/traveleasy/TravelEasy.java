@@ -807,7 +807,7 @@ public class TravelEasy implements AssistenzaObserver{
         float provaF;
         try {
             provaF = Float.parseFloat(percentuale);
-            if (provaF < 0 || provaF > 100)
+            if (provaF <= 0 || provaF > 100)
                 return -2.0F;
         } catch (Exception e){
             return -3.0F;
