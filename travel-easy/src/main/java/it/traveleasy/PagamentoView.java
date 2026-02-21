@@ -1,18 +1,19 @@
 package it.traveleasy;
 
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-//import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
-import javafx.scene.Scene;
 import java.sql.Connection;
 import java.util.List;
+
 import javax.swing.JOptionPane;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 
 public class PagamentoView {
@@ -161,7 +162,7 @@ public class PagamentoView {
                 JOptionPane.showMessageDialog(null, "Prenotazione non trovata. Riprovare.", "ERRORE", 0);
                 return;
             }
-            if(!cliente.pagamentoOnPortafoglioDB(conn, totale)){
+            if(!te.pagamentoOnPortafoglioDB(totale, cliente)){
                 JOptionPane.showMessageDialog(null, "Errore durante il pagamento, riprovare.", "ERRORE", 0);
                 return;
             }
@@ -232,19 +233,19 @@ public class PagamentoView {
         confirmButton.setOnAction(e -> {
             if (difference < 0) {
                 float rimborso = -difference;
-                if (!cliente.rimborsoOnPortafoglioDB(conn, rimborso)) {
+                if (!te.rimborsoOnPortafoglioDB(rimborso, cliente)) {
                     JOptionPane.showMessageDialog(null, "Il rimborso non e andato a buon fine. Prego riprovare.", "ERRORE", 0);
                     return;
                 }
             } else if (difference > 0) {
-                if (!cliente.pagamentoOnPortafoglioDB(conn, difference)) {
+                if (!te.pagamentoOnPortafoglioDB(difference, cliente)) {
                     JOptionPane.showMessageDialog(null, "Il pagamento non e andato a buon fine. Prego riprovare.", "ERRORE", 0);
                     return;
                 }
             }
             
-            prenotazione.setPrezzoAssistenzaSpeciale(nuovoPrezzoAssistenza);
-            prenotazione.setPrezzoTotale(nuovoTotale);
+            te.setPrezzoAssistenzaSpeciale(nuovoPrezzoAssistenza, prenotazione);
+            te.setPrezzoTotale(nuovoTotale, prenotazione);
             JOptionPane.showMessageDialog(null, "Modifica assistenza speciale effettuata!", "INFO", 1);
         });
 
@@ -290,13 +291,13 @@ public class PagamentoView {
         confirmButton.setOnAction(e -> {
             if (totaleOriginale > totale){
                 float rimborso = totaleOriginale - totale;
-                if (!cliente.rimborsoOnPortafoglioDB(conn, rimborso)){
+                if (!te.rimborsoOnPortafoglioDB(rimborso, cliente)){
                     JOptionPane.showMessageDialog(null, "Il rimborso non è andato a buon fine. Prego riprovare.", "ERRORE", 0);
                     return;
                 }
             } else {
                 float nuovoPagamento = totale - totaleOriginale;
-                if (!cliente.pagamentoOnPortafoglioDB(conn, nuovoPagamento)){
+                if (!te.pagamentoOnPortafoglioDB(nuovoPagamento, cliente)){
                     JOptionPane.showMessageDialog(null, "Il pagamento non è andato a buon fine. Prego riprovare.", "ERRORE", 0);
                     return;
                 }

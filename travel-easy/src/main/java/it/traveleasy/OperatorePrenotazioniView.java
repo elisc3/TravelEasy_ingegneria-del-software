@@ -271,37 +271,8 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
                 nuovo.setCecita(cecita);
                 nuovo.setSediaRotelle(sediaRotelle);
                 nuoviViaggiatori.add(nuovo);*/
-
-                te.modificaViaggiatori(prenotazione, nome, cognome, dataNascita, tipoDocumento, codiceDocumento, cecita, sediaRotelle, i);
-                //nuoviViaggiatori.add(nuovo);
-            }
-            
-            prenotazione.calcolaPrezzoAssistenzaSpeciale();
-
-            if (prenotazione.replaceViaggiatoriDB(conn)){
-                JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori effettuata!", "INFO", 1);
-            } else {
-                JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori fallita. Riprovare", "ERRORE", 0);
-            }
-            List<Viaggiatore> nuoviViaggiatori = prenotazione.getElencoViaggiatori();
-            for (int i = 0; i < nuoviViaggiatori.size(); i++) {
-                Viaggiatore v = nuoviViaggiatori.get(i);
                 int pos = i + 1;
-                int esitoValidazioneDati;
-
-                try {
-                    esitoValidazioneDati = te.validazioneViaggiatore(
-                        v.getNome(),
-                        v.getCognome(),
-                        v.getDataNascita(),
-                        v.getTipoDocumento(),
-                        v.getCodiceDocumento()
-                    );
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Data inserita non valida in persona " + pos + ".", "ERRORE", 0);
-                    return;
-                }
-
+                int esitoValidazioneDati = te.modificaViaggiatori(prenotazione, nome, cognome, dataNascita, tipoDocumento, codiceDocumento, cecita, sediaRotelle, i);
                 if (esitoValidazioneDati == -1) {
                     JOptionPane.showMessageDialog(null, "Hai dimenticato qualche campo in persona " + pos + ".", "ATTENZIONE", 2);
                     return;
@@ -318,6 +289,14 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
                     JOptionPane.showMessageDialog(null, "Codice del documento non valido in persona " + pos + ".", "ERRORE", 0);
                     return;
                 }
+            }
+            
+            te.calcolaPrezzoAssistenzaSpeciale(prenotazione);
+
+            if (te.replaceViaggiatoriDB(prenotazione)){
+                JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori effettuata!", "INFO", 1);
+            } else {
+                JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori fallita. Riprovare", "ERRORE", 0);
             }
 
         boolean assistenzaModificata = te.assistenzaSpecialeModificata(prenotazione.getPrezzoAssistenzaSpeciale(), vecchioPrezzoAssistenzaSpeciale);

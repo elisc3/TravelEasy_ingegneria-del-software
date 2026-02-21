@@ -960,7 +960,6 @@ public class TravelEasy implements AssistenzaObserver{
     
 
     //*PRENOTAZIONE
-
     public int validazioneViaggiatore(String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
 
             if (nome.isBlank() || cognome.isBlank() || dataNascita.isBlank() ||tipoDocumento.isBlank() || codiceDocumento.isBlank())
@@ -1049,7 +1048,6 @@ public class TravelEasy implements AssistenzaObserver{
         return true;
     }
 
-    //!RIVEDI
     public float getTotalePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori){
         OffertaSpeciale o = elencoOfferte.get(pacchetto);
         float prezzoVero = 0.0F;
@@ -1068,17 +1066,10 @@ public class TravelEasy implements AssistenzaObserver{
         return totaleSenzaSconto - totaleSenzaSconto*sconto/100;
     }
 
-    
-
-
-
-
-    //!RIVEDI
     public boolean registrazionePrenotazione(int idPrenotazione, float scontoApplicato, float totaleAggiornato, float offertaApplicata){
         return registrazionePrenotazione(idPrenotazione, scontoApplicato, totaleAggiornato, offertaApplicata, 0.0F);
     }
 
-    //!RIVEDI
     public boolean registrazionePrenotazione(int idPrenotazione, float scontoApplicato, float totaleAggiornato, float offertaApplicata, float prezzoAssistenzaSpeciale){
         String query = "UPDATE Prenotazioni SET DataPrenotazione = ?, PrezzoTotale = ?, ScontoApplicato= ?, OffertaSpeciale = ?, PrezzoAssistenzaSpeciale = ?, CheckIn = ? WHERE id = ?;";
 
@@ -1125,9 +1116,12 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
-    //!RIVEDI
-    public void inserisciDatiViaggiatore(List<Viaggiatore> elencoViaggiatori, Viaggiatore v){
-        elencoViaggiatori.add(v);
+    public boolean pagamentoOnPortafoglioDB(float totale, Cliente c) {
+        return c.pagamentoOnPortafoglioDB(conn, totale);
+    }
+
+    public boolean rimborsoOnPortafoglioDB(float rimborso, Cliente c) {
+        return c.rimborsoOnPortafoglioDB(conn, rimborso);
     }
 
     //*MODIFICA PACCHETTI
@@ -1172,8 +1166,36 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
+    public int modificaViaggiatori(Prenotazione p, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento, boolean cecita, boolean sediaRotelle, int index){
+        int res = validazioneViaggiatore(nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
+         
+        if(res != 0)
+            return res;
+        
+        p.replaceViaggiatori(conn, nome, cognome, dataNascita, tipoDocumento, codiceDocumento, cecita, sediaRotelle, index);
+        
+        notifyPrenotazioneModificata(p);
+
+        return res;
+    }
+
+    public void calcolaPrezzoAssistenzaSpeciale(Prenotazione prenotazione) {
+        prenotazione.calcolaPrezzoAssistenzaSpeciale();
+    }
+
+    public boolean replaceViaggiatoriDB(Prenotazione p){
+        return p.replaceViaggiatoriDB(conn);
+    }
+
+    public void setPrezzoAssistenzaSpeciale(float nuovoPrezzoAssistenza, Prenotazione prenotazione) {
+        prenotazione.setPrezzoAssistenzaSpeciale(nuovoPrezzoAssistenza);
+    }
+
+    public void setPrezzoTotale(float nuovoTotale, Prenotazione prenotazione) {
+        prenotazione.setPrezzoTotale(nuovoTotale);
+    }
+
     //*RECENSIONI
-    //!RIVEDI
     public boolean validaDatiNuovaRecensione(String commentoAgenzia, String commentoTrasporto, String commentoAlloggio){
         return !(commentoAgenzia.isBlank() || commentoTrasporto.isBlank() || commentoAlloggio.isBlank());
     }
@@ -1364,18 +1386,6 @@ public class TravelEasy implements AssistenzaObserver{
         }
 
         return p.checkIn(conn);
-    }
-
-    //!RIVEDI
-    public boolean modificaViaggiatori(Prenotazione p, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento, boolean cecita, boolean sediaRotelle, int index){
-        
-
-        p.replaceViaggiatori(conn, nome, cognome, dataNascita, tipoDocumento, codiceDocumento, cecita, sediaRotelle, index);
-        if (true) {
-            notifyPrenotazioneModificata(p);
-            return true;
-        }
-        return false;
     }
 
     public boolean assistenzaSpecialeModificata(float nuovoPrezzo, float vecchioPrezzo) {

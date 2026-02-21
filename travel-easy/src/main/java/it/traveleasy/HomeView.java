@@ -120,7 +120,7 @@ public class HomeView implements OffertaObserver {
         profileButton.getStyleClass().add("profile-button");
         profileButton.setOnAction(e -> openProfileWindow());
 
-        Button deleteButton = new Button("Elimina");
+        Button deleteButton = new Button("Elimina Account");
         deleteButton.getStyleClass().add("danger-button");
         deleteButton.setOnAction(e -> openDeleteView());
 
