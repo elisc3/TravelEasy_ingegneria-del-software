@@ -14,34 +14,39 @@ class TravelEasyRicaricaPortafoglioTest extends BaseTravelEasyTest {
 
     @Test
     void validazioneRicarica_conDatiValidi_restituisceImporto() {
+        Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
         float result = te.validazioneDatiNuovaRicarica(
-            "4111111111111111", "12/29", "123", "150.50");
+            "4111111111111111", "12/29", "123", "150.50", cliente);
         assertEquals(150.50f, result, 0.001f);
     }
 
     @Test
     void validazioneRicarica_conCampiVuoti_restituisceMenoUno() {
-        float result = te.validazioneDatiNuovaRicarica("", "", "", "");
+        Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
+        float result = te.validazioneDatiNuovaRicarica("", "", "", "", cliente);
         assertEquals(-1.0f, result, 0.001f);
     }
 
     @Test
     void validazioneRicarica_conCvvNonNumerico_restituisceMenoTre() {
+        Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
         float result = te.validazioneDatiNuovaRicarica(
-            "4111111111111111", "12/29", "abc", "10");
+            "4111111111111111", "12/29", "abc", "10", cliente);
         assertEquals(-3.0f, result, 0.001f);
     }
 
     @Test
     void validazioneRicarica_conScadenzaInvalida_restituisceMenoQuattro() {
+        Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
         float result = te.validazioneDatiNuovaRicarica(
-            "4111111111111111", "2029-12", "123", "10");
+            "4111111111111111", "2029-12", "123", "10", cliente);
         assertEquals(-4.0f, result, 0.001f);
     }
 
     @Test
     void insertCartaCredito_conDatiValidi_aggiornaTabellaCartaCredito() throws Exception {
-        boolean updated = te.insertCartaCredito(1, "5555555555554444", "10/30", "222", "Mastercard");
+        Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
+        boolean updated = te.insertCartaCredito(cliente, "5555555555554444", "10/30", "222", "Mastercard");
         assertTrue(updated);
 
         try (PreparedStatement ps = conn.prepareStatement(
@@ -54,4 +59,6 @@ class TravelEasyRicaricaPortafoglioTest extends BaseTravelEasyTest {
             assertEquals("Mastercard", rs.getString("Circuito"));
         }
     }
+    //testare cvv errato
+    //testare il caso in cui la carta è già inserita
 }

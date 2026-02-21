@@ -72,4 +72,6 @@ class TravelEasyGestionePortafoglioOreTest extends BaseTravelEasyTest {
             }
         }
     }
+
+    //AGGIUNGERE DECREMENTO ORE NEL CASO DI ELIMINAZIONE PRENOTAZIONE
 }

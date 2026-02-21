@@ -60,4 +60,6 @@ class TravelEasyRecensioniTest extends BaseTravelEasyTest {
         assertEquals(Set.of("Agenzia", "Trasporto", "Alloggio"), riferimenti);
         assertEquals(1, te.getNTotaleRecensioni());
     }
+
+    //testare caso in cui la validazione dati fallisce
 }

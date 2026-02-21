@@ -17,36 +17,38 @@ class TravelEasyNuovaOffertaSpecialeTest extends BaseTravelEasyTest {
     @Test
     void validazionePercentualeOfferta_conInputValido_restituisceValore() {
         PacchettoViaggio p = te.getElencoPacchetti().get(1);
-        float result = p.validazionePercentunaleNuovaOfferta("15");
+        float result = te.validazioneDatiNuovaOfferta(p, "15", p.getDataPartenza(), "10-04-2026", "5");
         assertEquals(15.0f, result, 0.001f);
     }
 
     @Test
     void validazionePercentualeOfferta_conInputNonNumerico_restituisceMenoTre() {
         PacchettoViaggio p = te.getElencoPacchetti().get(1);
-        float result = p.validazionePercentunaleNuovaOfferta("abc");
+        float result = te.validazioneDatiNuovaOfferta(p, "abc", p.getDataPartenza(), "10-04-2026", "5");
         assertEquals(-3.0f, result, 0.001f);
     }
 
     @Test
     void validazioneDataOfferta_conDataFineValida_restituisceTrue() {
         PacchettoViaggio p = te.getElencoPacchetti().get(2);
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String fine = LocalDate.now().plusDays(10).format(fmt);
-        assertTrue(p.validazioneDataInserimentoOfferta(fine, p.getDataPartenza()));
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+        String fine = LocalDate.parse(p.getDataPartenza(), fmt).minusDays(1).format(fmt);
+        float esito = te.validazioneDatiNuovaOfferta(p, "20", p.getDataPartenza(), fine, "10");
+        assertEquals(20.0f, esito, 0.001f);
     }
 
     @Test
     void nuovaOfferta_conDatiValidi_inserisceRigaInOffertaSpeciale() throws Exception {
         PacchettoViaggio p = te.getElencoPacchetti().get(2);
         int before = TestDbSupport.countRows(conn, "OffertaSpeciale");
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String fine = LocalDate.now().plusDays(5).format(fmt);
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+        String fine = LocalDate.parse(p.getDataPartenza(), fmt).minusDays(2).format(fmt);
 
-        OffertaSpeciale offerta = p.createNuovaOfferta(20.0f, fine, 10);
+        boolean created = te.createNuovaOfferta(20.0f, fine, 10, p);
 
-        assertNotNull(offerta);
+        assertTrue(created);
         assertEquals(before + 1, TestDbSupport.countRows(conn, "OffertaSpeciale"));
+        OffertaSpeciale offerta = te.getOffertaByPack(p);
         assertEquals(20.0f, offerta.getScontoPercentuale(), 0.001f);
     }
 
@@ -56,4 +58,6 @@ class TravelEasyNuovaOffertaSpecialeTest extends BaseTravelEasyTest {
         OffertaSpeciale offerta = te.getOffertaByPack(p);
         assertNotNull(offerta);
     }
+
+    //TESTARE DATI NON VALIDI
 }

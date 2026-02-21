@@ -75,4 +75,6 @@ class TravelEasyRegistrazioneTest extends BaseTravelEasyTest {
             }
         }
     }
+
+    //testare creazione di metodi di pagamento;
 }

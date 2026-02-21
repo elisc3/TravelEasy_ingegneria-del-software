@@ -38,4 +38,6 @@ class TravelEasyLoginTest extends BaseTravelEasyTest {
         String[] result = te.login(conn, "", "");
         assertEquals("errore", result[0]);
     }
+
+    
 }
