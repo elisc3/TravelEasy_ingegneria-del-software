@@ -577,7 +577,7 @@ public class TravelEasy implements AssistenzaObserver{
     }    
     
     //*NUOVA RICARICA
-    public float validazioneDatiNuovaRicarica(String numeroCarta, String scadenza, String cvv, String importo){
+    public float validazioneDatiNuovaRicarica(String numeroCarta, String scadenza, String cvv, String importo, Cliente cliente){
         if (numeroCarta.equals("") || scadenza.equals("") || cvv.equals("") || importo.equals(""))
             return -1.0F;
         
@@ -595,50 +595,24 @@ public class TravelEasy implements AssistenzaObserver{
         try {
             importoProva = Float.parseFloat(importo);
             if (importoProva < 0.0F)
-                return -5;
+                return -5.0F;
         } catch (Exception e){
-            return -6;
+            return -6.0F;
         }
         
+        if (!cliente.controlCvv(cvv)) return -7.0F;
+
         return importoProva;
     }
 
-    private PortafoglioVirtuale getPortafoglioByCliente(int idUtente){
-        for (Account a: elencoAccount.values()){
-            Cliente c = a.getCliente();
-            if (c.getId() == idUtente)
-                return c.getPv();
-        }
-        return null;
+    public boolean ricarica(Cliente c, float importo){
+        return c.insertOnPortafoglio(importo);
     }
 
-    public boolean insertCartaCredito(int idUtente, String numeroCarta, String scadenza, String cvv, String circuito){
-        String query = "UPDATE CartaCredito SET NumeroCarta = ?, Scadenza = ?, cvv = ?, Circuito = ?, PortafoglioVirtuale = ? WHERE Utente = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, numeroCarta);
-            pstmt.setString(2, scadenza);
-            pstmt.setString(3, cvv);
-            pstmt.setString(4, circuito);
-            
-            int idPortafoglio = 0;
-            PortafoglioVirtuale pv = this.getPortafoglioByCliente(idUtente);
-            if (pv != null)
-                idPortafoglio = pv.getId();
-
-            pstmt.setInt(5, idPortafoglio);
-            pstmt.setInt(6, idUtente);
-            pstmt.executeUpdate();
-
-            //elencoCarte.put(idUtente, new CartaCredito(idUtente, numeroCarta, scadenza, cvv, circuito, idPortafoglio, conn));
-            Cliente cliente = this.getClienteById(idUtente);
-            cliente.setCc(new CartaCredito(numeroCarta, scadenza, cvv, circuito, idPortafoglio, cliente, conn));
-            return true;
-        } catch (SQLException e){
-            System.out.println("Errore insertOnPortafoglio: "+e);
-            return false;
-        }
-    }
+    public boolean insertCartaCredito(Cliente cliente, String numeroCarta, String scadenza, String cvv, String circuito){
+        
+        return cliente.insertCartaCredito(conn, numeroCarta, scadenza, cvv, circuito);
+    } 
 
     //*INSERIMENTO PACCHETTO
     public float validazioneDatiNuovoPacchetto(String titolo, String citta, String nazione, String descrizione, String prezzo, String compagnia, String alloggio, String dataPartenza, String dataRitorno){
@@ -1357,4 +1331,5 @@ public class TravelEasy implements AssistenzaObserver{
 
         return p.getElencoViaggiatori();
     }
+
 }

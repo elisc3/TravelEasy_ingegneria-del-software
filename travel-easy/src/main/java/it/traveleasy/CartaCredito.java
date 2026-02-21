@@ -74,12 +74,12 @@ public class CartaCredito {
             return false;
     }
 
-    public boolean insertOnPortafoglio(int idUtente, float importo){
+    public boolean insertOnPortafoglio(float importo){
         String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo + ? WHERE Utente = ?;";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setFloat(1, importo);
-            pstmt.setInt(2, idUtente);
+            pstmt.setInt(2, cliente.getId());
             pstmt.executeUpdate();
 
             this.portafoglioVirtuale.incrementaSaldo(importo);

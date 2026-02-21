@@ -90,7 +90,7 @@ public class RicaricaView {
 
         confirm.setOnAction(e -> {
             CartaCredito ccOnConfirm = cliente.getCc();
-            int idUtente = cliente.getId();
+            //int idUtente = cliente.getId();
             
             if (ccOnConfirm != null && ccOnConfirm.getNumeroCarta() != null && !ccOnConfirm.getNumeroCarta().isEmpty()){
                 cardNumber.setText(ccOnConfirm.getNumeroCarta());
@@ -104,7 +104,7 @@ public class RicaricaView {
                 }
 
                 String cvvInserito = cvv.getText();
-                float esitoValidazioneDati = te.validazioneDatiNuovaRicarica(cardNumber.getText(), expiry.getText(), cvvInserito, amount.getText());
+                float esitoValidazioneDati = te.validazioneDatiNuovaRicarica(cardNumber.getText(), expiry.getText(), cvvInserito, amount.getText(), cliente);
                 if (esitoValidazioneDati == -1.0F){
                     JOptionPane.showMessageDialog(null, "Hai dimenticato qualche campo.", "ATTENZIONE", 2);
                     return;
@@ -123,25 +123,27 @@ public class RicaricaView {
                 } else if (esitoValidazioneDati == -6.0F){
                     JOptionPane.showMessageDialog(null, "Formato importo inserito non valido.", "ERRORE", 0);
                     return;
+                } else if (esitoValidazioneDati == -7.0F){
+                    JOptionPane.showMessageDialog(null, "Il cvv è errato. Prego riprovare", "ATTENZIONE", 0);
+                    return;
                 }
 
-                boolean esitoCvv = cc.controlCvv(cvvInserito);
-                if (esitoCvv){
+                //boolean esitoCvv = cc.controlCvv(cvvInserito);
+                //if (esitoCvv){
                     
-                    if (cc.insertOnPortafoglio(idUtente, Float.parseFloat(amount.getText()))) {
-                        JOptionPane.showMessageDialog(null, "Ricarica avvenuta con successo!", "INFO", 1);
-                        te.ricaricaEffettuata(idUtente);
-                        if (onRicaricaCompletata != null) {
-                            onRicaricaCompletata.run();
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Si è verificato un problema", "ERRORE", 2);
+                    
+                if (te.ricarica(cliente, esitoValidazioneDati)) {
+                    JOptionPane.showMessageDialog(null, "Ricarica avvenuta con successo!", "INFO", 1);
+                    te.ricaricaEffettuata(cliente.getId());
+                    if (onRicaricaCompletata != null) {
+                        onRicaricaCompletata.run();
                     }
                 } else {
-                    JOptionPane.showMessageDialog(null, "Il cvv è errato. Prego riprovare", "ATTENZIONE", 0);
+                    JOptionPane.showMessageDialog(null, "Si è verificato un problema", "ERRORE", 2);
                 }
+                
             } else {
-                float esitoValidazioneDati = te.validazioneDatiNuovaRicarica(cardNumber.getText(), expiry.getText(), cvv.getText(), amount.getText());
+                float esitoValidazioneDati = te.validazioneDatiNuovaRicarica(cardNumber.getText(), expiry.getText(), cvv.getText(), amount.getText(), cliente);
                 if (esitoValidazioneDati == -1.0F){
                     JOptionPane.showMessageDialog(null, "Hai dimenticato qualche campo.", "ATTENZIONE", 2);
                     return;
@@ -160,14 +162,14 @@ public class RicaricaView {
                 } else if (esitoValidazioneDati == -6.0F){
                     JOptionPane.showMessageDialog(null, "Formato importo inserito non valido.", "ERRORE", 0);
                     return;
-                }
+                } 
 
-                te.insertCartaCredito(idUtente, cardNumber.getText(), expiry.getText(), cvv.getText(), circuit.getValue());
+                te.insertCartaCredito(cliente, cardNumber.getText(), expiry.getText(), cvv.getText(), circuit.getValue());
                 //CartaCredito newCarta = te.getCartaCreditoByUtente(idUtente);
-                if (cc.insertOnPortafoglio(idUtente, Float.parseFloat(amount.getText()))){
+                if (te.ricarica(cliente, Float.parseFloat(amount.getText()))){
                     JOptionPane.showMessageDialog(null, "Ricarica avvenuta con successo!", "INFO", 1);
                     System.out.println("Ricarica avvenuta con sucecsso");
-                    te.ricaricaEffettuata(idUtente);
+                    te.ricaricaEffettuata(cliente.getId());
                     if (onRicaricaCompletata != null) {
                         onRicaricaCompletata.run();
                     }

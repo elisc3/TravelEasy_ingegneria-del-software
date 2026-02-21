@@ -243,5 +243,33 @@ public class Cliente extends Utente {
         }
         return null;
     }
+
+    public boolean controlCvv(String cvv){
+        return cc.controlCvv(cvv);
+    }
+
+    public boolean insertOnPortafoglio(float importo){
+        return cc.insertOnPortafoglio(importo);
+    }
+
+    public boolean insertCartaCredito(Connection conn, String numeroCarta, String scadenza, String cvv, String circuito) {
+        String query = "UPDATE CartaCredito SET NumeroCarta = ?, Scadenza = ?, cvv = ?, Circuito = ?, PortafoglioVirtuale = ? WHERE Utente = ?;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, numeroCarta);
+            pstmt.setString(2, scadenza);
+            pstmt.setString(3, cvv);
+            pstmt.setString(4, circuito);
+            pstmt.setInt(5, this.pv.getId());
+            pstmt.setInt(6, this.getId());
+            pstmt.executeUpdate();
+
+            this.setCc(new CartaCredito(numeroCarta, scadenza, cvv, circuito, this.pv.getId(), this, conn));
+            return true;
+        } catch (SQLException e){
+            System.out.println("Errore insertOnPortafoglio: "+e);
+            return false;
+        }
+    }
     
 }
