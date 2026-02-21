@@ -1,4 +1,6 @@
 # TravelEasy
+- Progetto di Ingegneria del Software di Giacomo Pisana, Eliana Scarpa, Giuliana Serio.
+- Università degli studi di Catania, corso di laurea magistrale di Ingegneria Informatica.
 
 ## Requisiti
 - JDK 17
