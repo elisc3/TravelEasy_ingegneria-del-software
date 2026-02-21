@@ -2,13 +2,13 @@ package it.traveleasy;
 
 import java.sql.Connection;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 public class DeleteView {
     private VBox root;
@@ -47,14 +47,7 @@ public class DeleteView {
 
         deleteButton.setOnAction(e -> {
             te.eliminaAccount(conn, email, confirmField.getText());
-            
-
-            // Chiude finestra
-            Stage stage = (Stage) root.getScene().getWindow();
-            stage.close();
-
-            // Torna alla schermata iniziale (login)
-            App.showLogin(stage);
+            Platform.exit();
         });
 
         root = new VBox(20, title, warning, confirmField, deleteButton);

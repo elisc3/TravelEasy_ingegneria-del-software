@@ -155,7 +155,7 @@ public class Cliente extends Utente {
             return false;
         }
 
-        query = "DELETE FROM PortafoglioOre WHERE Utente = ?;";
+        query = "DELETE FROM PortafoglioOre WHERE proprietario = ?;";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, this.getId());
             pstmt.executeUpdate();

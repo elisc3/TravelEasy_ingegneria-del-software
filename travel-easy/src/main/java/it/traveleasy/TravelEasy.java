@@ -901,6 +901,94 @@ public class TravelEasy implements AssistenzaObserver{
 
     //*PRENOTAZIONE
 
+    public int validazioneViaggiatore(String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
+
+            if (nome.isBlank() || cognome.isBlank() || dataNascita.isBlank() ||tipoDocumento.isBlank() || codiceDocumento.isBlank())
+                return -1;
+            
+            DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd-MM-uuuu").withResolverStyle(ResolverStyle.STRICT);
+
+            LocalDate d = LocalDate.parse(dataNascita, FMT);
+
+            if (d.isAfter(LocalDate.now()))
+                return -2;
+
+            if (tipoDocumento.equals("Carta d'identità") && codiceDocumento.length() != 9){
+                return -3;
+            } else if (tipoDocumento.equals("Patente di guida") && codiceDocumento.length() != 10){
+                return -4;
+            } else if (tipoDocumento.equals("Passaporto") && codiceDocumento.length() != 9){
+                return -5;
+            } 
+        return 0;
+    }
+
+    public int createPrenotazione(PacchettoViaggio pacchetto, int idUtente){
+        String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale, PrezzoAssistenzaSpeciale, CheckIn) values (?, ?, ?, ?, ?, ?, ?, ?);";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setInt(1, idUtente);
+            pstmt.setInt(2, pacchetto.getId());
+            pstmt.setString(3, "");
+            pstmt.setFloat(4, 0.0F);
+            pstmt.setFloat(5, 0.0F);
+            pstmt.setFloat(6, 0.0F);
+            pstmt.setFloat(7, 0.0F);
+            pstmt.setInt(8, 0);
+            pstmt.executeUpdate();
+
+            int newId = 0;
+            query = "SELECT last_insert_rowid();";
+
+            try (PreparedStatement pstmt2 = conn.prepareStatement(query)) {
+                ResultSet rs = pstmt2.executeQuery();
+                if (rs.next()) {
+                    newId = rs.getInt(1);
+                }
+            }
+
+            Cliente c = getClienteById(idUtente);
+            Prenotazione p = new Prenotazione(newId, c, pacchetto, "", 0.0F, 0.0F, 0.0F, false);
+
+            elencoPrenotazioni.put(newId, p);
+            if (c != null) {
+                c.addPrenotazione(p);
+            }
+            return newId;
+        } catch (SQLException e){
+            System.out.println("Errore createPrenotazione: "+e);
+            return 0;
+        }
+    }
+
+    public boolean createViaggiatore(int idPrenotazione, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
+        Prenotazione p = this.elencoPrenotazioni.get(idPrenotazione);
+        if (p == null) {
+            return false;
+        }
+
+        return p.createViaggiatore(conn, nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
+    }
+
+    public boolean annullaPrenotazioneBozza(int idPrenotazione) {
+        Prenotazione p = this.elencoPrenotazioni.get(idPrenotazione);
+        if (p == null) {
+            return false;
+        }
+
+        if (!p.eliminaBozzaDaDB(conn)) {
+            return false;
+        }
+
+        elencoPrenotazioni.remove(idPrenotazione);
+        Cliente cliente = p.getCliente();
+        if (cliente != null) {
+            cliente.removePrenotazione(idPrenotazione);
+        }
+        notifyPrenotazioneModificata(p);
+        return true;
+    }
+
     //!RIVEDI
     public float getTotalePrenotazione(Cliente cliente, PacchettoViaggio pacchetto, List<Viaggiatore> elencoViaggiatori){
         OffertaSpeciale o = elencoOfferte.get(pacchetto);
@@ -1259,94 +1347,6 @@ public class TravelEasy implements AssistenzaObserver{
 
     public Account getAccountToHomeView(String email){
         return this.elencoAccount.get(email);
-    }
-
-    public int validazioneViaggiatore(String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
-
-            if (nome.isBlank() || cognome.isBlank() || dataNascita.isBlank() ||tipoDocumento.isBlank() || codiceDocumento.isBlank())
-                return -1;
-            
-            DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd-MM-uuuu").withResolverStyle(ResolverStyle.STRICT);
-
-            LocalDate d = LocalDate.parse(dataNascita, FMT);
-
-            if (d.isAfter(LocalDate.now()))
-                return -2;
-
-            if (tipoDocumento.equals("Carta d'identità") && codiceDocumento.length() != 9){
-                return -3;
-            } else if (tipoDocumento.equals("Patente di guida") && codiceDocumento.length() != 10){
-                return -4;
-            } else if (tipoDocumento.equals("Passaporto") && codiceDocumento.length() != 9){
-                return -5;
-            } 
-        return 0;
-    }
-
-    public int createPrenotazione(PacchettoViaggio pacchetto, int idUtente){
-        String query = "INSERT INTO Prenotazioni (Utente, Pacchetto, DataPrenotazione, PrezzoTotale, ScontoApplicato, OffertaSpeciale, PrezzoAssistenzaSpeciale, CheckIn) values (?, ?, ?, ?, ?, ?, ?, ?);";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            pstmt.setInt(1, idUtente);
-            pstmt.setInt(2, pacchetto.getId());
-            pstmt.setString(3, "");
-            pstmt.setFloat(4, 0.0F);
-            pstmt.setFloat(5, 0.0F);
-            pstmt.setFloat(6, 0.0F);
-            pstmt.setFloat(7, 0.0F);
-            pstmt.setInt(8, 0);
-            pstmt.executeUpdate();
-
-            int newId = 0;
-            query = "SELECT last_insert_rowid();";
-
-            try (PreparedStatement pstmt2 = conn.prepareStatement(query)) {
-                ResultSet rs = pstmt2.executeQuery();
-                if (rs.next()) {
-                    newId = rs.getInt(1);
-                }
-            }
-
-            Cliente c = getClienteById(idUtente);
-            Prenotazione p = new Prenotazione(newId, c, pacchetto, "", 0.0F, 0.0F, 0.0F, false);
-
-            elencoPrenotazioni.put(newId, p);
-            if (c != null) {
-                c.addPrenotazione(p);
-            }
-            return newId;
-        } catch (SQLException e){
-            System.out.println("Errore createPrenotazione: "+e);
-            return 0;
-        }
-    }
-
-    public boolean createViaggiatore(int idPrenotazione, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
-        Prenotazione p = this.elencoPrenotazioni.get(idPrenotazione);
-        if (p == null) {
-            return false;
-        }
-
-        return p.createViaggiatore(conn, nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
-    }
-
-    public boolean annullaPrenotazioneBozza(int idPrenotazione) {
-        Prenotazione p = this.elencoPrenotazioni.get(idPrenotazione);
-        if (p == null) {
-            return false;
-        }
-
-        if (!p.eliminaBozzaDaDB(conn)) {
-            return false;
-        }
-
-        elencoPrenotazioni.remove(idPrenotazione);
-        Cliente cliente = p.getCliente();
-        if (cliente != null) {
-            cliente.removePrenotazione(idPrenotazione);
-        }
-        notifyPrenotazioneModificata(p);
-        return true;
     }
 
     public List<Viaggiatore> getViaggiatoriByPrenotazione(int idPrenotazione){
