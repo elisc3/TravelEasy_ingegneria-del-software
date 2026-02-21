@@ -10,9 +10,7 @@ import java.util.Map;
 
 public class Cliente extends Utente {
     private PortafoglioVirtuale pv; 
-    private CartaCredito cc;
-    //!MAGARI SI LEVA
-    private TravelEasy te = null;
+    private CartaCredito cc;   
     private PortafoglioOre po;
     private Map<Integer, Prenotazione> elencoPrenotazioniEffettuate;
     private Map<Integer, Recensione> elencoRecensioni;
@@ -104,7 +102,7 @@ public class Cliente extends Utente {
 
 
 
-        this.cc = new CartaCredito("", "", "", "", idPortafoglioVirtuale, this, conn);
+        this.cc = new CartaCredito("", "", "", "", idPortafoglioVirtuale, this);
         
         query = "INSERT INTO PortafoglioOre (Ore, Sconto, proprietario) VALUES (?, ?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -248,8 +246,8 @@ public class Cliente extends Utente {
         return cc.controlCvv(cvv);
     }
 
-    public boolean insertOnPortafoglio(float importo){
-        return cc.insertOnPortafoglio(importo);
+    public boolean insertOnPortafoglio(Connection conn, float importo){
+        return cc.insertOnPortafoglio(conn, importo);
     }
 
     public boolean insertCartaCredito(Connection conn, String numeroCarta, String scadenza, String cvv, String circuito) {
@@ -264,12 +262,11 @@ public class Cliente extends Utente {
             pstmt.setInt(6, this.getId());
             pstmt.executeUpdate();
 
-            this.setCc(new CartaCredito(numeroCarta, scadenza, cvv, circuito, this.pv.getId(), this, conn));
+            this.setCc(new CartaCredito(numeroCarta, scadenza, cvv, circuito, this.pv.getId(), this));
             return true;
         } catch (SQLException e){
             System.out.println("Errore insertOnPortafoglio: "+e);
             return false;
         }
     }
-    
 }

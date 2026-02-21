@@ -116,7 +116,7 @@ public class TravelEasy implements AssistenzaObserver{
             } 
     }
 
-    public PortafoglioOre gePortafoglioOreByUtente(int idUtente){
+    private PortafoglioOre gePortafoglioOreByUtente(int idUtente){
         String query = "SELECT * FROM PortafoglioOre WHERE proprietario = ?;";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)){
@@ -140,7 +140,7 @@ public class TravelEasy implements AssistenzaObserver{
         }
     }
 
-    public CartaCredito getCartaCreditoByUtenteDB(Cliente cliente){
+    private CartaCredito getCartaCreditoByUtenteDB(Cliente cliente){
         String query = "SELECT * FROM CartaCredito WHERE Utente = ?;";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)){
@@ -157,7 +157,7 @@ public class TravelEasy implements AssistenzaObserver{
                 String circuito = rs.getString("Circuito");
                 int idPortafoglio = rs.getInt("PortafoglioVirtuale");
 
-                cc = new CartaCredito(numeroCarta, scadenza, cvv, circuito, idPortafoglio, cliente, conn);
+                cc = new CartaCredito(numeroCarta, scadenza, cvv, circuito, idPortafoglio, cliente);
             }
             return cc;
             
@@ -606,7 +606,7 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     public boolean ricarica(Cliente c, float importo){
-        return c.insertOnPortafoglio(importo);
+        return c.insertOnPortafoglio(conn, importo);
     }
 
     public boolean insertCartaCredito(Cliente cliente, String numeroCarta, String scadenza, String cvv, String circuito){
@@ -734,16 +734,11 @@ public class TravelEasy implements AssistenzaObserver{
         else return null;
     }
 
-    public OffertaSpeciale getOffertaByPackOperatore(PacchettoViaggio p){
-        return this.elencoOfferte.get(p);
-    }
-
     
     //*ELIMINAZIONE OFFERTE SCADUTE O ESAURITE
     public boolean eliminaOfferteDB(OffertaSpeciale o){
         String query = "DELETE FROM OffertaSpeciale WHERE id = ?;";
 
-        //String query = "UPDATE OffertaSpeciale SET Visibilità = ? WHERE id = ?;";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, o.getId());
 
@@ -1352,7 +1347,6 @@ public class TravelEasy implements AssistenzaObserver{
             return -2;
         }
 
-        //float rimborso = calcolaRimborsoEliminazione(prenotazione);
         if (rimborso < 0.0F) {
             return -3;
         }
@@ -1395,18 +1389,6 @@ public class TravelEasy implements AssistenzaObserver{
     }
 
     //*METODI VARI
-    public void aggiornaOfferte(OffertaSpeciale o){
-        this.elencoOfferte.put(o.getPacchetto(), o);
-        notifyOffertaCreata(o);
-    }
-
-    public CompagniaTrasporto getCompagniaTrasportoByPacchetto(int idCompagnia){
-        return this.elencoCompagnie.get(idCompagnia);   
-    }
-
-    public Alloggio getAlloggioByPacchetto(int idAlloggio){
-        return this.elencoAlloggi.get(idAlloggio);
-    }
 
     public Cliente getClienteById(int idCliente){
         for (Account a: elencoAccount.values()){

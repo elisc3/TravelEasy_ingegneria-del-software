@@ -10,8 +10,6 @@ public class Account {
     private String password;
     private String ruolo;
     private Utente utente;
-    //!MAGARI SI LEVA
-    private TravelEasy te = null;
 
     public Account(int id, String email, String password, String ruolo, Utente utente) {
         this.id = id;

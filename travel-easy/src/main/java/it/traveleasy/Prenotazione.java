@@ -157,10 +157,7 @@ public class Prenotazione {
         return Collections.unmodifiableList(this.elencoViaggiatori);
     }
 
-    //!RIVEDI -- da levare
-    public void setElencoViaggiatori (List<Viaggiatore> elencoViaggiatori){
-        this.elencoViaggiatori = elencoViaggiatori;
-    }
+    
 
     //*ASSISTENZA SPECIALE
     public void aggiornaAssistenza(Viaggiatore v, String tipoAssistenza, boolean valore) {
@@ -273,7 +270,6 @@ public class Prenotazione {
             }
 
             conn.commit();
-            //this.elencoViaggiatori = new ArrayList<>(nuoviDati);
             return true;
         } catch (SQLException e) {
             try {
@@ -361,15 +357,6 @@ public class Prenotazione {
         this.elencoViaggiatori.add(v);
         return true;
     }
-
-    /*public boolean updateViaggiatori(Connection conn, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
-        Viaggiatore v = new Viaggiatore(nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
-        if (!this.insertViaggiatoriDB(conn, v))
-            return false;
-
-        this.setViaggiatore(v);
-        return true;
-    }*/
 
     public List<Viaggiatore> getViaggiatori(){
         return Collections.unmodifiableList(elencoViaggiatori);

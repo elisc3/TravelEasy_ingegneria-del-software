@@ -11,10 +11,9 @@ public class CartaCredito {
     private String cvv;
     private String circuito;
     private PortafoglioVirtuale portafoglioVirtuale;
-    private Connection conn;
+    //private Connection conn;
 
-    public CartaCredito(String numeroCarta, String scadenza, String cvv, String circuito, int idPortafoglioVirtuale, Cliente cliente, Connection conn) {
-        this.conn = conn;
+    public CartaCredito(String numeroCarta, String scadenza, String cvv, String circuito, int idPortafoglioVirtuale, Cliente cliente) {
         this.cliente = cliente;
         this.portafoglioVirtuale = this.cliente.getPv();
         this.numeroCarta = numeroCarta;
@@ -74,7 +73,7 @@ public class CartaCredito {
             return false;
     }
 
-    public boolean insertOnPortafoglio(float importo){
+    public boolean insertOnPortafoglio(Connection conn, float importo){
         String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo + ? WHERE Utente = ?;";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {

@@ -80,8 +80,4 @@ public class Viaggiatore {
     public void setCecita(boolean cecita) { 
         this.cecita = cecita; 
     }
-
-    public void setCecitaDB(Connection conn, boolean cecita){
-        String query = "UPDATE Viaggiatore SET Cecità = ?;";
-    }
 }
