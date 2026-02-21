@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.util.List;
 
 import javax.swing.JOptionPane;
-
+import java.applet.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,9 +14,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.application.Platform;
 
 
-public class PagamentoView {
+public class PagamentoView implements RicaricaObserver {
 
     private final StackPane root;
     private TravelEasy te;
@@ -43,7 +44,7 @@ public class PagamentoView {
         this.elencoViaggiatori = elencoViaggiatori;
         this.pacchetto = pacchetto;
         this.prezzoAssistenzaSpeciale = prezzoAssistenzaSpeciale;
-        
+        this.te.addRicaricaObserver(this);
         this.conn = conn;
         root = new StackPane();
         root.getStyleClass().add("payment-root");
@@ -63,6 +64,7 @@ public class PagamentoView {
         this.conn = conn;
         this.prezzoAssistenzaSpeciale = prezzoAssistenzaSpeciale;
         this.modificaPrenotazioneMode = true;
+        this.te.addRicaricaObserver(this);
         root = new StackPane();
         root.getStyleClass().add("payment-root");
         root.getChildren().add(buildCard(prenotazione));
@@ -77,6 +79,7 @@ public class PagamentoView {
         this.conn = conn;
         this.vecchioPrezzoAssistenzaSpeciale = vecchioPrezzoAssistenzaSpeciale;
         this.modificaAssistenzaSpecialeMode = true;
+        this.te.addRicaricaObserver(this);
         root = new StackPane();
         root.getStyleClass().add("payment-root");
         root.getChildren().add(buildCard(prenotazione));
@@ -331,7 +334,7 @@ public class PagamentoView {
 
     private void openRechargeWindow() {
         Stage stage = new Stage();
-        RicaricaView view = new RicaricaView(te, cliente.getId(), this::refreshAfterRecharge);
+        RicaricaView view = new RicaricaView(te, cliente.getId());
         Scene scene = new Scene(view.getRoot(), 520, 460);
         scene.getStylesheets().add(App.class.getResource(App.STYLESHEET).toExternalForm());
         stage.setTitle("Travel Easy - Ricarica");
@@ -371,6 +374,15 @@ public class PagamentoView {
             confirmButton.setDisable(false);
         }
     }
-}
 
+    @Override
+    public void onRicaricaEffettuata(int idUtente, double nuovoSaldo) {
+        if (cliente != null && cliente.getId() == idUtente) {
+            if (cliente.getPv() != null) {
+                cliente.getPv().setSaldo(nuovoSaldo);
+            }
+            Platform.runLater(this::refreshAfterRecharge);
+        }
+    }
+}
 

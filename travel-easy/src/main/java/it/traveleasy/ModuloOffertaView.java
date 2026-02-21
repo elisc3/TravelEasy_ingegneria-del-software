@@ -90,6 +90,9 @@ public class ModuloOffertaView {
                 JOptionPane.showMessageDialog(null, "Inserimento nuova offerta fallito!", "ERRORE", 0);
             } else {
                 JOptionPane.showMessageDialog(null, "Inserimento nuova offerta avvenuto con successo!", "INFO", 1);
+                if (onOffertaInserita != null) {
+                    onOffertaInserita.run();
+                }
             }
         });
 

@@ -874,7 +874,9 @@ public class TravelEasy implements AssistenzaObserver{
                 }
             }
 
-            this.elencoOfferte.put(pacchetto, new OffertaSpeciale(newId, pacchetto, percentuale, prezzoScontato, dataFine, disponibilità));
+            OffertaSpeciale newOfferta = new OffertaSpeciale(newId, pacchetto, percentuale, prezzoScontato, dataFine, disponibilità);
+            this.elencoOfferte.put(pacchetto, newOfferta);
+            notifyOffertaCreata(newOfferta);
             return true;
 
         } catch (SQLException e){
@@ -1427,5 +1429,4 @@ public class TravelEasy implements AssistenzaObserver{
 
         return p.getElencoViaggiatori();
     }
-
 }

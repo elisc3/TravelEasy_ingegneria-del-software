@@ -124,4 +124,6 @@ class TravelEasyNuovaPrenotazioneTest extends BaseTravelEasyTest {
         Prenotazione last = te.getPrenotazioneById(newIdPrenotazione);
         assertEquals(expectedToday, last.getDataPrenotazione());
     }
+
+    //testare l'eliminazione della bozza se la prenotazione non va a buon fine
 }
