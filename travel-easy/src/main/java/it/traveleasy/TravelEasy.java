@@ -1186,15 +1186,15 @@ public class TravelEasy implements AssistenzaObserver{
         }
 
         Cliente cliente = prenotazione.getCliente();
-        if (!cliente.rimborsoOnPortafoglioDB(conn, rimborso)) {
+        if (!prenotazione.rimborsoOnPortafoglioDB(conn, rimborso)) {
             return -1;
         }
 
-        if(!cliente.levaOreViaggio(conn, prenotazione.getPacchetto().getOreViaggio()))
+        if(!prenotazione.levaOreViaggio(conn))
             return -1;
 
         if (!eliminaPrenotazioneDB(prenotazione.getId())) {
-            cliente.pagamentoOnPortafoglioDB(conn, rimborso);
+            prenotazione.pagamentoOnPortafoglioDB(conn, rimborso);
             return -2;
         }
 

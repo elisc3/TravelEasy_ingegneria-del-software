@@ -375,4 +375,16 @@ public class Prenotazione {
         return Collections.unmodifiableList(elencoViaggiatori);
     }
 
+    public boolean rimborsoOnPortafoglioDB(Connection conn, float rimborso){
+        return cliente.rimborsoOnPortafoglioDB(conn, rimborso);
+    }
+
+    public boolean levaOreViaggio(Connection conn){
+        return cliente.levaOreViaggio(conn, pacchetto.getOreViaggio());
+    }
+    
+    public boolean pagamentoOnPortafoglioDB(Connection conn, float rimborso){
+        return cliente.pagamentoOnPortafoglioDB(conn, rimborso);
+    }
+
 }
