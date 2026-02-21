@@ -799,6 +799,92 @@ public class TravelEasy implements AssistenzaObserver{
         return true;
     }
 
+    //*INSERIMENTO OFFERTA
+    public float validazioneDatiNuovaOfferta(PacchettoViaggio pacchetto, String percentuale, String dataPartenza, String dataFine, String numeroMassimoPacchetti){
+        if (percentuale == null || percentuale.isBlank())
+            return -1.0F;
+        
+        float provaF;
+        try {
+            provaF = Float.parseFloat(percentuale);
+            if (provaF < 0 || provaF > 100)
+                return -2.0F;
+        } catch (Exception e){
+            return -3.0F;
+        }
+
+        if (dataFine == null || dataFine.isBlank()) return -5.0F;
+        if (dataPartenza == null || dataPartenza.isBlank()) return -5.0F;
+
+        if (!dataFine.matches("\\d{2}-\\d{2}-\\d{4}")) return -5.0F;
+        if (!dataPartenza.matches("\\d{2}-\\d{2}-\\d{4}")) return -5.0F;
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-uuuu")
+                .withResolverStyle(ResolverStyle.STRICT);
+
+        try {
+            LocalDate fine = LocalDate.parse(dataFine, formatter);
+            LocalDate partenza = LocalDate.parse(dataPartenza, formatter);
+
+            if (fine.isBefore(LocalDate.now())) return -5.0F;
+
+            if (fine.isAfter(partenza)) return -5.0F;
+
+            
+        } catch (Exception e) {
+            return -5.0F;
+        }
+
+        if (numeroMassimoPacchetti == null || numeroMassimoPacchetti.isBlank())
+            return -6.0F;
+        int provaN;
+        try{
+             provaN = Integer.parseInt(numeroMassimoPacchetti);
+            if (provaN <= 0)
+                return -7.0F;
+        } catch (Exception e){
+            return -8.0F;
+        }
+
+        return provaF;
+    }
+
+    public boolean createNuovaOfferta(float percentuale, String dataFine, int disponibilità, PacchettoViaggio pacchetto){
+        String query = "INSERT INTO OffertaSpeciale (Pacchetto, ScontoPercentuale, PrezzoScontato, DataFine, Disponibilità) values (?, ?, ?, ?, ?);";
+        
+        float prezzo = pacchetto.getPrezzo();
+        float prezzoScontato = prezzo - prezzo*percentuale/100;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setInt(1, pacchetto.getId());
+            pstmt.setFloat(2, percentuale);
+            pstmt.setFloat(3, prezzoScontato);
+            pstmt.setString(4, dataFine);
+            pstmt.setInt(5, disponibilità);
+            
+            
+
+            pstmt.executeUpdate();
+
+            int newId = 0;
+            try (Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery("SELECT last_insert_rowid();")) {
+                if (rs.next()) {
+                     newId = rs.getInt(1);
+                }
+            }
+
+            this.elencoOfferte.put(pacchetto, new OffertaSpeciale(newId, pacchetto, percentuale, prezzoScontato, dataFine, disponibilità));
+            return true;
+
+        } catch (SQLException e){
+            System.out.println("Errore nuovaOfferta: "+e);
+            return false;
+        }
+        
+    }   
+
+
     //*OBSERVER
     public void addOffertaObserver(OffertaObserver observer) {
         if (observer != null && !offertaObservers.contains(observer)) offertaObservers.add(observer);

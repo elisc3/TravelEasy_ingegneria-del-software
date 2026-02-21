@@ -59,7 +59,7 @@ public class ModuloOffertaView {
             String dataFineValue = dataFine.getValue() == null ? "" : dataFine.getValue().format(dateFormat);
             String maxPacchetti = maxPacchettiField.getText();
 
-            float percentualeF = p.validazionePercentunaleNuovaOfferta(percentuale);
+            float percentualeF = te.validazioneDatiNuovaOfferta(p, percentuale, p.getDataPartenza(), dataFineValue, maxPacchetti);
             if (percentualeF == -1.0F){
                 JOptionPane.showMessageDialog(null, "Il campo percentuale non può essere vuoto.", "ATTENZIONE", 2);
                 return;
@@ -69,34 +69,26 @@ public class ModuloOffertaView {
             } else if (percentualeF == -3.0F){
                 JOptionPane.showMessageDialog(null, "Formato percentuale non valido.", "ERRORE", 0);
                 return;
-            }
-
-            if (!p.validazioneDataInserimentoOfferta(dataFineValue, p.getDataPartenza())){
+            } else if (percentualeF == -5.0F){
                 JOptionPane.showMessageDialog(null, "Data inserita non valida.", "ERRORE", 0);
-                return;
-            }
-
-            int maxPacchettiI = p.validazioneNumeroPacchettiNuovaOfferta(maxPacchetti);
-            if (maxPacchettiI == -1){
+                return;   
+            } else if (percentualeF == -6.0F){
                 JOptionPane.showMessageDialog(null, "Il campo Numero Massimo Pacchetti non può essere vuoto.", "ATTENZIONE", 2);
                 return;
-            } else if (maxPacchettiI == -2){
+            } else if (percentualeF == -7.0F){
                 JOptionPane.showMessageDialog(null, "Il campo Numero Massimo Pacchetti deve essere maggiore o uguale di 0.", "ATTENZIONE", 2);
                 return;
-            } else if (maxPacchettiI == -3.0F){
+            } else if (percentualeF == -7.0F){
                 JOptionPane.showMessageDialog(null, "Formato Numero Massimo Pacchetti non valido.", "ERRORE", 0);
                 return;
             }
 
-            OffertaSpeciale newOffertaSpeciale = p.createNuovaOfferta(percentualeF, dataFineValue, maxPacchettiI);
+            int maxPacchettiI = Integer.parseInt(maxPacchetti);
+            //OffertaSpeciale newOffertaSpeciale = te.createNuovaOfferta(percentualeF, dataFineValue, maxPacchettiI);
 
-            if (newOffertaSpeciale == null){
+            if (!te.createNuovaOfferta(percentualeF, dataFineValue, maxPacchettiI, p)){
                 JOptionPane.showMessageDialog(null, "Inserimento nuova offerta fallito!", "ERRORE", 0);
             } else {
-                te.aggiornaOfferte(newOffertaSpeciale);
-                if (this.onOffertaInserita != null) {
-                    this.onOffertaInserita.run();
-                }
                 JOptionPane.showMessageDialog(null, "Inserimento nuova offerta avvenuto con successo!", "INFO", 1);
             }
         });
