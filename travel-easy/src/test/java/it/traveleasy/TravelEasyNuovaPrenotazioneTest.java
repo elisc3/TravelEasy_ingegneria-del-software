@@ -1,6 +1,8 @@
 package it.traveleasy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.PreparedStatement;
@@ -123,6 +125,32 @@ class TravelEasyNuovaPrenotazioneTest extends BaseTravelEasyTest {
         String expectedToday = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
         Prenotazione last = te.getPrenotazioneById(newIdPrenotazione);
         assertEquals(expectedToday, last.getDataPrenotazione());
+    }
+
+    @Test
+    void registrazionePrenotazione_nonVaABuonFine_bozzaAnnullabileERimossa() throws Exception {
+        Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
+        PacchettoViaggio pacchetto = te.getElencoPacchetti().get(2);
+        List<Viaggiatore> viaggiatori = List.of(
+            new Viaggiatore("Nina", "Fail", "07-07-1993", "Passaporto", "NF1234567")
+        );
+
+        int prenotazioniBefore = TestDbSupport.countRows(conn, "Prenotazioni");
+        int viaggiatoriBefore = TestDbSupport.countRows(conn, "Viaggiatore");
+        int idPrenotazione = creaBozzaConViaggiatori(cliente, pacchetto, viaggiatori);
+        assertEquals(prenotazioniBefore + 1, TestDbSupport.countRows(conn, "Prenotazioni"));
+        assertEquals(viaggiatoriBefore + 1, TestDbSupport.countRows(conn, "Viaggiatore"));
+
+        Prenotazione bozza = te.getPrenotazioneById(idPrenotazione);
+        bozza.setPacchetto(null);
+        boolean registrata = te.registrazionePrenotazione(idPrenotazione, 0.0f, 480.0f, 0.0f);
+        assertFalse(registrata);
+
+        boolean annullata = te.annullaPrenotazioneBozza(idPrenotazione);
+        assertTrue(annullata);
+        assertNull(te.getPrenotazioneById(idPrenotazione));
+        assertEquals(prenotazioniBefore, TestDbSupport.countRows(conn, "Prenotazioni"));
+        assertEquals(viaggiatoriBefore, TestDbSupport.countRows(conn, "Viaggiatore"));
     }
 
     //testare l'eliminazione della bozza se la prenotazione non va a buon fine

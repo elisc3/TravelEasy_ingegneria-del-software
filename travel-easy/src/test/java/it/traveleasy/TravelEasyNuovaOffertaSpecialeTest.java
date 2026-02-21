@@ -1,8 +1,8 @@
 package it.traveleasy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -57,6 +57,36 @@ class TravelEasyNuovaOffertaSpecialeTest extends BaseTravelEasyTest {
         PacchettoViaggio p = te.getElencoPacchetti().get(1);
         OffertaSpeciale offerta = te.getOffertaByPack(p);
         assertNotNull(offerta);
+    }
+
+    @Test
+    void validazioneNuovaOfferta_conPercentualeVuota_restituisceMenoUno() {
+        PacchettoViaggio p = te.getElencoPacchetti().get(2);
+        String partenza = LocalDate.now().plusDays(30).format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
+        String fine = LocalDate.now().plusDays(20).format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
+
+        float esito = te.validazioneDatiNuovaOfferta(p, "", partenza, fine, "3");
+        assertEquals(-1.0f, esito, 0.001f);
+    }
+
+    @Test
+    void validazioneNuovaOfferta_conDataFineDopoPartenza_restituisceMenoCinque() {
+        PacchettoViaggio p = te.getElencoPacchetti().get(2);
+        String partenza = LocalDate.now().plusDays(30).format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
+        String fine = LocalDate.now().plusDays(31).format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
+
+        float esito = te.validazioneDatiNuovaOfferta(p, "10", partenza, fine, "3");
+        assertEquals(-5.0f, esito, 0.001f);
+    }
+
+    @Test
+    void validazioneNuovaOfferta_conNumeroPacchettiNonNumerico_restituisceMenoOtto() {
+        PacchettoViaggio p = te.getElencoPacchetti().get(2);
+        String partenza = LocalDate.now().plusDays(30).format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
+        String fine = LocalDate.now().plusDays(20).format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
+
+        float esito = te.validazioneDatiNuovaOfferta(p, "10", partenza, fine, "abc");
+        assertEquals(-8.0f, esito, 0.001f);
     }
 
     //TESTARE DATI NON VALIDI

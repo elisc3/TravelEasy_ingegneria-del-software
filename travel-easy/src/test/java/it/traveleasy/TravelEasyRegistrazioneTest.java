@@ -76,5 +76,43 @@ class TravelEasyRegistrazioneTest extends BaseTravelEasyTest {
         }
     }
 
+    @Test
+    void registrazione_conDatiValidi_creaMetodiPagamentoCompleti() throws Exception {
+        String email = "metodi.pagamento@example.com";
+        String result = te.registrazione("Metodi", "Pagamento", email, "pwd123", "pwd123", "333999111");
+        assertEquals(email, result);
+
+        try (PreparedStatement ps = conn.prepareStatement(
+            "SELECT u.id FROM Utenti u JOIN Account a ON u.Account = a.id WHERE a.Email = ?")) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                int utenteId = rs.getInt(1);
+
+                try (PreparedStatement psCc = conn.prepareStatement(
+                    "SELECT NumeroCarta, Scadenza, cvv, Circuito FROM CartaCredito WHERE Utente = ?")) {
+                    psCc.setInt(1, utenteId);
+                    try (ResultSet rsCc = psCc.executeQuery()) {
+                        assertTrue(rsCc.next());
+                        assertEquals("", rsCc.getString("NumeroCarta"));
+                        assertEquals("", rsCc.getString("Scadenza"));
+                        assertEquals("", rsCc.getString("cvv"));
+                        assertEquals("", rsCc.getString("Circuito"));
+                    }
+                }
+
+                try (PreparedStatement psPo = conn.prepareStatement(
+                    "SELECT Ore, Sconto FROM PortafoglioOre WHERE proprietario = ?")) {
+                    psPo.setInt(1, utenteId);
+                    try (ResultSet rsPo = psPo.executeQuery()) {
+                        assertTrue(rsPo.next());
+                        assertEquals(0.0f, rsPo.getFloat("Ore"), 0.001f);
+                        assertEquals(0.0f, rsPo.getFloat("Sconto"), 0.001f);
+                    }
+                }
+            }
+        }
+    }
+
     //testare creazione di metodi di pagamento;
 }

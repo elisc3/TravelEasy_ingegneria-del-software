@@ -1,6 +1,7 @@
 package it.traveleasy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import it.traveleasy.testsupport.BaseTravelEasyTest;
+import it.traveleasy.testsupport.TestDbSupport;
 
 class TravelEasyRecensioniTest extends BaseTravelEasyTest {
 
@@ -59,6 +61,16 @@ class TravelEasyRecensioniTest extends BaseTravelEasyTest {
 
         assertEquals(Set.of("Agenzia", "Trasporto", "Alloggio"), riferimenti);
         assertEquals(1, te.getNTotaleRecensioni());
+    }
+
+    @Test
+    void validazioneNuovaRecensione_conCampiVuoti_fallisceSenzaInserireRecord() throws Exception {
+        int before = TestDbSupport.countRows(conn, "Recensione");
+        boolean valida = te.validaDatiNuovaRecensione("", "Trasporto ok", "Alloggio ok");
+
+        assertFalse(valida);
+        assertEquals(before, TestDbSupport.countRows(conn, "Recensione"));
+        assertEquals(0, te.getRecensioni().size());
     }
 
     //testare caso in cui la validazione dati fallisce

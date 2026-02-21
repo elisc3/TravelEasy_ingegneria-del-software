@@ -59,6 +59,56 @@ class TravelEasyRicaricaPortafoglioTest extends BaseTravelEasyTest {
             assertEquals("Mastercard", rs.getString("Circuito"));
         }
     }
+
+    @Test
+    void validazioneRicarica_conCvvErrato_restituisceMenoSette() {
+        Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
+        float result = te.validazioneDatiNuovaRicarica(
+            "4111111111111111", "12/29", "999", "10", cliente);
+        assertEquals(-7.0f, result, 0.001f);
+    }
+
+    @Test
+    void insertCartaCredito_conCartaGiaPresente_aggiornaSenzaDuplicareRecord() throws Exception {
+        Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
+
+        int before;
+        try (PreparedStatement ps = conn.prepareStatement(
+            "SELECT COUNT(*) FROM CartaCredito WHERE Utente = ?")) {
+            ps.setInt(1, cliente.getId());
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                before = rs.getInt(1);
+            }
+        }
+
+        assertTrue(te.insertCartaCredito(cliente, "4000000000000002", "11/30", "321", "VISA"));
+        assertTrue(te.insertCartaCredito(cliente, "378282246310005", "09/31", "456", "AMEX"));
+
+        int after;
+        try (PreparedStatement ps = conn.prepareStatement(
+            "SELECT COUNT(*) FROM CartaCredito WHERE Utente = ?")) {
+            ps.setInt(1, cliente.getId());
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                after = rs.getInt(1);
+            }
+        }
+        assertEquals(before, after);
+
+        try (PreparedStatement ps = conn.prepareStatement(
+            "SELECT NumeroCarta, Scadenza, cvv, Circuito FROM CartaCredito WHERE Utente = ?")) {
+            ps.setInt(1, cliente.getId());
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                assertEquals("378282246310005", rs.getString("NumeroCarta"));
+                assertEquals("09/31", rs.getString("Scadenza"));
+                assertEquals("456", rs.getString("cvv"));
+                assertEquals("AMEX", rs.getString("Circuito"));
+            }
+        }
+    }
+
     //testare cvv errato
     //testare il caso in cui la carta è già inserita
 }

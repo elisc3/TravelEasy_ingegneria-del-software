@@ -1,10 +1,13 @@
 package it.traveleasy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Test;
 
@@ -69,6 +72,35 @@ class TravelEasyGestionePortafoglioOreTest extends BaseTravelEasyTest {
                 assertTrue(rs.next());
                 assertEquals(31.0f, rs.getFloat("Ore"), 0.001f);
                 assertEquals(9.0f, rs.getFloat("Sconto"), 0.001f);
+            }
+        }
+    }
+
+    @Test
+    void decrementaOre_conEliminazionePrenotazione_aggiornaPortafoglioOre() throws Exception {
+        Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
+        PortafoglioOre po = cliente.getPo();
+        Prenotazione prenotazione = te.getPrenotazioneById(1);
+        assertNotNull(prenotazione);
+
+        String partenza = LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
+        String ritorno = LocalDate.now().plusDays(14).format(DateTimeFormatter.ofPattern("dd-MM-uuuu"));
+        PacchettoViaggio pacchetto = new PacchettoViaggio(
+            1, "TMP-DEL", "Tmp", "Roma", "Italia", partenza, ritorno, "tmp", 300.0f, 3.5f, 1, 1, 1, conn);
+        prenotazione.setPacchetto(pacchetto);
+
+        int esito = te.eliminaPrenotazione(prenotazione, 50.0f);
+        assertEquals(0, esito);
+        assertEquals(1.5f, po.getOre(), 0.001f);
+        assertEquals(6.0f, po.getSconto(), 0.001f);
+
+        try (PreparedStatement ps = conn.prepareStatement(
+            "SELECT Ore, Sconto FROM PortafoglioOre WHERE id = ?")) {
+            ps.setInt(1, po.getId());
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                assertEquals(1.5f, rs.getFloat("Ore"), 0.001f);
+                assertEquals(6.0f, rs.getFloat("Sconto"), 0.001f);
             }
         }
     }

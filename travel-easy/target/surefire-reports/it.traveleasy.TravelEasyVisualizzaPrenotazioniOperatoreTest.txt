@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest
 -------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.149 s -- in it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.424 s -- in it.traveleasy.TravelEasyVisualizzaPrenotazioniOperatoreTest
