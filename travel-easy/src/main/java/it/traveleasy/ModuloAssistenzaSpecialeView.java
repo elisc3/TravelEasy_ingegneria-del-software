@@ -39,10 +39,10 @@ public class ModuloAssistenzaSpecialeView {
         this.root = build();
     }
 
-    public ModuloAssistenzaSpecialeView(List<Viaggiatore> viaggiatori, DialogCloseHandler closeHandler) {
+    public ModuloAssistenzaSpecialeView(List<Viaggiatore> viaggiatori, Prenotazione prenotazione, DialogCloseHandler closeHandler) {
         this.conn = null;
         this.te = null;
-        this.prenotazione = null;
+        this.prenotazione = prenotazione;
         this.observer = null;
         this.viaggiatori = viaggiatori;
         this.closeHandler = closeHandler;
@@ -106,7 +106,7 @@ public class ModuloAssistenzaSpecialeView {
 
         sediaCheck.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (observer != null && prenotazione != null) {
-                observer.onAssistenzaChanged(prenotazione, v, "sediaRotelle", newVal);
+                observer.onAssistenzaChanged(prenotazione, v, "SediaRotelle", newVal);
             } else {
                 v.setSediaRotelle(newVal);
             }
@@ -128,7 +128,7 @@ public class ModuloAssistenzaSpecialeView {
 
         cecitaCheck.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (observer != null && prenotazione != null) {
-                observer.onAssistenzaChanged(prenotazione, v, "cecita", newVal);
+                observer.onAssistenzaChanged(prenotazione, v, "Cecità", newVal);
             } else {
                 v.setCecita(newVal);
             }

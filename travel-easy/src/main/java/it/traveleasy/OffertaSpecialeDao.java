@@ -13,13 +13,13 @@ public interface OffertaSpecialeDao {
 class JdbcOffertaSpecialeDao implements OffertaSpecialeDao {
     @Override
     public boolean decrementDisponibilita(Connection conn, int offertaId) {
-        String query = "UPDATE OffertaSpeciale SET DisponibilitÃ  = DisponibilitÃ  - 1 WHERE id = ?;";
+        String query = "UPDATE OffertaSpeciale SET Disponibilit\u00E0 = Disponibilit\u00E0 - 1 WHERE id = ?;";
         try (java.sql.PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, offertaId);
             pstmt.executeUpdate();
             return true;
         } catch (java.sql.SQLException e) {
-            System.out.println("Errore diminuisci disponibilitÃ  offerta: " + e);
+            System.out.println("Errore diminuisci disponibilit\u00E0 offerta: " + e);
             return false;
         }
     }

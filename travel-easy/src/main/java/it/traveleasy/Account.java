@@ -60,7 +60,7 @@ public class Account {
 
     //*CREAZIONE CLIENTE
     public int createClient(Connection conn, String nome, String cognome, String telefono) {
-        if (!UtenteDao.INSTANCE.insertCliente(conn, nome, cognome, telefono, this.id)) {
+        if (!AccountDao.INSTANCE.createClient(conn, nome, cognome, telefono, this.id)) {
             return 0;
         }
 
@@ -74,8 +74,6 @@ public class Account {
 
         if(!c.metodiPagamento(conn))
             return 0;
-
-        
         
         return idUtente;
     }

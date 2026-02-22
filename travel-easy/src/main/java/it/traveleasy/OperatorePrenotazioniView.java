@@ -246,18 +246,9 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
         confermaButton.getStyleClass().add("primary-button");
         this.vecchioPrezzoAssistenzaSpeciale = prenotazione.getPrezzoAssistenzaSpeciale();
         confermaButton.setOnAction(e -> {
-            //List<Viaggiatore> nuoviViaggiatori = new ArrayList<>();
+            
 
             for (int i = 0; i < nomeFields.size(); i++) {
-                /*Viaggiatore nuovo = new Viaggiatore(
-                    nomeFields.get(i).getText(),
-                    cognomeFields.get(i).getText(),
-                    dataNascitaFields.get(i).getText(),
-                    tipoDocumentoFields.get(i).getValue(),
-                    codiceDocumentoFields.get(i).getText()
-                );*/
-                //nuovo.setSediaRotelle(sediaRotelleChecks.get(i).isSelected());
-                //nuovo.setCecita(cecitaChecks.get(i).isSelected());
 
                 String nome = nomeFields.get(i).getText();
                 String cognome = cognomeFields.get(i).getText();
@@ -267,10 +258,6 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
                 boolean cecita = cecitaChecks.get(i).isSelected();
                 boolean sediaRotelle = sediaRotelleChecks.get(i).isSelected();
 
-                /*Viaggiatore nuovo = new Viaggiatore(nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
-                nuovo.setCecita(cecita);
-                nuovo.setSediaRotelle(sediaRotelle);
-                nuoviViaggiatori.add(nuovo);*/
                 int pos = i + 1;
                 int esitoValidazioneDati = te.modificaViaggiatori(prenotazione, nome, cognome, dataNascita, tipoDocumento, codiceDocumento, cecita, sediaRotelle, i);
                 if (esitoValidazioneDati == -1) {
@@ -293,10 +280,9 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
             
             te.calcolaPrezzoAssistenzaSpeciale(prenotazione);
 
-            if (te.replaceViaggiatoriDB(prenotazione)){
-                JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori effettuata!", "INFO", 1);
-            } else {
+            if (!te.replaceViaggiatoriDB(prenotazione)){
                 JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori fallita. Riprovare", "ERRORE", 0);
+                return;
             }
 
         boolean assistenzaModificata = te.assistenzaSpecialeModificata(prenotazione.getPrezzoAssistenzaSpeciale(), vecchioPrezzoAssistenzaSpeciale);
@@ -305,11 +291,9 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
                 currentStage.close();
                 openPagamentoModificaAssistenzaWindow(prenotazione);
                 return;
-            }            /*if(te.modificaViaggiatori(prenotazione, nuoviViaggiatori))
+            } else {
                 JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori effettuata!", "INFO", 1);
-            else
-                JOptionPane.showMessageDialog(null, "Modifica dei viaggiatori fallita. Riprovare", "ERRORE", 0);
-            */
+            }
         });
 
         content.getChildren().addAll(title, scrollPane, confermaButton);
@@ -341,10 +325,17 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
 
     private void eliminaPrenotazioneCliente(Prenotazione prenotazione) {
         float rimborso = te.getRimborsoEliminazionePrenotazione(prenotazione);
-        if (rimborso < 0.0F) {
-            JOptionPane.showMessageDialog(null, "Prenotazione non eliminabile: partenza entro 2 giorni.", "INFO", 1);
+        if (rimborso == -1.0F) {
+            JOptionPane.showMessageDialog(null, "Prenotazione non eliminabile: partenza entro 2 giorni.", "ATTENZIONE", 2);
             return;
         }
+
+        if (rimborso == -2.0F){
+            JOptionPane.showMessageDialog(null, "Prenotazione non eliminabile: il viaggio è già avvenuto.", "INFO", 1);
+            return;
+        }
+
+
 
         String rimborsoFormatted = String.format(java.util.Locale.US, "%.2f", rimborso);
         int conferma = JOptionPane.showConfirmDialog(
@@ -447,14 +438,32 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
             Button reviewButton = new Button("Inserisci Recensione");
             reviewButton.getStyleClass().add("secondary-button");
             reviewButton.setPrefWidth(180);
-            Recensione[] recensione = prenotazione.getCliente().getRecensioneByPrenotazione(prenotazione.getId());
-            // = 
+
+            boolean recensioneGiaInserita = false;
+            int idPrenotazione = prenotazione.getId();
+            int idClientePrenotazione = prenotazione.getCliente().getId();
+            Recensione[] recensioniDaVisualizzare = new Recensione[3];
+            int idxRecensione = 0;
+            for (Recensione r : te.getRecensioni().values()) {
+                if (r != null
+                    && r.getCliente() != null
+                    && r.getPrenotazione() != null
+                    && r.getCliente().getId() == idClientePrenotazione
+                    && r.getPrenotazione().getId() == idPrenotazione) {
+                    recensioneGiaInserita = true;
+                    if (idxRecensione < recensioniDaVisualizzare.length) {
+                        recensioniDaVisualizzare[idxRecensione++] = r;
+                    }
+                }
+            }
+
             boolean conclusa = prenotazioneConclusa(prenotazione.getPacchetto().getDataRitorno());
             if (!conclusa) {
                 reviewButton.setDisable(true);
-            } else if (recensione != null) {
+            } else if (recensioneGiaInserita) {
+                Recensione[] recensioneFinale = recensioniDaVisualizzare;
                 reviewButton.setText("Visualizza Recensione");
-                reviewButton.setOnAction(e -> openRecensioneWindow(prenotazione, recensione, true));
+                reviewButton.setOnAction(e -> openRecensioneWindow(prenotazione, recensioneFinale, true));
             } else {
                 reviewButton.setOnAction(e -> openRecensioneWindow(prenotazione));
             }
@@ -478,8 +487,15 @@ public class OperatorePrenotazioniView implements PrenotazioneObserver, Recensio
             checkInButton.getStyleClass().add("secondary-button");
             checkInButton.setPrefWidth(180);
             checkInButton.setOnAction(e -> {
-                    if(te.effettuaCheckIn(prenotazione))
+                    int esitoCheckIn = te.effettuaCheckIn(prenotazione);
+                    if(esitoCheckIn == 0)
                         JOptionPane.showMessageDialog(null, "Check-in effettuato con successo.", "INFO", 1);
+                    else if (esitoCheckIn == -2)
+                        JOptionPane.showMessageDialog(null, "Check-in non consentito, mancano più di 2 giorni alla partenza.", "ERRORE", 0);
+                    else if (esitoCheckIn == -3)
+                        JOptionPane.showMessageDialog(null, "Non e' stato possibile effettuare il check-in. Riprovare.", "ERRORE", 0);
+                    else if (esitoCheckIn == -4)
+                        JOptionPane.showMessageDialog(null, "Check-in già effettuato.", "INFO", 1);
                 }
             );
             actions.getChildren().add(checkInButton);

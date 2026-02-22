@@ -1,6 +1,8 @@
 package it.traveleasy;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public interface PrenotazioneDao {
     PrenotazioneDao INSTANCE = new JdbcPrenotazioneDao();
@@ -12,6 +14,7 @@ public interface PrenotazioneDao {
     boolean deleteViaggiatoriByPrenotazione(Connection conn, int prenotazioneId);
 
     boolean deletePrenotazioneById(Connection conn, int prenotazioneId);
+
 }
 
 class JdbcPrenotazioneDao implements PrenotazioneDao {
@@ -30,7 +33,7 @@ class JdbcPrenotazioneDao implements PrenotazioneDao {
 
     @Override
     public boolean insertViaggiatore(Connection conn, int prenotazioneId, Viaggiatore v) {
-        String query = "INSERT INTO Viaggiatore (Nome, Cognome, DataNascita, TipoDocumento, CodiceDocumento, Prenotazione, SediaRotelle, \"CecitÃ \") values (?, ?, ?, ?, ?, ?, ?, ?);";
+        String query = "INSERT INTO Viaggiatore (Nome, Cognome, DataNascita, TipoDocumento, CodiceDocumento, Prenotazione, SediaRotelle, \"Cecit\u00E0\") values (?, ?, ?, ?, ?, ?, ?, ?);";
         try (java.sql.PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, v.getNome());
             pstmt.setString(2, v.getCognome());

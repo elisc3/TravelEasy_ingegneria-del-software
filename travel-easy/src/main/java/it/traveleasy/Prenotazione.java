@@ -150,12 +150,12 @@ public class Prenotazione {
         return Collections.unmodifiableList(this.elencoViaggiatori);
     }
 
-    public void aggiornaAssistenza(Viaggiatore v, String tipoAssistenza, boolean valore) {
+    public void aggiornaAssistenza(Connection conn, Viaggiatore v, String tipoAssistenza, boolean valore) {
         switch (tipoAssistenza) {
-            case "sediaRotelle":
+            case "SediaRotelle":
                 v.setSediaRotelle(valore);
                 break;
-            case "cecita":
+            case "Cecità":
                 v.setCecita(valore);
                 break;
         }
@@ -178,9 +178,9 @@ public class Prenotazione {
         this.prezzoAssistenzaSpeciale = totaleAssistenza;
     }
 
-    public boolean checkIn(Connection conn) {
+    public int checkIn(Connection conn) {
         if (this.pacchetto == null) {
-            return false;
+            return -3;
         }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-uuuu");
@@ -190,13 +190,13 @@ public class Prenotazione {
 
         if (giorniMancanti <= 2) {
             if (!PrenotazioneDao.INSTANCE.updateCheckIn(conn, this.id)) {
-                return false;
+                return -3;
             }
             this.setCheckedIn(true);
-            return true;
+            return 0;
         } else {
             System.out.println("Check-in non consentito. Mancano piÃ¹ di 2 giorni alla partenza.");
-            return false;
+            return -2;
         }
     }
 

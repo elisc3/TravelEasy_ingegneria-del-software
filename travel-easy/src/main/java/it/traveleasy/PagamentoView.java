@@ -27,7 +27,7 @@ public class PagamentoView implements RicaricaObserver {
     private List<Viaggiatore> elencoViaggiatori;
     private Connection conn;
     private Label balanceLabel;
-    private Button confirmButton;
+    private Button confirmButton; 
     private float totale;
     private float prezzoAssistenzaSpeciale;
     private boolean modificaPrenotazioneMode;
@@ -231,6 +231,7 @@ public class PagamentoView implements RicaricaObserver {
             confirmButton.setDisable(difference > saldoPortafoglio);
         } else {
             confirmButton.setDisable(false);
+            confirmButton.setText("Ottieni rimborso.");
         }
 
         confirmButton.setOnAction(e -> {
@@ -238,6 +239,9 @@ public class PagamentoView implements RicaricaObserver {
                 float rimborso = -difference;
                 if (!te.rimborsoOnPortafoglioDB(rimborso, cliente)) {
                     JOptionPane.showMessageDialog(null, "Il rimborso non e andato a buon fine. Prego riprovare.", "ERRORE", 0);
+                    return;
+                } else {
+                    JOptionPane.showMessageDialog(null, "Rimborsati "+rimborso+ " EUR", "INFO", 1);
                     return;
                 }
             } else if (difference > 0) {

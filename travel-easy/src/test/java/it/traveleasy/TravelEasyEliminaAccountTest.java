@@ -20,7 +20,7 @@ class TravelEasyEliminaAccountTest extends BaseTravelEasyTest {
         int beforeAccount = TestDbSupport.countRows(conn, "Account");
         int beforeUtenti = TestDbSupport.countRows(conn, "Utenti");
 
-        boolean deleted = te.eliminaAccount(conn, "cliente@example.com", "pwd123");
+        boolean deleted = te.eliminaAccount("cliente@example.com", "pwd123");
 
         assertTrue(deleted);
         assertEquals(beforeAccount - 1, TestDbSupport.countRows(conn, "Account"));
@@ -33,7 +33,7 @@ class TravelEasyEliminaAccountTest extends BaseTravelEasyTest {
         int beforeAccount = TestDbSupport.countRows(conn, "Account");
         int beforeUtenti = TestDbSupport.countRows(conn, "Utenti");
 
-        boolean deleted = te.eliminaAccount(conn, "cliente@example.com", "wrong");
+        boolean deleted = te.eliminaAccount("cliente@example.com", "wrong");
 
         assertFalse(deleted);
         assertEquals(beforeAccount, TestDbSupport.countRows(conn, "Account"));
@@ -42,7 +42,7 @@ class TravelEasyEliminaAccountTest extends BaseTravelEasyTest {
 
     @Test
     void eliminaAccount_rimuoveMetodiPagamentoAssociati() throws Exception {
-        boolean deleted = te.eliminaAccount(conn, "cliente@example.com", "pwd123");
+        boolean deleted = te.eliminaAccount("cliente@example.com", "pwd123");
         assertTrue(deleted);
 
         try (PreparedStatement ps = conn.prepareStatement(
@@ -62,7 +62,7 @@ class TravelEasyEliminaAccountTest extends BaseTravelEasyTest {
 
     @Test
     void eliminaAccount_rimuovePortafoglioOreAssociato() throws Exception {
-        boolean deleted = te.eliminaAccount(conn, "cliente@example.com", "pwd123");
+        boolean deleted = te.eliminaAccount("cliente@example.com", "pwd123");
         assertTrue(deleted);
 
         try (PreparedStatement ps = conn.prepareStatement(

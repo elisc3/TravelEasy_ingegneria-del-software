@@ -29,7 +29,7 @@ class TravelEasyCheckInTest extends BaseTravelEasyTest {
         Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
         Prenotazione p = new Prenotazione(1, cliente, pacchettoConPartenzaTra(1), "", 0.0f, 0.0f, 0.0f, false);
 
-        boolean ok = te.effettuaCheckIn(p);
+        boolean ok = te.effettuaCheckIn(p) == 0;
         assertTrue(ok);
         assertTrue(p.isCheckedIn());
 
@@ -46,7 +46,7 @@ class TravelEasyCheckInTest extends BaseTravelEasyTest {
         Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
         Prenotazione p = new Prenotazione(1, cliente, pacchettoConPartenzaTra(6), "", 0.0f, 0.0f, 0.0f, false);
 
-        boolean ok = te.effettuaCheckIn(p);
+        boolean ok = te.effettuaCheckIn(p) == 0;
         assertFalse(ok);
     }
 
@@ -55,7 +55,7 @@ class TravelEasyCheckInTest extends BaseTravelEasyTest {
         Cliente cliente = te.getAccountToHomeView("cliente@example.com").getCliente();
         Prenotazione p = new Prenotazione(1, cliente, pacchettoConPartenzaTra(1), "", 0.0f, 0.0f, 0.0f, false);
 
-        assertTrue(te.effettuaCheckIn(p));
-        assertFalse(te.effettuaCheckIn(p));
+        assertTrue(te.effettuaCheckIn(p) == 0);
+        assertFalse(te.effettuaCheckIn(p) == 0);
     }
 }

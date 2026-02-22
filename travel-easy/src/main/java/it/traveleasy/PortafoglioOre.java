@@ -71,7 +71,8 @@ public class PortafoglioOre {
         float oreSconto = this.sconto / 3 * 10;
         this.ore += oreSconto;
         this.ore -= ore;
-
+        if (ore < 0)
+            this.ore = 0;
         aggiornaSconto();
 
         if(!applicaScontoDB(conn)) {
@@ -83,7 +84,5 @@ public class PortafoglioOre {
 
     public boolean applicaScontoDB(Connection conn){
         return PortafoglioOreDao.INSTANCE.update(conn, this.id, this.ore, this.sconto);
-    }
-
-    
+    }   
 }

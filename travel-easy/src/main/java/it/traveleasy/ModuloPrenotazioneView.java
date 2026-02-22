@@ -197,9 +197,10 @@ public class ModuloPrenotazioneView {
             }
 
             listaViaggiatori = te.getViaggiatoriByPrenotazione(newIdPrenotazione);
+            Prenotazione prenotazione = te.getPrenotazioneById(newIdPrenotazione);
             if (listaViaggiatori == null)
                 return;
-            openAssistenzaSpecialeWindow(newIdPrenotazione, listaViaggiatori);
+            openAssistenzaSpecialeWindow(prenotazione, listaViaggiatori);
         });
 
         ScrollPane scrollPane = new ScrollPane(peopleForm);
@@ -212,10 +213,14 @@ public class ModuloPrenotazioneView {
         return content;
     }
 
-    private void openAssistenzaSpecialeWindow(int idPrenotazione, List<Viaggiatore> viaggiatori) {
-        ModuloAssistenzaSpecialeView view = new ModuloAssistenzaSpecialeView(viaggiatori, assistenzaSpeciale -> {
+    private void openAssistenzaSpecialeWindow(Prenotazione prenotazione, List<Viaggiatore> viaggiatori) {
+        ModuloAssistenzaSpecialeView view = new ModuloAssistenzaSpecialeView(viaggiatori, prenotazione, assistenzaSpeciale -> {
+            if (!te.replaceViaggiatoriDB(prenotazione)) {
+                JOptionPane.showMessageDialog(null, "Salvataggio assistenza speciale fallito. Riprovare.", "ERRORE", 0);
+                return;
+            }
             if (closeHandler != null) {
-                closeHandler.onConferma(idPrenotazione, assistenzaSpeciale);
+                closeHandler.onConferma(prenotazione.getId(), assistenzaSpeciale);
             }
         });
 

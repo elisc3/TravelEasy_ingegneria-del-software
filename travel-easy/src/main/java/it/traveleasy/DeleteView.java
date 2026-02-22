@@ -46,7 +46,7 @@ public class DeleteView {
         deleteButton.getStyleClass().add("danger-button");
 
         deleteButton.setOnAction(e -> {
-            te.eliminaAccount(conn, email, confirmField.getText());
+            te.eliminaAccount(email, confirmField.getText());
             Platform.exit();
         });
 
