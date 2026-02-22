@@ -1,9 +1,6 @@
 package it.traveleasy;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -61,39 +58,11 @@ public class HomeView implements OffertaObserver {
     }
 
     private int getIdAccountByEmail(String email){
-        String query = "SELECT * FROM Account where Email = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            pstmt.setString(1, email);
-            ResultSet rs = pstmt.executeQuery();
-
-            int id = 0;
-            while (rs.next()){
-                    id = rs.getInt("id");
-                }
-            return id;
-        } catch (SQLException e){
-            System.out.println("Errore getIdByEmail: "+e);
-            return 0;
-        }
+        return AccountDao.INSTANCE.findIdByEmail(conn, email);
     }
 
     private int getIdUtenteByAccount(int idAccount){
-        String query = "SELECT * FROM Utenti where Account = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            pstmt.setInt(1, idAccount);
-            ResultSet rs = pstmt.executeQuery();
-
-            int id = 0;
-            while (rs.next()){
-                id = rs.getInt("id");
-            }
-            return id;
-        } catch (SQLException e){
-            System.out.println("Errore getIdByEmail: "+e);
-            return 0;
-        }
+        return UtenteDao.INSTANCE.findIdByAccount(conn, idAccount);
     }
 
     public String getEmailUtente() {

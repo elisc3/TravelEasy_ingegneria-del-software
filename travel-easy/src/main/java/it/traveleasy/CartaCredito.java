@@ -1,8 +1,6 @@
 package it.traveleasy;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class CartaCredito {
     private Cliente cliente;
@@ -74,19 +72,12 @@ public class CartaCredito {
     }
 
     public boolean insertOnPortafoglio(Connection conn, float importo){
-        String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo + ? WHERE Utente = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setFloat(1, importo);
-            pstmt.setInt(2, cliente.getId());
-            pstmt.executeUpdate();
-
-            this.portafoglioVirtuale.incrementaSaldo(importo);
-            return true;
-        } catch (SQLException e){
-            System.out.println("Errore insertOnPortafoglio: "+e);
+        if (!PortafoglioVirtualeDao.INSTANCE.incrementSaldoByUtente(conn, cliente.getId(), importo)) {
             return false;
         }
+
+        this.portafoglioVirtuale.incrementaSaldo(importo);
+        return true;
     }
 }
 

@@ -1,8 +1,5 @@
 package it.traveleasy;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class Account {
     private int id;
@@ -63,40 +60,14 @@ public class Account {
 
     //*CREAZIONE CLIENTE
     public int createClient(Connection conn, String nome, String cognome, String telefono) {
-
-        String query = "INSERT INTO Utenti (Nome, Cognome, Telefono, Ruolo, Account) values (?, ?, ?, ?, ?);";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, nome);
-            pstmt.setString(2, cognome);
-            pstmt.setString(3, telefono);
-            pstmt.setString(4, "Cliente");
-            pstmt.setInt(5, this.id);
-            pstmt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("Errore registrazioneCliente: "+e);
+        if (!UtenteDao.INSTANCE.insertCliente(conn, nome, cognome, telefono, this.id)) {
             return 0;
         }
 
-        int idUtente = 0;
-        query = "Select id FROM Utenti where Account = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            pstmt.setInt(1, this.id);
-
-            ResultSet rs = pstmt.executeQuery();
-
-            if(!rs.next())
-                return 0;
-
-            idUtente = rs.getInt("id");
-
-        } catch (SQLException e) {
-            System.out.println("Errore Utente non esiste:"+e);
+        int idUtente = UtenteDao.INSTANCE.findIdByAccount(conn, this.id);
+        if (idUtente == 0) {
             return 0;
         }
-
-        
 
         Cliente c = new Cliente(idUtente, nome, cognome, telefono, "Cliente", this.id, null, null, null);
         this.utente = c;
@@ -118,16 +89,7 @@ public class Account {
         if(!cliente.eliminaMetodiPagamento(conn))
             return false;
 
-        String query = "DELETE FROM Utenti where id = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            pstmt.setInt(1, this.utente.getId());
-            pstmt.executeUpdate();
-            return true;
-        } catch (SQLException e){
-            System.out.println("Errore eliminazione cliente: "+e);
-            return false;
-        }
+        return UtenteDao.INSTANCE.deleteById(conn, this.utente.getId());
     }
 
     //*VARIE

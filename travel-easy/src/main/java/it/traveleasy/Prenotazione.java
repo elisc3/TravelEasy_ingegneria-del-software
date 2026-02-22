@@ -1,9 +1,9 @@
 package it.traveleasy;
+
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter; 
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +20,6 @@ public class Prenotazione {
     private float scontoApplicato;
     private float percentualeOfferta;
     private boolean checkedIn;
-    
 
     public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, float prezzoTotale, float scontoApplicato, float percentualeOfferta, boolean checkin) {
         this(0, cliente, pacchetto, dataPrenotazione, prezzoTotale, scontoApplicato, percentualeOfferta, checkin);
@@ -85,11 +84,11 @@ public class Prenotazione {
         this.dataPrenotazione = dataPrenotazione;
     }
 
-    public float getPrezzoTotale(){
+    public float getPrezzoTotale() {
         return this.prezzoTotale;
     }
 
-    public void setPrezzoTotale(float prezzoTotale){
+    public void setPrezzoTotale(float prezzoTotale) {
         this.prezzoTotale = prezzoTotale;
     }
 
@@ -101,15 +100,15 @@ public class Prenotazione {
         this.prezzoAssistenzaSpeciale = prezzoAssistenzaSpeciale;
     }
 
-    public float getScontoApplicato(){
+    public float getScontoApplicato() {
         return this.scontoApplicato;
     }
 
-    public void setScontoApplicato(float scontoApplicato){
+    public void setScontoApplicato(float scontoApplicato) {
         this.scontoApplicato = scontoApplicato;
     }
 
-    public float getPercentualeOfferta(){
+    public float getPercentualeOfferta() {
         return percentualeOfferta;
     }
 
@@ -129,27 +128,21 @@ public class Prenotazione {
         this.checkedIn = checkedIn;
     }
 
-
-    public boolean aggiornaOreViaggio(Connection conn){
+    public boolean aggiornaOreViaggio(Connection conn) {
         if (this.cliente == null || this.pacchetto == null) {
             return false;
         }
         return this.cliente.aggiornaOreViaggio(conn, this.pacchetto.getOreViaggio());
     }
 
-    //!RIVEDI
     public boolean applicaSconto(Connection conn, float scontoApplicato) {
-        
-        if (scontoApplicato > 0 && scontoApplicato % 3 == 0){
-            int nVolte = (int) scontoApplicato / 3;
-
+        if (scontoApplicato > 0 && scontoApplicato % 3 == 0) {
             PortafoglioOre po = this.cliente.getPo();
             if (po == null) {
                 return true;
             }
-            po.setSconto(0); 
+            po.setSconto(0);
         }
-
         return true;
     }
 
@@ -157,9 +150,6 @@ public class Prenotazione {
         return Collections.unmodifiableList(this.elencoViaggiatori);
     }
 
-    
-
-    //*ASSISTENZA SPECIALE
     public void aggiornaAssistenza(Viaggiatore v, String tipoAssistenza, boolean valore) {
         switch (tipoAssistenza) {
             case "sediaRotelle":
@@ -172,8 +162,8 @@ public class Prenotazione {
     }
 
     public void calcolaPrezzoAssistenzaSpeciale() {
-        float costoSediaRotelle = 35.0f; 
-        float costoCecita = 25.0f; 
+        float costoSediaRotelle = 35.0f;
+        float costoCecita = 25.0f;
         float totaleAssistenza = 0.0f;
 
         for (Viaggiatore v : elencoViaggiatori) {
@@ -188,70 +178,37 @@ public class Prenotazione {
         this.prezzoAssistenzaSpeciale = totaleAssistenza;
     }
 
-    //*CHEK-IN
     public boolean checkIn(Connection conn) {
-        if(this.pacchetto == null){
+        if (this.pacchetto == null) {
             return false;
         }
-        
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-uuuu");
         LocalDate dataPartenza = LocalDate.parse(this.pacchetto.getDataPartenza(), formatter);
         LocalDate oggi = LocalDate.now();
         long giorniMancanti = ChronoUnit.DAYS.between(oggi, dataPartenza);
 
         if (giorniMancanti <= 2) {
-            String query = "UPDATE Prenotazioni SET checkIn = 1 WHERE id = ?;";
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setInt(1, this.id);
-                pstmt.executeUpdate();
-            } catch (SQLException e){
-                System.out.println("Errore salvataggio check-in: "+e);
+            if (!PrenotazioneDao.INSTANCE.updateCheckIn(conn, this.id)) {
                 return false;
             }
             this.setCheckedIn(true);
             return true;
-        }
-        else {
-            System.out.println("Check-in non consentito. Mancano più di 2 giorni alla partenza.");
-            return false;
-        }
-    }    
-
-    private boolean insertViaggiatoriDB(Connection conn, Viaggiatore v){
-        String query = "INSERT INTO Viaggiatore (Nome, Cognome, DataNascita, TipoDocumento, CodiceDocumento, Prenotazione, SediaRotelle, \"Cecità\") values (?, ?, ?, ?, ?, ?, ?, ?);";
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, v.getNome());
-            pstmt.setString(2, v.getCognome());
-            pstmt.setString(3, v.getDataNascita());
-            pstmt.setString(4, v.getTipoDocumento());
-            pstmt.setString(5, v.getCodiceDocumento());
-            pstmt.setInt(6, id);
-            pstmt.setInt(7, v.isSediaRotelle() ? 1 : 0);
-            pstmt.setInt(8, v.isCecita() ? 1 : 0);
-            pstmt.executeUpdate();
-
-            return true;
-        } catch (SQLException e){
-            System.out.println("Errore insertViaggiatoriDB: "+e);
+        } else {
+            System.out.println("Check-in non consentito. Mancano piÃ¹ di 2 giorni alla partenza.");
             return false;
         }
     }
 
+    private boolean insertViaggiatoriDB(Connection conn, Viaggiatore v) {
+        return PrenotazioneDao.INSTANCE.insertViaggiatore(conn, id, v);
+    }
 
     private boolean deleteViaggiatoriDB(Connection conn) {
-        String query = "DELETE FROM Viaggiatore WHERE Prenotazione = ?;";
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-            return true;
-        } catch (SQLException e) {
-            System.out.println("Errore deleteViaggiatoriDB: " + e);
-            return false;
-        }
+        return PrenotazioneDao.INSTANCE.deleteViaggiatoriByPrenotazione(conn, id);
     }
 
     public boolean replaceViaggiatoriDB(Connection conn) {
-
         boolean oldAutoCommit = true;
         try {
             oldAutoCommit = conn.getAutoCommit();
@@ -305,8 +262,6 @@ public class Prenotazione {
         }
 
         boolean oldAutoCommit = true;
-        String deletePrenotazione = "DELETE FROM Prenotazioni WHERE id = ?;";
-
         try {
             oldAutoCommit = conn.getAutoCommit();
             conn.setAutoCommit(false);
@@ -316,13 +271,9 @@ public class Prenotazione {
                 return false;
             }
 
-            try (PreparedStatement pstmt = conn.prepareStatement(deletePrenotazione)) {
-                pstmt.setInt(1, id);
-                int rows = pstmt.executeUpdate();
-                if (rows != 1) {
-                    conn.rollback();
-                    return false;
-                }
+            if (!PrenotazioneDao.INSTANCE.deletePrenotazioneById(conn, id)) {
+                conn.rollback();
+                return false;
             }
 
             conn.commit();
@@ -345,33 +296,29 @@ public class Prenotazione {
         }
     }
 
-
-
-    public boolean createViaggiatore(Connection conn, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento){
-        
-        
+    public boolean createViaggiatore(Connection conn, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento) {
         Viaggiatore v = new Viaggiatore(nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
-        if (!this.insertViaggiatoriDB(conn, v))
+        if (!this.insertViaggiatoriDB(conn, v)) {
             return false;
+        }
 
         this.elencoViaggiatori.add(v);
         return true;
     }
 
-    public List<Viaggiatore> getViaggiatori(){
+    public List<Viaggiatore> getViaggiatori() {
         return Collections.unmodifiableList(elencoViaggiatori);
     }
 
-    public boolean rimborsoOnPortafoglioDB(Connection conn, float rimborso){
+    public boolean rimborsoOnPortafoglioDB(Connection conn, float rimborso) {
         return cliente.rimborsoOnPortafoglioDB(conn, rimborso);
     }
 
-    public boolean levaOreViaggio(Connection conn){
+    public boolean levaOreViaggio(Connection conn) {
         return cliente.levaOreViaggio(conn, pacchetto.getOreViaggio());
     }
-    
-    public boolean pagamentoOnPortafoglioDB(Connection conn, float rimborso){
+
+    public boolean pagamentoOnPortafoglioDB(Connection conn, float rimborso) {
         return cliente.pagamentoOnPortafoglioDB(conn, rimborso);
     }
-
 }

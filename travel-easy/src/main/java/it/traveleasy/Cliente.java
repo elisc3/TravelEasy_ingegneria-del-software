@@ -1,9 +1,6 @@
 package it.traveleasy;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,25 +56,12 @@ public class Cliente extends Utente {
 
     //*CREAZIONE OGGETTI CONNESSI
     public boolean metodiPagamento(Connection conn){
-        String query = "INSERT INTO PortafoglioVirtuale (Utente, Saldo) VALUES (?, ?);";
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, this.getId());
-            pstmt.setDouble(2, 0.0);
-            pstmt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("Errore creazione Portafoglio Virtuale: "+e);
+        if (!PortafoglioVirtualeDao.INSTANCE.insert(conn, this.getId(), 0.0)) {
             return false;
         }
 
-        query = "SELECT id FROM PortafoglioVirtuale WHERE Utente = ?;";
-        int idPortafoglio = 0;
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, this.getId());
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next())
-                idPortafoglio = rs.getInt("id");
-        } catch (SQLException e){
-            System.out.println("Errore recupero id Portafoglio Virtuale: "+e);
+        int idPortafoglio = PortafoglioVirtualeDao.INSTANCE.findIdByUtente(conn, this.getId());
+        if (idPortafoglio == 0) {
             return false;
         }
 
@@ -85,46 +69,20 @@ public class Cliente extends Utente {
         setPv(pv);
 
         int idPortafoglioVirtuale = pv.getId();
-        
-        query= "INSERT INTO CartaCredito (Utente, NumeroCarta, Scadenza, cvv, Circuito, PortafoglioVirtuale) VALUES (?, ?, ?, ?, ?, ?);";
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, this.getId());
-            pstmt.setString(2, "");
-            pstmt.setString(3, "");
-            pstmt.setString(4, "");
-            pstmt.setString(5, "");
-            pstmt.setInt(6, idPortafoglioVirtuale);
-            pstmt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("Errore creazione carta di credito: "+e);
+
+        if (!CartaCreditoDao.INSTANCE.insertPlaceholder(conn, this.getId(), idPortafoglioVirtuale)) {
             return false;
         }
-
-
 
         this.cc = new CartaCredito("", "", "", "", idPortafoglioVirtuale, this);
-        
-        query = "INSERT INTO PortafoglioOre (Ore, Sconto, proprietario) VALUES (?, ?, ?);";
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setFloat(1, 0.0F);
-            pstmt.setInt(2, 0);
-            pstmt.setInt(3, this.getId());
-            pstmt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("Errore creazione Portafoglio Ore: "+e);
+
+        if (!PortafoglioOreDao.INSTANCE.insert(conn, this.getId(), 0.0F, 0)) {
             return false;
         }
 
-         query = "SELECT id FROM PortafoglioOre WHERE proprietario = ?;";
-         int idPortafoglioOre = 0;
-         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-             pstmt.setInt(1, this.getId());
-             ResultSet rs = pstmt.executeQuery();
-             if (rs.next())
-                 idPortafoglioOre = rs.getInt("id");
-         } catch (SQLException e){
-             System.out.println("Errore recupero id Portafoglio Ore: "+e);
-             return false;
+         int idPortafoglioOre = PortafoglioOreDao.INSTANCE.findIdByProprietario(conn, this.getId());
+         if (idPortafoglioOre == 0) {
+            return false;
          }
 
          PortafoglioOre po = new PortafoglioOre(idPortafoglioOre, this.getId(), 0.0f, 0);
@@ -135,30 +93,15 @@ public class Cliente extends Utente {
 
     //*ELIMINAZIONE OGGETTI CONNESSI
     public boolean eliminaMetodiPagamento(Connection conn){
-        String query = "DELETE FROM CartaCredito WHERE Utente = ?;";
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, this.getId());
-            pstmt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("Errore eliminazione carta di credito: "+e);
+        if (!CartaCreditoDao.INSTANCE.deleteByUtente(conn, this.getId())) {
             return false;
         }
 
-        query = "DELETE FROM PortafoglioVirtuale WHERE Utente = ?;";
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, this.getId());
-            pstmt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("Errore eliminazione portafoglio virtuale: "+e);
+        if (!PortafoglioVirtualeDao.INSTANCE.deleteByUtente(conn, this.getId())) {
             return false;
         }
 
-        query = "DELETE FROM PortafoglioOre WHERE proprietario = ?;";
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, this.getId());
-            pstmt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("Errore eliminazione portafoglio ore: "+e);
+        if (!PortafoglioOreDao.INSTANCE.deleteByProprietario(conn, this.getId())) {
             return false;
         }
 
@@ -168,35 +111,21 @@ public class Cliente extends Utente {
     //*PAGAMENTO
     //!RIVEDIAMOLE (2)
     public boolean pagamentoOnPortafoglioDB(Connection conn, float importo){
-        String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo - ? WHERE Utente = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setFloat(1, importo);
-            pstmt.setInt(2, this.getId());
-            pstmt.executeUpdate();
-
-            this.pv.decrementaSaldo(importo);
-            return true;
-        } catch (SQLException e){
-            System.out.println("Errore pagamentoPortafoglio: "+e);
+        if (!PortafoglioVirtualeDao.INSTANCE.decrementSaldoByUtente(conn, this.getId(), importo)) {
             return false;
         }
+
+        this.pv.decrementaSaldo(importo);
+        return true;
     }
 
     public boolean rimborsoOnPortafoglioDB(Connection conn, float importo){
-        String query = "UPDATE PortafoglioVirtuale SET Saldo = Saldo + ? WHERE Utente = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setFloat(1, importo);
-            pstmt.setInt(2, this.getId());
-            pstmt.executeUpdate();
-
-            this.pv.incrementaSaldo(importo);
-            return true;
-        } catch (SQLException e){
-            System.out.println("Errore rimborsoPortafoglio: "+e);
+        if (!PortafoglioVirtualeDao.INSTANCE.incrementSaldoByUtente(conn, this.getId(), importo)) {
             return false;
         }
+
+        this.pv.incrementaSaldo(importo);
+        return true;
     }
 
     public void addPrenotazione(Prenotazione p){
@@ -251,22 +180,12 @@ public class Cliente extends Utente {
     }
 
     public boolean insertCartaCredito(Connection conn, String numeroCarta, String scadenza, String cvv, String circuito) {
-        String query = "UPDATE CartaCredito SET NumeroCarta = ?, Scadenza = ?, cvv = ?, Circuito = ?, PortafoglioVirtuale = ? WHERE Utente = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, numeroCarta);
-            pstmt.setString(2, scadenza);
-            pstmt.setString(3, cvv);
-            pstmt.setString(4, circuito);
-            pstmt.setInt(5, this.pv.getId());
-            pstmt.setInt(6, this.getId());
-            pstmt.executeUpdate();
-
-            this.setCc(new CartaCredito(numeroCarta, scadenza, cvv, circuito, this.pv.getId(), this));
-            return true;
-        } catch (SQLException e){
-            System.out.println("Errore insertOnPortafoglio: "+e);
+        if (!CartaCreditoDao.INSTANCE.updateByUtente(conn, this.getId(), numeroCarta, scadenza, cvv, circuito, this.pv.getId())) {
             return false;
         }
+
+        this.setCc(new CartaCredito(numeroCarta, scadenza, cvv, circuito, this.pv.getId(), this));
+        return true;
     }
+
 }

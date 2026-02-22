@@ -1,7 +1,6 @@
 package it.traveleasy;
+
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class OffertaSpeciale {
     private int id;
@@ -9,15 +8,15 @@ public class OffertaSpeciale {
     private float scontoPercentuale;
     private float prezzoScontato;
     private String dataFine;
-    private int Disponibilità;
-    
-    public OffertaSpeciale(int id, PacchettoViaggio pacchetto, float scontoPercentuale, float prezzoScontato, String dataFine, int Disponibilità /*, boolean visibilità*/) {
+    private int disponibilita;
+
+    public OffertaSpeciale(int id, PacchettoViaggio pacchetto, float scontoPercentuale, float prezzoScontato, String dataFine, int disponibilita) {
         this.id = id;
         this.pacchetto = pacchetto;
         this.scontoPercentuale = scontoPercentuale;
         this.prezzoScontato = prezzoScontato;
         this.dataFine = dataFine;
-        this.Disponibilità = Disponibilità;
+        this.disponibilita = disponibilita;
     }
 
     public int getId() {
@@ -32,8 +31,8 @@ public class OffertaSpeciale {
         return pacchetto;
     }
 
-    public void setPacchetto(PacchettoViaggio idPacchetto) {
-        this.pacchetto = idPacchetto;
+    public void setPacchetto(PacchettoViaggio pacchetto) {
+        this.pacchetto = pacchetto;
     }
 
     public float getScontoPercentuale() {
@@ -61,34 +60,22 @@ public class OffertaSpeciale {
     }
 
     public int getDisponibilità() {
-        return Disponibilità;
+        return disponibilita;
     }
 
-    public void setDisponibilità(int Disponibilità) {
-        this.Disponibilità = Disponibilità;
+    public void setDisponibilità(int disponibilita) {
+        this.disponibilita = disponibilita;
     }
 
-    private boolean diminuisciDisponibilitàDB(Connection conn){
-        String query = "UPDATE OffertaSpeciale SET Disponibilità = Disponibilità - 1 WHERE id = ?;";
+    private boolean diminuisciDisponibilitàDB(Connection conn) {
+        return OffertaSpecialeDao.INSTANCE.decrementDisponibilita(conn, id);
+    }
 
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-
+    public boolean diminuisciDisponibilità(Connection conn) {
+        if (this.diminuisciDisponibilitàDB(conn)) {
+            disponibilita--;
             return true;
-        } catch (SQLException e){
-            System.out.println("Errore diminuisci diponibilità offerta: "+e);
-            return false;
         }
-        
-    }
-
-    public boolean diminuisciDisponibilità(Connection conn){
-        
-        if(this.diminuisciDisponibilitàDB(conn)){
-            Disponibilità--;
-            return true;
-        } else
-            return false;  
+        return false;
     }
 }

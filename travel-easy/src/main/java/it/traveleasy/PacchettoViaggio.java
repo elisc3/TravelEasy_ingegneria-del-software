@@ -1,13 +1,6 @@
 package it.traveleasy;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.ResolverStyle;
 
 public class PacchettoViaggio {
     private int id;
@@ -95,41 +88,11 @@ public class PacchettoViaggio {
     }
 
     private CompagniaTrasporto recuperaCompagnia(int idCompagniaTrasporto){
-        String query = "SELECT * from CompagniaTrasporto WHERE id = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            pstmt.setInt(1, idCompagniaTrasporto);
-
-            ResultSet rs = pstmt.executeQuery();
-            String nome = rs.getString("Nome");
-            String tipo = rs.getString("TIPO");
-
-            CompagniaTrasporto c = new CompagniaTrasporto(idCompagniaTrasporto, nome, tipo);
-            return c;
-        } catch (SQLException e){
-            System.out.println("Errore recuperaCompagnia: "+e);
-            return null;
-        }
+        return PacchettoViaggioDao.INSTANCE.findCompagniaById(conn, idCompagniaTrasporto);
     }
 
     private Alloggio recuperaAlloggio(int idAlloggio){
-        String query = "SELECT * from Alloggio WHERE id = ?;";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)){
-            pstmt.setInt(1, idAlloggio);
-
-            ResultSet rs = pstmt.executeQuery();
-            String nome = rs.getString("Nome");
-            String indirizzo = rs.getString("Indirizzo");
-            String tipo = rs.getString("TIPO");
-            int stelle = rs.getInt("Stelle");
-
-            Alloggio a = new Alloggio(idAlloggio, nome, indirizzo, tipo, stelle);
-            return a;
-        } catch (SQLException e){
-            System.out.println("Errore recuperaAlloggio: "+e);
-            return null;
-        }
+        return PacchettoViaggioDao.INSTANCE.findAlloggioById(conn, idAlloggio);
     }
 
 

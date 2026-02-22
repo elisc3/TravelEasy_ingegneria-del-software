@@ -1,7 +1,5 @@
 package it.traveleasy;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class PortafoglioOre {
     private int id;
@@ -84,17 +82,7 @@ public class PortafoglioOre {
     }
 
     public boolean applicaScontoDB(Connection conn){
-        String query = "UPDATE PortafoglioOre SET Ore = ?, Sconto = ? where id = ?;";
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setFloat(1, this.ore);
-                pstmt.setFloat(2, this.sconto);
-                pstmt.setInt(3, this.id);
-                pstmt.executeUpdate();
-            } catch (SQLException e){
-                System.out.println("Errore aggiornamento Portafoglio Ore: "+e);
-                return false;
-            }
-            return true;
+        return PortafoglioOreDao.INSTANCE.update(conn, this.id, this.ore, this.sconto);
     }
 
     
