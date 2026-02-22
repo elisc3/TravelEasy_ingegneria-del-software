@@ -19,8 +19,8 @@ class TravelEasyAssistenzaSpecialeTest extends BaseTravelEasyTest {
         Viaggiatore primo = viaggiatori.get(0);
         Viaggiatore secondo = viaggiatori.get(1);
 
-        te.onAssistenzaChanged(p, primo, "sediaRotelle", true);
-        te.onAssistenzaChanged(p, secondo, "cecita", true);
+        te.onAssistenzaChanged(p, primo, "SediaRotelle", true);
+        te.onAssistenzaChanged(p, secondo, "Cecità", true);
         te.confermaAssistenzaSpeciale(p);
 
         assertTrue(primo.isSediaRotelle());
