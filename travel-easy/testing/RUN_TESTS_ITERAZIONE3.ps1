@@ -1,0 +1,2 @@
+Set-Location "$PSScriptRoot\.."
+mvn -Dtest=TravelEasyModificaPrenotazioneTest,TravelEasyEliminaPrenotazioneTest,TravelEasyRecensioniTest,TravelEasyAssistenzaSpecialeTest,TravelEasyCheckInTest test

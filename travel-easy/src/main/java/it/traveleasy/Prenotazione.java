@@ -1,0 +1,324 @@
+package it.traveleasy;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class Prenotazione {
+    private int id;
+    private Cliente cliente;
+    private PacchettoViaggio pacchetto;
+    private String dataPrenotazione;
+    private List<Viaggiatore> elencoViaggiatori;
+    private float prezzoTotale;
+    private float prezzoAssistenzaSpeciale;
+    private float scontoApplicato;
+    private float percentualeOfferta;
+    private boolean checkedIn;
+
+    public Prenotazione(Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, float prezzoTotale, float scontoApplicato, float percentualeOfferta, boolean checkin) {
+        this(0, cliente, pacchetto, dataPrenotazione, prezzoTotale, scontoApplicato, percentualeOfferta, checkin);
+        this.prezzoAssistenzaSpeciale = 0;
+    }
+
+    public Prenotazione(int id, Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, float prezzoTotale, float scontoApplicato, float percentualeOfferta, boolean checkin) {
+        this.id = id;
+        this.cliente = cliente;
+        this.pacchetto = pacchetto;
+        this.dataPrenotazione = dataPrenotazione;
+        this.elencoViaggiatori = new ArrayList<>();
+        this.prezzoTotale = prezzoTotale;
+        this.scontoApplicato = scontoApplicato;
+        this.percentualeOfferta = percentualeOfferta;
+        this.prezzoAssistenzaSpeciale = 0;
+        this.checkedIn = checkin;
+    }
+
+    public Prenotazione(int id, Cliente cliente, PacchettoViaggio pacchetto, String dataPrenotazione, List<Viaggiatore> elencoViaggiatori, float prezzoTotale, float scontoApplicato, float percentualeOfferta, boolean checkin) {
+        this.id = id;
+        this.cliente = cliente;
+        this.pacchetto = pacchetto;
+        this.dataPrenotazione = dataPrenotazione;
+        this.elencoViaggiatori = elencoViaggiatori;
+        this.prezzoTotale = prezzoTotale;
+        this.scontoApplicato = scontoApplicato;
+        this.percentualeOfferta = percentualeOfferta;
+        this.prezzoAssistenzaSpeciale = 0;
+        this.checkedIn = checkin;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public PacchettoViaggio getPacchetto() {
+        return pacchetto;
+    }
+
+    public void setPacchetto(PacchettoViaggio pacchetto) {
+        this.pacchetto = pacchetto;
+    }
+
+    public String getDataPrenotazione() {
+        return dataPrenotazione;
+    }
+
+    public void setDataPrenotazione(String dataPrenotazione) {
+        this.dataPrenotazione = dataPrenotazione;
+    }
+
+    public float getPrezzoTotale() {
+        return this.prezzoTotale;
+    }
+
+    public void setPrezzoTotale(float prezzoTotale) {
+        this.prezzoTotale = prezzoTotale;
+    }
+
+    public float getPrezzoAssistenzaSpeciale() {
+        return prezzoAssistenzaSpeciale;
+    }
+
+    public void setPrezzoAssistenzaSpeciale(float prezzoAssistenzaSpeciale) {
+        this.prezzoAssistenzaSpeciale = prezzoAssistenzaSpeciale;
+    }
+
+    public float getScontoApplicato() {
+        return this.scontoApplicato;
+    }
+
+    public void setScontoApplicato(float scontoApplicato) {
+        this.scontoApplicato = scontoApplicato;
+    }
+
+    public float getPercentualeOfferta() {
+        return percentualeOfferta;
+    }
+
+    public float getOffertaApplicata() {
+        return this.percentualeOfferta;
+    }
+
+    public void setOffertaApplicata(float percentualeOfferta) {
+        this.percentualeOfferta = percentualeOfferta;
+    }
+
+    public boolean isCheckedIn() {
+        return checkedIn;
+    }
+
+    public void setCheckedIn(boolean checkedIn) {
+        this.checkedIn = checkedIn;
+    }
+
+    public boolean aggiornaOreViaggio(Connection conn) {
+        if (this.cliente == null || this.pacchetto == null) {
+            return false;
+        }
+        return this.cliente.aggiornaOreViaggio(conn, this.pacchetto.getOreViaggio());
+    }
+
+    public boolean applicaSconto(Connection conn, float scontoApplicato) {
+        if (scontoApplicato > 0 && scontoApplicato % 3 == 0) {
+            PortafoglioOre po = this.cliente.getPo();
+            if (po == null) {
+                return true;
+            }
+            po.setSconto(0);
+        }
+        return true;
+    }
+
+    public List<Viaggiatore> getElencoViaggiatori() {
+        return Collections.unmodifiableList(this.elencoViaggiatori);
+    }
+
+    public void aggiornaAssistenza(Connection conn, Viaggiatore v, String tipoAssistenza, boolean valore) {
+        switch (tipoAssistenza) {
+            case "SediaRotelle":
+                v.setSediaRotelle(valore);
+                break;
+            case "Cecità":
+                v.setCecita(valore);
+                break;
+        }
+    }
+
+    public void calcolaPrezzoAssistenzaSpeciale() {
+        float costoSediaRotelle = 35.0f;
+        float costoCecita = 25.0f;
+        float totaleAssistenza = 0.0f;
+
+        for (Viaggiatore v : elencoViaggiatori) {
+            if (v.isSediaRotelle()) {
+                totaleAssistenza += costoSediaRotelle;
+            }
+            if (v.isCecita()) {
+                totaleAssistenza += costoCecita;
+            }
+        }
+
+        this.prezzoAssistenzaSpeciale = totaleAssistenza;
+    }
+
+    public int checkIn(Connection conn) {
+        if (this.pacchetto == null) {
+            return -3;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+        LocalDate dataPartenza = LocalDate.parse(this.pacchetto.getDataPartenza(), formatter);
+        LocalDate oggi = LocalDate.now();
+        long giorniMancanti = ChronoUnit.DAYS.between(oggi, dataPartenza);
+
+        if (giorniMancanti <= 2) {
+            if (!PrenotazioneDao.INSTANCE.updateCheckIn(conn, this.id)) {
+                return -3;
+            }
+            this.setCheckedIn(true);
+            return 0;
+        } else {
+            System.out.println("Check-in non consentito. Mancano piÃ¹ di 2 giorni alla partenza.");
+            return -2;
+        }
+    }
+
+    private boolean insertViaggiatoriDB(Connection conn, Viaggiatore v) {
+        return PrenotazioneDao.INSTANCE.insertViaggiatore(conn, id, v);
+    }
+
+    private boolean deleteViaggiatoriDB(Connection conn) {
+        return PrenotazioneDao.INSTANCE.deleteViaggiatoriByPrenotazione(conn, id);
+    }
+
+    public boolean replaceViaggiatoriDB(Connection conn) {
+        boolean oldAutoCommit = true;
+        try {
+            oldAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+
+            if (!deleteViaggiatoriDB(conn)) {
+                conn.rollback();
+                return false;
+            }
+
+            for (Viaggiatore v : this.elencoViaggiatori) {
+                if (!insertViaggiatoriDB(conn, v)) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackEx) {
+                System.out.println("Errore rollback replaceViaggiatori: " + rollbackEx);
+            }
+            System.out.println("Errore replaceViaggiatori: " + e);
+            return false;
+        } finally {
+            try {
+                conn.setAutoCommit(oldAutoCommit);
+            } catch (SQLException e) {
+                System.out.println("Errore ripristino autocommit replaceViaggiatori: " + e);
+            }
+        }
+    }
+
+    public void replaceViaggiatori(Connection conn, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento, boolean cecita, boolean sediaRotelle, int index) {
+        Viaggiatore v = this.elencoViaggiatori.get(index);
+        v.setNome(nome);
+        v.setCognome(cognome);
+        v.setDataNascita(dataNascita);
+        v.setTipoDocumento(tipoDocumento);
+        v.setCodiceDocumento(codiceDocumento);
+        v.setCecita(cecita);
+        v.setSediaRotelle(sediaRotelle);
+    }
+
+    public boolean eliminaBozzaDaDB(Connection conn) {
+        if (conn == null || id <= 0) {
+            return false;
+        }
+
+        boolean oldAutoCommit = true;
+        try {
+            oldAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+
+            if (!deleteViaggiatoriDB(conn)) {
+                conn.rollback();
+                return false;
+            }
+
+            if (!PrenotazioneDao.INSTANCE.deletePrenotazioneById(conn, id)) {
+                conn.rollback();
+                return false;
+            }
+
+            conn.commit();
+            this.elencoViaggiatori.clear();
+            return true;
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackEx) {
+                System.out.println("Errore rollback eliminaBozzaDaDB: " + rollbackEx);
+            }
+            System.out.println("Errore eliminaBozzaDaDB: " + e);
+            return false;
+        } finally {
+            try {
+                conn.setAutoCommit(oldAutoCommit);
+            } catch (SQLException e) {
+                System.out.println("Errore ripristino autocommit eliminaBozzaDaDB: " + e);
+            }
+        }
+    }
+
+    public boolean createViaggiatore(Connection conn, String nome, String cognome, String dataNascita, String tipoDocumento, String codiceDocumento) {
+        Viaggiatore v = new Viaggiatore(nome, cognome, dataNascita, tipoDocumento, codiceDocumento);
+        if (!this.insertViaggiatoriDB(conn, v)) {
+            return false;
+        }
+
+        this.elencoViaggiatori.add(v);
+        return true;
+    }
+
+    public List<Viaggiatore> getViaggiatori() {
+        return Collections.unmodifiableList(elencoViaggiatori);
+    }
+
+    public boolean rimborsoOnPortafoglioDB(Connection conn, float rimborso) {
+        return cliente.rimborsoOnPortafoglioDB(conn, rimborso);
+    }
+
+    public boolean levaOreViaggio(Connection conn) {
+        return cliente.levaOreViaggio(conn, pacchetto.getOreViaggio());
+    }
+
+    public boolean pagamentoOnPortafoglioDB(Connection conn, float rimborso) {
+        return cliente.pagamentoOnPortafoglioDB(conn, rimborso);
+    }
+}
